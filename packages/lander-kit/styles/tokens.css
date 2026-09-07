@@ -1,5 +1,11 @@
-/* Monkeys at Work lander-kit — design tokens (brief §8.1). Brand values are fixed. */
+/*
+ * Monkeys at Work lander-kit — design tokens.
+ * createawebsite.ca uses the "Menu du jour" sub-brand direction approved by Angelique on 7 Sept 2026
+ * (docs/DECISIONS.md): the MAW palette re-weighted, one added tint (Paper), zero radius, hard offset shadows.
+ * Brand values themselves are unchanged.
+ */
 :root {
+  /* MAW family palette */
   --maw-power-blue: #264653;
   --maw-perfect-sunset: #E76F51;
   --maw-pacific-sea: #2A9D8F;
@@ -7,28 +13,58 @@
   --maw-not-exactly-white: #F7FBFE;
   --maw-deep-warmth: #F4A261;
 
-  --color-bg: var(--maw-not-exactly-white);       /* page background — never pure white */
-  --color-surface: #FFFFFF;                        /* table body cells and form fields only */
+  /* Sub-brand additions */
+  --caw-paper: #FBF4EA;            /* warm paper page ground — the one added tint */
+  --caw-charcoal-deep: #2D3034;    /* inset blocks on charcoal */
+  --caw-paper-tint: #F3EADC;       /* placeholder wells, subtle fills */
+
+  /* Roles */
+  --color-bg: var(--caw-paper);                    /* page background */
+  --color-surface: #FFFFFF;                        /* cards on paper, inputs */
   --color-text: var(--maw-charcoal);
-  --color-heading: var(--maw-power-blue);
-  --color-accent: var(--maw-perfect-sunset);
-  --color-secondary: var(--maw-pacific-sea);
-  --color-rule: color-mix(in srgb, var(--maw-power-blue) 18%, transparent);
-  --color-focus: var(--maw-power-blue);
+  --color-heading: var(--maw-charcoal);
+  --color-ink-on-dark: var(--caw-paper);           /* text on charcoal */
+  --color-dark: var(--maw-charcoal);               /* dark sections, buttons, borders */
+  --color-dark-inset: var(--caw-charcoal-deep);
+  --color-accent: var(--maw-perfect-sunset);       /* the brand dot, primary CTA fill. Never text. */
+  --color-leader: var(--maw-deep-warmth);          /* dot leaders, rules, badges, prices on dark. Never body text on paper. */
+  --color-confirm: var(--maw-pacific-sea);         /* confirm states, large marks only */
+  --color-parent: var(--maw-power-blue);           /* MAW mark only */
+  --color-rule: rgba(54, 57, 62, 0.25);
+  --color-rule-on-dark: rgba(251, 244, 234, 0.4);
+  --color-meta: color-mix(in srgb, var(--maw-charcoal) 72%, var(--caw-paper)); /* ≈ 4.6:1 on paper */
+  --color-meta-on-dark: color-mix(in srgb, var(--caw-paper) 78%, var(--maw-charcoal));
+  --color-focus: var(--maw-perfect-sunset);
+  --color-focus-on-dark: var(--maw-deep-warmth);
 
-  --font-heading: "Satoshi", system-ui, sans-serif;
+  --font-display: "Satoshi", system-ui, sans-serif;
+  --font-heading: var(--font-display);
   --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  /* fluid type scale, ratio 1.25 (mobile) → 1.333 (desktop) */
-  --step--1: clamp(0.94rem, 0.90rem + 0.20vw, 1.00rem);
-  --step-0:  clamp(1.06rem, 1.00rem + 0.30vw, 1.19rem);   /* body: 17 → 19 px */
-  --step-1:  clamp(1.33rem, 1.20rem + 0.60vw, 1.58rem);
-  --step-2:  clamp(1.66rem, 1.45rem + 1.00vw, 2.11rem);
-  --step-3:  clamp(2.07rem, 1.70rem + 1.70vw, 2.81rem);
-  --step-4:  clamp(2.59rem, 2.00rem + 2.70vw, 3.75rem);   /* H1 */
+  /* type scale */
+  --step--1: clamp(0.88rem, 0.85rem + 0.2vw, 0.95rem);
+  --step-0:  clamp(1.0rem, 0.95rem + 0.3vw, 1.19rem);    /* body 16 → 19 px */
+  --step-1:  clamp(1.19rem, 1.1rem + 0.5vw, 1.5rem);
+  --step-2:  clamp(1.375rem, 1.2rem + 0.9vw, 1.875rem);   /* H3 / card titles */
+  --step-3:  clamp(1.875rem, 1.4rem + 2.2vw, 2.875rem);   /* H2 */
+  --step-4:  clamp(2.625rem, 1.6rem + 4.6vw, 5rem);       /* H1 */
+  --step-price: clamp(1.19rem, 1rem + 0.9vw, 1.5rem);
+  --step-numeral: clamp(4rem, 2rem + 6vw, 6rem);
+  --step-mono: 0.8rem;
 
-  --measure: 68ch;
-  --content-max: 72rem;
+  --measure: 66ch;
+  --content-max: 70rem;      /* 1120 px */
+  --content-narrow: 53.75rem;/* 860 px */
+  --content-text: 45rem;     /* 720 px */
+  --gutter: clamp(1.125rem, 4vw, 3rem);
+  --section-pad: clamp(2.5rem, 6vw, 4.75rem);
   --space-1: 0.5rem; --space-2: 1rem; --space-3: 1.5rem; --space-4: 2.5rem; --space-5: 4rem; --space-6: 6.5rem;
-  --radius: 6px;                                    /* one radius, everywhere it is used */
+
+  --radius: 0;               /* zero everywhere except circles */
+  --shadow-2: 2px 2px 0 var(--maw-charcoal);
+  --shadow-4: 4px 4px 0 var(--maw-charcoal);
+  --shadow-4-warm: 4px 4px 0 var(--maw-deep-warmth);
+  --shadow-8-warm: 8px 8px 0 var(--maw-deep-warmth);
+  --border: 2px solid var(--maw-charcoal);
 }

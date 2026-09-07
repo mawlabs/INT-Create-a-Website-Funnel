@@ -1,6 +1,7 @@
 ---
-/** Form success (brief §5.8). Fires form_submit through the analytics island via <body data-event>. Not indexed. */
+/** Post-submit page (quote request or question). Fires form_submit via <body data-event>. Not indexed. */
 import Layout from '@maw/lander-kit/components/Layout.astro';
+import LeaderLine from '@maw/lander-kit/components/LeaderLine.astro';
 import type { Locale } from '@maw/lander-kit/lib/i18n';
 import { copy } from '../i18n';
 import { layoutProps, pageMeta } from '../lib/page';
@@ -13,14 +14,24 @@ const meta = pageMeta('thanks', locale, c.meta.thanks, { noindex: true });
 ---
 <Layout {...layoutProps(locale)} meta={meta} bodyEvent="form_submit">
   <section class="page">
-    <div class="wrap flow">
-      <h1>{c.thanks.h1}</h1>
+    <div class="wrap wrap-text">
+      <span class="check" aria-hidden="true"></span>
+      <h1 class="dot">{c.thanks.h1.replace(/\.$/, '')}</h1>
       <p>{c.thanks.text}</p>
-      <p><a href={routes.home[locale]}>{c.thanks.back}</a></p>
+      <LeaderLine label={c.thanks.received} value={c.thanks.receivedValue} size="small" class="received" />
+      <p class="btn-row">
+        <a class="btn btn-dark" href={routes.home[locale]}>{c.thanks.back}</a>
+        <a class="btn btn-outline" href={routes.guide[locale]}>{c.thanks.guide}</a>
+      </p>
     </div>
   </section>
 </Layout>
 
 <style>
   .page { padding-block: var(--space-6); min-height: 50vh; }
+  .page > .wrap { display: grid; gap: var(--space-3); }
+  .check { width: 3rem; height: 3rem; border-radius: 50%; background: var(--color-confirm); position: relative; }
+  .check::after { content: ""; position: absolute; left: 1rem; top: 0.55rem; width: 0.8rem; height: 1.4rem; border: solid var(--caw-paper); border-width: 0 4px 4px 0; transform: rotate(45deg); }
+  .received { max-width: 24rem; }
+  .received :global(.value) { color: var(--color-confirm); }
 </style>

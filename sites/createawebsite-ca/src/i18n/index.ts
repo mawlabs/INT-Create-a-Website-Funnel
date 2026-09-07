@@ -3,8 +3,8 @@
  * FR nodes carry `_review: true` until Angelique's pass; `_todo*` keys hold facts only she can confirm.
  */
 import type {
-  ChromeCopy, CompareCopy, ConsentCopy, FaqCopy, FooterCopy, FormCopy, HeaderCopy, HeroCopy,
-  LangBarCopy, PageMetaCopy, PricingCopy, Reviewable, StepsCopy, WorkCopy,
+  BoardCopy, ChromeCopy, ConsentCopy, FaqCopy, FooterCopy, FormCopy, HeaderCopy, HeroCopy,
+  LangBarCopy, PageMetaCopy, QuoteCopy, Reviewable, StepsCopy, WorkCopy,
 } from '@maw/lander-kit/lib/copy';
 import type { Locale } from '@maw/lander-kit/lib/i18n';
 import en from './en.json';
@@ -25,24 +25,26 @@ export interface SiteCopy {
   };
   home: {
     hero: HeroCopy;
-    compare: CompareCopy;
-    pricing: PricingCopy;
+    quote: QuoteCopy;
+    board: BoardCopy;
     steps: StepsCopy;
     work: WorkCopy;
     faq: FaqCopy;
     form: FormCopy;
   };
   guide: {
+    eyebrow: string;
     breadcrumbHome: string;
     breadcrumbGuides: string;
     byline: string;         // "{author} · Updated {date}"
+    ctaHeading: string;
+    ctaText: string;
     cta: string;
-    ctaNote: string;
     faqH2: string;
     backHome: string;
   } & Reviewable;
-  thanks: { h1: string; text: string; back: string } & Reviewable;
-  notFound: { h1: string; text: string; home: string; guide: string } & Reviewable;
+  thanks: { h1: string; text: string; received: string; receivedValue: string; back: string; guide: string } & Reviewable;
+  notFound: { label: string; h1: string; joke: string; jokeValue: string; text: string; home: string; guide: string } & Reviewable;
   privacy: {
     h1: string;
     intro: string;

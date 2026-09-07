@@ -65,7 +65,9 @@ export function loadGA4(measurementId: string): void {
   document.head.appendChild(s);
 }
 
-export type EventName = 'price_reveal' | 'cta_click' | 'form_submit' | 'lang_switch';
+export type EventName =
+  | 'price_reveal' | 'cta_click' | 'form_submit' | 'lang_switch'
+  | 'quote_start' | 'quote_step' | 'quote_shown' | 'quote_accept' | 'quote_lead' | 'book_call' | 'out_of_budget';
 
 /**
  * Record an event. Before consent (or after decline) this only touches an in-memory array — no network.

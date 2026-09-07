@@ -1,181 +1,154 @@
 ---
 /**
- * The hero is the first question of the MAW quote chat, made tangible (brief §5.2).
- * Native radios in a fieldset, an aria-live reveal panel, then the CTA with `project` pre-selected.
- * Works without JavaScript (CSS :has reveals the text; the link still opens the chat without `project`).
+ * Hero (quote-first): copy on the left, the instant-quote panel on the right — the MAW chat's questions made physical
+ * as a chalkboard menu. The QuotePanel island renders the steps; the server renders the first question and a no-JS
+ * fallback that opens the same quote in the MAW chat.
  */
-import type { HeroCopy } from '../lib/copy';
+import type { HeroCopy, QuoteCopy } from '../lib/copy';
 import { chatUrl } from '../lib/chat';
 import type { Locale } from '../lib/i18n';
 import { renderPricing, type PricingData } from '../lib/pricing';
+import { ALL_STEPS, PROJECT_TYPES } from '../lib/quote';
+import LeaderLine from './LeaderLine.astro';
 
 interface Props {
   copy: HeroCopy;
+  quote: QuoteCopy;
   locale: Locale;
   pricing: PricingData;
-  source?: string;
+  config: { leadEndpoint: string; bookUrl: string; supportEmail: string; thanksPath: string; privacyPath: string; termsUrl: string; domain: string };
 }
-const { copy, locale, pricing, source } = Astro.props;
-const baseHref = chatUrl({ lang: locale, section: 'hero', source });
-const tiles = copy.tiles.map((t) => ({ ...t, reveal: renderPricing(t.reveal, pricing, locale) }));
+const { copy, quote, locale, pricing, config } = Astro.props;
+
+// Everything the island needs, rendered once. Pricing tokens in copy are resolved here.
+const resolveDeep = <T,>(v: T): T => {
+  if (typeof v === 'string') return renderPricing(v, pricing, locale) as T;
+  if (Array.isArray(v)) return v.map(resolveDeep) as T;
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v as Record<string, unknown>).filter(([k]) => !k.startsWith('_')).map(([k, x]) => [k, resolveDeep(x)])) as T;
+  return v;
+};
+const islandConfig = {
+  locale,
+  copy: resolveDeep(quote),
+  pricing,
+  ...config,
+  chatUrl: chatUrl({ lang: locale, section: 'hero', source: config.domain }),
+};
+const first = quote.steps.projectType;
+const h1Parts = copy.h1.replace(/\.$/, '');
+const missing = ALL_STEPS.flatMap((s) => s.options.filter((o) => !quote.steps[s.id]?.options[o]).map((o) => `${s.id}.${o}`));
+if (missing.length) throw new Error(`quote copy (${locale}) is missing option labels: ${missing.join(', ')}`);
 ---
-<section class="hero" data-hero data-source={source ?? ''} data-lang={locale}>
+<section class="hero" id="quote">
   <div class="wrap grid">
     <div class="copy">
-      <h1>{copy.h1}</h1>
+      <p class="pill meta">{copy.pill}</p>
+      <h1 class="dot">{h1Parts}</h1>
       <p class="sub">{copy.sub}</p>
+      <div class="lines">
+        {copy.lines.map((l) => <LeaderLine label={l.label} value={l.value} size="small" />)}
+      </div>
     </div>
+
     <div class="panel-wrap">
-      <form class="panel" action={baseHref} method="get" data-hero-form>
-        <fieldset>
-          <legend>{copy.panelHeading}</legend>
-          <div class="tiles">
-            {tiles.map((t) => (
-              <label class="tile">
-                <input type="radio" name="project" value={t.id} />
-                <span>{t.label}</span>
-              </label>
+      <div class="panel on-dark" data-quote-panel data-config={JSON.stringify(islandConfig)}>
+        <span class="sticker" aria-hidden="true">{quote.sticker}</span>
+        <p class="meta signage on-dark">{quote.panelLabel}</p>
+        <div class="stage" data-quote-stage>
+          <!-- Server-rendered first question. The island replaces this once it runs. -->
+          <h2 class="q" id="quote-q">{first.q}</h2>
+          {first.hint && <p class="hint">{first.hint}</p>}
+          <div class="options" role="group" aria-labelledby="quote-q">
+            {PROJECT_TYPES.map((p) => (
+              <a class="opt" href={chatUrl({ project: p === 'business' || p === 'blog' || p === 'landing' ? 'business' : p, lang: locale, section: 'hero', source: config.domain })} data-nojs-option={p}>
+                <span>{first.options[p]}</span><span class="opt-dot" aria-hidden="true"></span>
+              </a>
             ))}
           </div>
-        </fieldset>
-        <div class="reveal" data-reveal>
-          <div class="reveal-text" aria-live="polite" data-reveal-live>
-            <p data-reveal-empty>{copy.placeholder}</p>
-            {tiles.map((t) => <p data-project={t.id} hidden>{t.reveal}</p>)}
-          </div>
-          <p class="cta" data-cta-wrap hidden>
-            <a class="btn" href={baseHref} data-cta="hero">{copy.cta}</a>
-            <span class="btn-note">{copy.ctaNote}</span>
-          </p>
+          <noscript><p class="hint">{quote.nojs.text} <a href={islandConfig.chatUrl}>{quote.nojs.link}</a></p></noscript>
         </div>
-      </form>
-      <p class="caption">{copy.caption}</p>
+      </div>
     </div>
   </div>
+  <div class="deco deco-1" aria-hidden="true"></div>
+  <div class="deco deco-2" aria-hidden="true"></div>
 </section>
 
 <style>
-  .hero { padding-block: var(--space-5) var(--space-6); }
-  .grid { display: grid; gap: var(--space-4); align-items: start; }
-  @media (min-width: 60em) {
-    .grid { grid-template-columns: 7fr 5fr; gap: var(--space-5); }
-    .hero { padding-block: var(--space-6); }
-  }
-  .sub { margin-top: var(--space-3); font-size: var(--step-1); line-height: 1.4; max-width: 34ch; }
-  @media (min-width: 60em) { .sub { max-width: var(--measure); } }
+  .hero { position: relative; overflow: hidden; padding-block: var(--section-pad) calc(var(--section-pad) + 1rem); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: clamp(1.75rem, 4vw, 4rem); align-items: start; position: relative; z-index: 1; }
+  .pill { display: inline-block; background: var(--color-surface); border: 1.5px solid var(--color-dark); padding: 0.3em 0.7em; margin-bottom: var(--space-3); letter-spacing: 0.04em; }
+  .sub { margin-top: var(--space-3); font-size: var(--step-1); line-height: 1.45; }
+  .lines { margin-top: var(--space-4); display: grid; gap: 0.6rem; max-width: 30rem; }
 
+  .panel-wrap { position: relative; padding-top: 1.5rem; }
   .panel {
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius);
-    background: var(--color-surface);
+    position: relative;
     padding: var(--space-3);
+    box-shadow: var(--shadow-8-warm);
+    transform: rotate(-0.6deg);
   }
-  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
-  legend {
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: var(--step-1);
-    color: var(--color-heading);
-    padding: 0;
-    margin-bottom: var(--space-2);
-  }
-  .tiles { display: grid; gap: var(--space-1); }
-  .tile {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: 0.8em var(--space-2);
-    border: 1px solid var(--color-rule);
-    border-inline-start: 4px solid transparent;
-    border-radius: var(--radius);
-    font-weight: 600;
-    color: var(--color-heading);
-    cursor: pointer;
-    max-width: none;
-  }
-  .tile input {
-    width: 1.25rem;
-    height: 1.25rem;
-    margin: 0;
-    flex: none;
-    accent-color: var(--maw-power-blue);
-  }
-  .tile:hover { border-color: color-mix(in srgb, var(--maw-power-blue) 40%, transparent); }
-  .tile:has(input:checked) { border-inline-start-color: var(--color-accent); background: var(--color-bg); }
-  .tile:has(input:focus-visible) { outline: 3px solid var(--color-focus); outline-offset: 2px; }
-  .tile input:focus-visible { outline: none; }
+  @media (max-width: 45em) { .panel { transform: none; } }
+  .sticker { position: absolute; top: -1.6rem; right: -0.4rem; }
+  .deco { position: absolute; border-radius: 50%; pointer-events: none; }
+  .deco-1 { top: -6rem; right: -6rem; width: 20rem; height: 20rem; background: var(--color-leader); opacity: 0.28; }
+  .deco-2 { bottom: -7rem; left: -5rem; width: 16rem; height: 16rem; border: 3px dotted var(--color-accent); opacity: 0.6; }
+</style>
 
-  .reveal {
-    margin-top: var(--space-3);
-    padding-inline-start: var(--space-2);
-    border-inline-start: 3px solid var(--color-accent);
-    min-height: 4.5rem;
-    transition: opacity 150ms ease;
+<style is:global>
+  /* Panel internals are global because the island creates these elements at runtime. */
+  [data-quote-panel] .signage { margin-bottom: var(--space-2); }
+  [data-quote-panel] .stage { transition: opacity 150ms ease; }
+  [data-quote-panel] .stage.is-fading { opacity: 0; }
+  [data-quote-panel] .progress { letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+  [data-quote-panel] .q { font-size: var(--step-2); margin-bottom: 0.35rem; color: var(--color-ink-on-dark); outline: none; }
+  [data-quote-panel] .q:focus-visible { outline: 2px solid var(--color-focus-on-dark); outline-offset: 4px; }
+  [data-quote-panel] .sub-h { font-size: var(--step-0); color: var(--color-ink-on-dark); margin-top: var(--space-3); }
+  [data-quote-panel] .hint { color: var(--color-meta-on-dark); font-size: var(--step--1); margin-bottom: var(--space-2); max-width: none; }
+  [data-quote-panel] .body { margin-bottom: var(--space-2); }
+  [data-quote-panel] .options { display: grid; gap: 0.5rem; margin-top: var(--space-2); }
+  [data-quote-panel] .opt {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); width: 100%;
+    min-height: 44px; padding: 0.6rem 0.85rem; margin: 0;
+    border: 1.5px solid var(--color-rule-on-dark); background: transparent;
+    color: var(--color-ink-on-dark); text-decoration: none; text-align: start; cursor: pointer;
+    font-family: var(--font-body); font-weight: 600; font-size: 0.95rem; line-height: 1.3; max-width: none;
   }
-  .reveal.is-fading { opacity: 0; }
-  .reveal-text p { margin: 0; }
-  .cta { margin-top: var(--space-2); max-width: none; }
-  .caption { margin-top: var(--space-2); font-size: var(--step--1); }
-
-  /* No-JS reveal: the checked tile shows its range. Disabled once the island runs (html.js). */
-  html:not(.js) .hero:has(input[name="project"]:checked) [data-reveal-empty] { display: none; }
-  html:not(.js) .hero:has(input[name="project"]:checked) [data-cta-wrap] { display: block; }
-  html:not(.js) .hero:has(input[value="business"]:checked) [data-project="business"],
-  html:not(.js) .hero:has(input[value="ecommerce"]:checked) [data-project="ecommerce"],
-  html:not(.js) .hero:has(input[value="redesign"]:checked) [data-project="redesign"],
-  html:not(.js) .hero:has(input[value="changes"]:checked) [data-project="changes"],
-  html:not(.js) .hero:has(input[value="custom"]:checked) [data-project="custom"] { display: block; }
+  [data-quote-panel] .opt:hover { border-color: var(--color-leader); }
+  [data-quote-panel] .opt:focus-visible, [data-quote-panel] .opt:has(input:focus-visible) { outline: 2px solid var(--color-focus-on-dark); outline-offset: 2px; }
+  [data-quote-panel] .opt[aria-pressed="true"] { border-color: var(--color-accent); background: rgba(231, 111, 81, 0.18); }
+  [data-quote-panel] .opt[aria-pressed="true"] .opt-dot { background: var(--color-accent); border-color: var(--color-accent); }
+  [data-quote-panel] .opt-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; border: 1.5px solid var(--color-rule-on-dark); }
+  [data-quote-panel] label.opt { justify-content: flex-start; }
+  [data-quote-panel] label.opt input { width: 1.1rem; height: 1.1rem; margin: 0; flex: none; accent-color: var(--maw-deep-warmth); }
+  [data-quote-panel] label.opt input:focus-visible { outline: none; }
+  [data-quote-panel] label.opt:has(input:checked) { border-color: var(--color-accent); background: rgba(231, 111, 81, 0.18); }
+  [data-quote-panel] .actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-3); }
+  [data-quote-panel] .linkish { background: none; border: 0; padding: 0.25em 0; color: var(--color-ink-on-dark); text-decoration: underline; text-underline-offset: 0.15em; font-size: var(--step--1); font-weight: 600; cursor: pointer; }
+  [data-quote-panel] .links { margin-top: var(--space-3); }
+  [data-quote-panel] .links a { color: var(--color-ink-on-dark); }
+  [data-quote-panel] .reveal { background: var(--color-dark-inset); border: 1.5px dashed var(--color-rule-on-dark); padding: var(--space-2); display: grid; gap: 0.5rem; }
+  [data-quote-panel] .reveal .big .value { font-size: clamp(1.4rem, 3vw, 1.75rem); color: var(--color-leader); }
+  [data-quote-panel] .reveal .big .label { font-family: var(--font-display); font-weight: 700; }
+  [data-quote-panel] .reveal .leader-line .value { color: var(--color-leader); }
+  [data-quote-panel] .provide { padding-inline-start: 1.1em; margin-top: 0.4rem; font-size: var(--step--1); display: grid; gap: 0.2rem; }
+  [data-quote-panel] .provide li { max-width: none; }
+  [data-quote-panel] .intake { margin-top: var(--space-2); }
+  [data-quote-panel] .intake .field { margin-bottom: var(--space-2); }
+  [data-quote-panel] .intake .field label { color: var(--color-ink-on-dark); }
+  [data-quote-panel] .intake .field-check label { color: var(--color-ink-on-dark); }
+  [data-quote-panel] .intake input:not([type="checkbox"]), [data-quote-panel] .intake textarea { border-color: var(--color-rule-on-dark); background: var(--color-surface); color: var(--color-text); }
+  [data-quote-panel] .intake input[type="checkbox"] { accent-color: var(--maw-deep-warmth); }
+  [data-quote-panel] .intake .field-error, [data-quote-panel] .form-status { color: var(--color-leader); }
+  [data-quote-panel] .hp { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+  [data-quote-panel] .summary { margin-bottom: var(--space-2); font-size: var(--step--1); }
+  [data-quote-panel] .summary summary { cursor: pointer; font-weight: 600; color: var(--color-ink-on-dark); }
+  [data-quote-panel] .summary ul { padding-inline-start: 1.1em; margin-top: 0.4rem; color: var(--color-meta-on-dark); }
+  [data-quote-panel] .summary li { max-width: none; }
 </style>
 
 <script>
-  /* PriceReveal island: vanilla TS. Rewrites the CTA's `project` value, crossfades the reveal, fires price_reveal. */
-  import { track } from '../lib/analytics';
-  import { isProject } from '../lib/chat';
-
+  import { mountQuotePanel } from '../lib/quote-panel';
   document.documentElement.classList.add('js');
-
-  for (const root of document.querySelectorAll<HTMLElement>('[data-hero]')) {
-    const form = root.querySelector<HTMLFormElement>('[data-hero-form]');
-    const radios = root.querySelectorAll<HTMLInputElement>('input[name="project"]');
-    const reveal = root.querySelector<HTMLElement>('[data-reveal]');
-    const empty = root.querySelector<HTMLElement>('[data-reveal-empty]');
-    const texts = root.querySelectorAll<HTMLElement>('[data-project]');
-    const ctaWrap = root.querySelector<HTMLElement>('[data-cta-wrap]');
-    const cta = root.querySelector<HTMLAnchorElement>('a[data-cta="hero"]');
-    if (!form || !reveal || !cta) continue;
-
-    // The form's GET action would submit to the chat with project=… even without JS; with JS, the link does it.
-    form.addEventListener('submit', (e) => e.preventDefault());
-
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const baseHref = cta.href;
-    let pending: number | undefined;
-
-    const show = (project: string) => {
-      empty?.setAttribute('hidden', '');
-      texts.forEach((el) => { el.hidden = el.dataset.project !== project; });
-      if (ctaWrap) ctaWrap.hidden = false;
-      const url = new URL(baseHref);
-      url.searchParams.set('project', project);
-      cta.href = url.toString();
-      cta.dataset.project = project;
-    };
-
-    const select = (project: string) => {
-      if (!isProject(project)) return;
-      track('price_reveal', { project });
-      if (reduced.matches) { show(project); return; }
-      window.clearTimeout(pending);
-      reveal.classList.add('is-fading');
-      pending = window.setTimeout(() => {
-        show(project);
-        reveal.classList.remove('is-fading');
-      }, 150);
-    };
-
-    radios.forEach((r) => r.addEventListener('change', () => { if (r.checked) select(r.value); }));
-    // Restore a selection the browser kept across reload/back navigation.
-    const checked = Array.from(radios).find((r) => r.checked);
-    if (checked) show(checked.value);
-  }
+  for (const el of document.querySelectorAll<HTMLElement>('[data-quote-panel]')) mountQuotePanel(el);
 </script>

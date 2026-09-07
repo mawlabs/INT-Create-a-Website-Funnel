@@ -38,8 +38,8 @@ export const layoutProps = (locale: Locale) => ({
     consent: copy[locale].consent,
   },
   langBar: copy[locale === 'en' ? 'fr' : 'en'].langBar,
-  site: { origin: site.origin, ga4Id: site.ga4Id, gscVerification: site.gscVerification },
-  paths: { home: routes.home[locale], privacy: routes.privacy[locale] },
+  site: { origin: site.origin, ga4Id: site.ga4Id, gscVerification: site.gscVerification, bookUrl: site.bookUrl, mawUrl: site.org.url },
+  paths: { home: routes.home[locale], privacy: routes.privacy[locale], guide: routes.guide[locale] },
 });
 
 export function baseNodes(locale: Locale): Record<string, unknown>[] {

@@ -1,24 +1,10 @@
 ---
-/** Primary button that opens the MAW quote chat (brief §7.1). Same name for the same action everywhere. */
-import { chatUrl, type CtaSection, type Project } from '../lib/chat';
-import type { Locale } from '../lib/i18n';
-
-interface Props {
-  label: string;
-  note?: string;
-  locale: Locale;
-  section: CtaSection;
-  project?: Project | null;
-  source?: string;
-}
-const { label, note, locale, section, project = null, source } = Astro.props;
-const href = chatUrl({ project, lang: locale, section, source });
+/** Primary button. By default it points at the on-page quote tool; pass `href` for anything else. */
+interface Props { label: string; note?: string; href: string; section: string; project?: string }
+const { label, note, href, section, project } = Astro.props;
 ---
 <p class="cta">
-  <a class="btn" href={href} data-cta={section} data-project={project ?? undefined}>{label}</a>
+  <a class="btn" href={href} data-cta={section} data-project={project}>{label}</a>
   {note && <span class="btn-note">{note}</span>}
 </p>
-
-<style>
-  .cta { max-width: none; }
-</style>
+<style>.cta { max-width: none; }</style>

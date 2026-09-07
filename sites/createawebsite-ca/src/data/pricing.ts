@@ -19,6 +19,14 @@ export const pricing: PricingData = {
       ],
     },
     {
+      id: 'landing', // TODO(angelique): landing-page base hours are not in the chat framework; derived from "Simple/Basic 20–40 h"
+      tiers: [
+        { id: 'builder', price: { min: 1700, max: 2550 }, hours: { min: 20, max: 30 } },
+        { id: 'customTheme', price: { min: 2550, max: 3825 }, hours: { min: 30, max: 45 } },
+        { id: 'custom', price: { min: 3825, max: 5950 }, hours: { min: 45, max: 70 } },
+      ],
+    },
+    {
       id: 'shopify',
       tiers: [
         { id: 'basic', price: { min: 2500, max: 4000 }, hours: { min: 30, max: 50 } },

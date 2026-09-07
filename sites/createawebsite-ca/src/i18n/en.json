@@ -2,16 +2,28 @@
   "siteName": "createawebsite.ca",
   "skipLink": "Skip to content",
   "header": {
-    "logoAlt": "Monkeys at Work",
-    "homeLabel": "createawebsite.ca home",
+    "logoAlt": "create a website",
+    "homeLabel": "create a website — home",
     "switchLabel": "Language",
     "en": "EN",
-    "fr": "FR"
+    "fr": "FR",
+    "nav": {
+      "prices": "Prices",
+      "how": "How it works",
+      "guide": "The guide"
+    },
+    "book": "Book a call"
   },
   "footer": {
-    "iconAlt": "Monkeys at Work icon",
-    "line": "createawebsite.ca is run by Monkeys at Work, a web studio in Quebec.",
-    "links": { "site": "monkeysat.work", "portfolio": "Portfolio", "book": "Book a call", "privacy": "Privacy" }
+    "iconAlt": "Monkeys at Work",
+    "line": "createawebsite.ca is run by {maw}, a web studio in Quebec.",
+    "mawName": "Monkeys at Work",
+    "links": {
+      "guide": "The guide",
+      "privacy": "Privacy",
+      "book": "Book a call",
+      "email": "support@monkeysat.work"
+    }
   },
   "langBar": {
     "text": "This site is also in English.",
@@ -27,173 +39,491 @@
   },
   "meta": {
     "home": {
-      "title": "Create a website: real prices, honest advice — Canada",
-      "description": "See what a website really costs in Canada, whether to DIY or hire, and get an exact price range from Monkeys at Work's quote chat in about three minutes."
+      "title": "Create a website: get a real quote in three minutes — Canada",
+      "description": "Answer the questions our studio asks every client and get a website price range on the spot, with the hours behind it. Bilingual, no sales call. By Monkeys at Work."
     },
     "privacy": {
       "title": "Privacy — createawebsite.ca",
-      "description": "What createawebsite.ca collects, why, where it goes, and how to withdraw. Analytics only after consent. Run by Monkeys at Work."
+      "description": "What createawebsite.ca collects when you request a quote, why, where it goes, and how to withdraw. Analytics only after consent. Run by Monkeys at Work."
     },
     "thanks": {
       "title": "Got it — createawebsite.ca",
-      "description": "Your question is on its way to Monkeys at Work."
+      "description": "Your quote request is on its way to Monkeys at Work."
     },
     "notFound": {
       "title": "Page not found — createawebsite.ca",
-      "description": "That page doesn't exist. Head to the home page or the guide on what a website costs in Canada."
+      "description": "That page isn't on the menu. Head back to the quote tool or the guide on what a website costs in Canada."
     }
   },
   "home": {
     "hero": {
-      "h1": "A real price for a real website, in about three minutes.",
-      "sub": "Pick what you need and we'll show you what it usually costs. Want an exact range? Our quote chat asks about ten questions and gives you one — no sales call, and the final quote won't go above it. If a DIY builder is the better call for you, we'll say so.",
+      "pill": "websites · Quebec · real quotes",
+      "h1": "A real quote for your website. Right now.",
+      "sub": "Answer the questions our studio asks every client and get a price range on the spot, with the hours behind it. No sales call, no \"contact us for pricing\". The final quote never goes above the range you're shown.",
       "_todo_promise": "TODO(angelique): confirm the 'final quote won't exceed the range' promise on a public page (brief §13 #6)",
-      "panelHeading": "What do you need?",
-      "tiles": [
-        { "id": "business", "label": "A website for my business", "reveal": "Most business sites land between {min:websites.basic} and {max:websites.intermediate} ({h:websites.basic..websites.intermediate} hours). Fully custom builds run {price:websites.custom}." },
-        { "id": "ecommerce", "label": "An online store", "reveal": "Shopify stores {price:shopify.basic..shopify.intermediate}, WooCommerce {price:woocommerce.basic..woocommerce.intermediate} ({h:shopify.basic..shopify.intermediate} hours). Big custom stores go higher." },
-        { "id": "redesign", "label": "A redesign of my current site", "reveal": "A visual refresh {price:redesign.refresh}. A full redesign {price:redesign.full}. Changing platform too, {price:redesign.migration}." },
-        { "id": "changes", "label": "A fix or an update", "reveal": "Quick fixes and updates {price:fixes.fixes} ({h:fixes.fixes} hours)." },
-        { "id": "custom", "label": "A custom app or integration", "reveal": "Starts with a paid discovery phase, {price:custom.discovery} ({h:custom.discovery} hours). The build quote comes after that." }
-      ],
-      "placeholder": "Pick one to see a typical range.",
-      "cta": "Get my exact range",
-      "ctaNote": "Opens our quote chat on monkeysat.work.",
-      "caption": "Ballpark ranges in Canadian dollars. The chat narrows it to your project; the final quote stays within the range it gives you."
+      "lines": [
+        {
+          "label": "A quote, start to finish",
+          "value": "3 minutes"
+        },
+        {
+          "label": "Sales call needed",
+          "value": "none"
+        },
+        {
+          "label": "Final quote above the range",
+          "value": "never"
+        }
+      ]
     },
-    "compare": {
-      "h2": "Do you need us?",
-      "intro": "Sometimes the answer is no. Here's how the three ways to get a website compare.",
-      "columns": ["DIY builder (Wix, Squarespace, Shopify theme)", "Freelancer", "Monkeys at Work"],
-      "rows": [
-        { "label": "Cost", "cells": ["$20–$60 a month, plus your evenings", "$1,000–$4,000 typical", "{price:websites.basic..websites.custom} (ranges below)"], "_todo_freelancerCost": "TODO(angelique): confirm the freelancer cost cell (brief §5.3)" },
-        { "label": "Time to first version", "cells": ["A weekend to a few weeks", "3–8 weeks", "4–10 weeks"], "_todo_timelines": "TODO(angelique): confirm the freelancer and MAW timeline cells (brief §5.3)" },
-        { "label": "Who does the work", "cells": ["You", "One person", "A team: design, development, content, QA"] },
-        { "label": "Best when", "cells": ["A simple site, a tight budget, and you like tinkering", "A small site with a clear brief", "Bilingual, e-commerce, custom features, or a site your revenue depends on"], "highlight": true },
-        { "label": "Watch out for", "cells": ["Templates look like templates; French, SEO and integrations are on you; subscriptions add up over years", "Availability, hand-off, and who fixes it in a year", "Not the cheapest option — and we'll say so if you don't need us"] }
-      ],
-      "no": {
-        "title": "You probably don't need us if",
-        "items": [
-          "you want a one-page site for a hobby or side project and you're fine with a builder",
-          "you have no online sales, no custom features and no need for French and English",
-          "you'd rather spend time than money right now"
-        ]
+    "quote": {
+      "sticker": "instant",
+      "panelLabel": "Instant quote",
+      "progress": "Question {n} of {total}",
+      "back": "Previous question",
+      "continue": "Continue",
+      "startOver": "Start over",
+      "multiHint": "Pick everything that applies.",
+      "steps": {
+        "projectType": {
+          "q": "What are you building?",
+          "hint": "Pick one. A few more questions and we'll price it.",
+          "options": {
+            "business": "A website for my business",
+            "blog": "A blog or news site",
+            "landing": "A landing page",
+            "ecommerce": "An online store",
+            "redesign": "A redesign of my current site",
+            "changes": "Changes to my current site",
+            "custom": "A custom app, tool or AI integration"
+          }
+        },
+        "platform": {
+          "q": "What platform would you like to use?",
+          "options": {
+            "wordpress": "WordPress",
+            "shopify": "Shopify",
+            "woocommerce": "WooCommerce",
+            "fullyCustom": "Fully custom code",
+            "other": "Other, or not sure"
+          }
+        },
+        "currentPlatform": {
+          "q": "What platform is your current site on?",
+          "options": {
+            "wordpress": "WordPress",
+            "shopify": "Shopify",
+            "woocommerce": "WooCommerce",
+            "other": "Other, or I don't know"
+          }
+        },
+        "approach": {
+          "q": "What kind of build fits best?",
+          "options": {
+            "builder": "Builder-based (Elementor, ACF components)",
+            "customTheme": "Custom-coded theme",
+            "themeStore": "Theme-based store",
+            "customizedStore": "Customized store",
+            "customCodedStore": "Custom-coded store",
+            "refresh": "Visual refresh, same structure",
+            "fullRedesign": "Full redesign, new structure",
+            "migration": "Redesign and move to a new platform"
+          }
+        },
+        "design": {
+          "q": "Do you have a design or inspiration to share?",
+          "options": {
+            "ready": "Yes, I have a design ready",
+            "inspiration": "I have some inspiration and examples",
+            "scratch": "No, I need the design from scratch"
+          }
+        },
+        "multilingual": {
+          "q": "Will the site need to be in more than one language?",
+          "options": {
+            "bilingual": "Yes, English and French",
+            "multi": "Yes, several languages",
+            "single": "No, one language"
+          }
+        },
+        "integrations": {
+          "q": "What will it need to connect to?",
+          "options": {
+            "analytics": "Analytics",
+            "crm": "CRM",
+            "newsletter": "Email newsletter",
+            "liveChat": "Live chat",
+            "booking": "Booking or reservations",
+            "other": "Something else",
+            "none": "Nothing for now"
+          }
+        },
+        "shopIntegrations": {
+          "q": "What will the store need to connect to?",
+          "options": {
+            "payments": "Payment gateway",
+            "shipping": "Shipping and fulfillment",
+            "subscriptions": "Subscriptions",
+            "reviews": "Reviews",
+            "marketing": "Email or SMS marketing",
+            "other": "Something else",
+            "none": "Nothing for now"
+          }
+        },
+        "newIntegrations": {
+          "q": "Will you be adding new integrations?",
+          "options": {
+            "analytics": "Analytics",
+            "crm": "CRM",
+            "newsletter": "Email newsletter",
+            "liveChat": "Live chat",
+            "booking": "Booking or reservations",
+            "other": "Something else",
+            "none": "No new integrations"
+          }
+        },
+        "pages": {
+          "q": "How many pages do you need?",
+          "options": {
+            "p1_5": "1 to 5 pages",
+            "p6_10": "6 to 10 pages",
+            "p11_20": "11 to 20 pages",
+            "p20plus": "More than 20 pages"
+          }
+        },
+        "blog": {
+          "q": "Do you need a blog?",
+          "options": {
+            "yes": "Yes",
+            "no": "No",
+            "later": "Maybe later"
+          }
+        },
+        "categories": {
+          "q": "How many categories or sections will you need?",
+          "options": {
+            "c1_3": "1 to 3",
+            "c4_8": "4 to 8",
+            "c9plus": "9 or more"
+          }
+        },
+        "templates": {
+          "q": "Will you need different templates for different article types?",
+          "options": {
+            "multi": "Yes, several templates",
+            "one": "No, one template is fine",
+            "unsure": "Not sure yet"
+          }
+        },
+        "affiliate": {
+          "q": "Will the blog be used for affiliate marketing?",
+          "options": {
+            "yes": "Yes",
+            "no": "No",
+            "later": "Maybe in the future"
+          }
+        },
+        "products": {
+          "q": "Roughly how many products will you have?",
+          "options": {
+            "under50": "Under 50",
+            "p50_200": "50 to 200",
+            "p200_1000": "200 to 1,000",
+            "p1000plus": "More than 1,000"
+          }
+        },
+        "productHelp": {
+          "q": "Will you need help adding the products?",
+          "options": {
+            "full": "Yes, full product setup",
+            "few": "Just a few products",
+            "none": "No, I'll handle it"
+          }
+        },
+        "international": {
+          "q": "Will you be selling internationally?",
+          "options": {
+            "multi": "Yes, several countries",
+            "caUs": "Canada and the US",
+            "local": "No, local only"
+          }
+        },
+        "morePages": {
+          "q": "Will you be adding more pages?",
+          "options": {
+            "few": "Yes, a few more",
+            "many": "Yes, a lot more",
+            "same": "No, same pages"
+          }
+        },
+        "changeTypes": {
+          "q": "What kind of changes do you need?",
+          "options": {
+            "features": "Add new features",
+            "design": "Update the design or layout",
+            "fixes": "Fix issues or bugs",
+            "content": "Content updates",
+            "performance": "Speed and performance",
+            "other": "Something else"
+          }
+        },
+        "users": {
+          "q": "Who will be using it?",
+          "options": {
+            "internal": "My team, internally",
+            "customers": "My customers",
+            "both": "Both",
+            "other": "Not sure yet"
+          }
+        },
+        "timeline": {
+          "q": "How's your timeline?",
+          "hint": "Rush work is real work, so it costs 20 to 30 percent more.",
+          "options": {
+            "standard": "The usual timeline works",
+            "rush": "I need it on a rush",
+            "flexible": "It can take longer if needed"
+          }
+        }
       },
-      "yes": {
-        "title": "You probably do if",
-        "items": [
-          "the site has to earn its keep (sales, bookings, leads)",
-          "you're in Quebec and it has to work properly in both languages",
-          "it needs to connect to something (payments, CRM, booking, inventory)"
-        ]
+      "result": {
+        "heading": "Your ballpark quote",
+        "priceLabel": "Price range",
+        "hoursLabel": "Estimated hours",
+        "hoursUnit": "h",
+        "breakdown": {
+          "design": "Design",
+          "development": "Development",
+          "content": "Content",
+          "contentShop": "Content and products",
+          "testing": "Testing and launch"
+        },
+        "timelineLabel": "Timeline",
+        "weeks": "{low}–{high} weeks",
+        "rushNote": "Rush timeline included.",
+        "provideHeading": "What you'll need to provide",
+        "provide": {
+          "designFiles": "Your design files",
+          "brand": "Logo, colours and any photos you have",
+          "content": "Text for the pages, or a decision that we write it",
+          "products": "Product list, prices and images",
+          "access": "Access to your current site and hosting",
+          "translations": "Content in each language, or a decision that we translate"
+        },
+        "guarantee": "This is a ballpark. Angelique confirms the exact amount with you, and the final quote will not exceed this range.",
+        "_todo_promise": "TODO(angelique): confirm the 'final quote won't exceed the range' promise on a public page (brief §13 #6)",
+        "taxes": "Canadian dollars. Taxes extra.",
+        "discovery": {
+          "heading": "Custom work starts with a discovery phase",
+          "text": "Custom apps, tools and AI integrations are scoped in a paid discovery phase: {price} ({hours} hours) for a full plan and roadmap. The build quote comes after, and it's based on that plan.",
+          "cta": "Book a discovery call",
+          "or": "or",
+          "send": "Send me the details"
+        },
+        "actions": {
+          "accept": "Great, let's get started",
+          "book": "Book a discovery call",
+          "budget": "Out of budget",
+          "chat": "Prefer to talk it through? Continue in the Monkeys at Work chat."
+        }
+      },
+      "intake": {
+        "heading": "Almost there.",
+        "intro": "Leave your details and Angelique will confirm the exact amount by email. Your answers and this range go with it.",
+        "followUpHeading": "We'll check back in a month.",
+        "followUpIntro": "Leave your details and Angelique will get in touch in about a month. No pressure in the meantime.",
+        "name": "your name",
+        "email": "email",
+        "phone": "phone (optional)",
+        "company": "company (optional)",
+        "notes": "anything else we should know? (optional)",
+        "consent": "I agree that Monkeys at Work may store my details and these answers to prepare my quote. No newsletter, no sharing.",
+        "button": "Send my quote request",
+        "followUpButton": "Contact me in a month",
+        "sending": "Sending…",
+        "errors": {
+          "name": "Enter your name so we know who to write to.",
+          "email": "Enter an email address so Angelique can reply.",
+          "consent": "Tick the box so we're allowed to keep your details and reply.",
+          "tooFast": "That was quick. Give it a couple of seconds and send again.",
+          "network": "We couldn't send that. Try again, or email {email} with your answers and we'll take it from there.",
+          "notConfigured": "The quote pipeline isn't connected yet. Email {email} and we'll reply with your quote."
+        }
+      },
+      "budget": {
+        "heading": "Budgets can be tight.",
+        "text": "We're flexible and usually find a way. Book a quick call with Angelique to see what we can work out together, or ask us to check back in a month.",
+        "book": "Book a discovery call",
+        "later": "Contact me in a month",
+        "back": "Back to my quote"
+      },
+      "nojs": {
+        "text": "The quote tool needs JavaScript. You can get the same quote in the Monkeys at Work chat:",
+        "link": "Open the quote chat on monkeysat.work"
+      },
+      "summary": {
+        "heading": "Your answers",
+        "edit": "Change"
       }
     },
-    "pricing": {
-      "h2": "What things cost",
-      "intro": "Real ranges, in Canadian dollars, from our rate of {rate} an hour. Most agencies won't publish these. We think you should see them before you talk to anyone.",
+    "board": {
+      "label": "Le menu",
+      "h2": "What things cost.",
+      "intro": "The ranges behind the quote tool, in Canadian dollars at {rate} an hour. Most agencies won't publish these. We think you should see them before you talk to anyone.",
       "_todo_rate": "TODO(angelique): confirm publishing the hourly rate (brief §5.4)",
-      "headers": { "tier": "Tier", "price": "Price", "hours": "Hours", "includes": "What's included" },
-      "quotedLater": "Quoted after discovery.",
+      "stamp": "taxes extra — obviously",
       "groups": {
         "websites": {
-          "title": "Websites (WordPress with ACF or Elementor)",
+          "title": "Websites — WordPress",
           "tiers": {
-            "basic": { "name": "Basic", "includes": "Custom design from components, 5–10 pages, basic forms" },
-            "intermediate": { "name": "Intermediate", "includes": "Custom design plus custom functions and relations, CMS, enhanced features" },
-            "custom": { "name": "Fully custom", "includes": "Discovery phase, complex integrations, advanced functionality" }
+            "basic": "Basic, 5–10 pages, design from components",
+            "intermediate": "Intermediate, custom functions and CMS",
+            "custom": "Fully custom, discovery and complex integrations"
+          }
+        },
+        "landing": {
+          "title": "Landing pages",
+          "tiers": {
+            "builder": "Builder-based",
+            "customTheme": "Custom-coded",
+            "custom": "Fully custom code"
           }
         },
         "shopify": {
           "title": "Online stores — Shopify",
           "tiers": {
-            "basic": { "name": "Basic", "includes": "Purchased theme, on-brand styling, up to 50 products" },
-            "intermediate": { "name": "Intermediate", "includes": "Custom templates within the theme, hard-coded customizations" },
-            "custom": { "name": "Fully custom", "includes": "Custom theme, complex checkout, app integrations" }
+            "basic": "Basic, purchased theme, up to 50 products",
+            "intermediate": "Intermediate, custom templates",
+            "custom": "Fully custom theme and checkout"
           }
         },
         "woocommerce": {
           "title": "Online stores — WooCommerce",
           "tiers": {
-            "basic": { "name": "Basic", "includes": "ACF/Elementor design, standard WooCommerce, up to 50 products" },
-            "intermediate": { "name": "Intermediate", "includes": "Custom product types, tailored checkout, shipping and tax rules" },
-            "custom": { "name": "Fully custom", "includes": "B2B/wholesale, subscriptions, ERP integrations" }
+            "basic": "Basic, standard WooCommerce, up to 50 products",
+            "intermediate": "Intermediate, custom product types and checkout",
+            "custom": "Fully custom, B2B, subscriptions, ERP"
           }
         },
         "redesign": {
           "title": "Redesigns",
           "tiers": {
-            "refresh": { "name": "Refresh (UI only)", "includes": "New design on the existing structure" },
-            "full": { "name": "Full redesign", "includes": "New structure, content restructuring, SEO" },
-            "migration": { "name": "Platform migration + redesign", "includes": "New platform, data migration, redirects" }
-          }
-        },
-        "custom": {
-          "title": "Custom apps, plugins, dashboards",
-          "tiers": {
-            "discovery": { "name": "Discovery phase", "includes": "A full plan and roadmap" },
-            "build": { "name": "Build", "includes": "" }
+            "refresh": "Visual refresh on the existing structure",
+            "full": "Full redesign, new structure and SEO",
+            "migration": "Redesign and platform migration"
           }
         },
         "fixes": {
-          "title": "Quick fixes and updates",
+          "title": "Fixes and changes",
           "tiers": {
-            "fixes": { "name": "Fix or update", "includes": "One to eight hours of work at {rate} an hour" }
+            "fixes": "Quick fixes and updates, 1 to 8 hours"
+          }
+        },
+        "custom": {
+          "title": "Custom apps, tools, AI",
+          "tiers": {
+            "discovery": "Discovery phase, plan and roadmap",
+            "build": "The build"
           }
         },
         "maintenance": {
-          "title": "After launch — maintenance plans at {maintenanceRate} an hour",
-          "priceLabel": "Price a month",
+          "title": "After launch — maintenance at {maintenanceRate} an hour",
+          "suffix": "a month",
           "tiers": {
-            "light": { "name": "Light", "includes": "{hours:maintenance.light} a month" },
-            "standard": { "name": "Standard", "includes": "{hours:maintenance.standard} a month" },
-            "premium": { "name": "Premium", "includes": "{hours:maintenance.premium} a month" }
+            "light": "Light, 10 to 18 hours",
+            "standard": "Standard, 18 to 30 hours",
+            "premium": "Premium, 30 to 50 hours"
           }
         }
       },
-      "line": "Ranges cover the typical scope. The quote chat narrows them to your project in about three minutes.",
-      "cta": "Get my exact range",
-      "ctaNote": "Opens our quote chat on monkeysat.work."
+      "quotedLater": "quoted after discovery",
+      "line": "If your project lands outside these ranges, the quote will say so, with the why.",
+      "cta": "Get my quote"
     },
     "steps": {
       "h2": "How it works",
       "items": [
-        { "title": "Answer about ten questions", "text": "In the quote chat: what you're building, platform, pages, languages, integrations, timeline." },
-        { "title": "Get a price range on the spot", "text": "With the hours split across design, development, content, and testing and launch." },
-        { "title": "Angelique confirms the exact amount with you", "text": "The final quote stays within the range you were given." }
+        {
+          "title": "Answer the questions",
+          "text": "The same ones our studio asks every client: what you're building, platform, pages, languages, integrations, timeline. About three minutes, on your phone."
+        },
+        {
+          "title": "Get your range on the spot",
+          "text": "A price range and the hours behind it, split across design, development, content, and testing and launch."
+        },
+        {
+          "title": "Angelique confirms the exact amount",
+          "text": "By email, within one business day. The final quote stays within the range you were shown.",
+          "_todo_replyTime": "TODO(angelique): confirm the reply-time promise (brief §5.8)"
+        }
       ]
     },
     "work": {
       "h2": "Work we've shipped",
+      "aside": "names pending client sign-off",
       "linkLabel": "Read the case study on monkeysat.work",
       "quotesHeading": "What clients say"
     },
     "faq": {
       "h2": "Questions",
       "items": [
-        { "q": "How much does a website cost?", "a": "Most business sites cost {price:websites.basic..websites.intermediate}; stores and custom builds more. The full ranges are above, and the guide {guideLink} walks through what moves the number." },
-        { "q": "How long does it take?", "a": "Most business sites take 4 to 8 weeks from kickoff; stores and custom builds longer. The chat gives you a timeline with your quote.", "_todo_timeline": "TODO(angelique): confirm the 4 to 8 weeks timeline (brief §5.7)" },
-        { "q": "Does my Quebec website need to be in French?", "a": "If you do business in Quebec, yes: your site has to be available in French, at least as prominently as any other language (the Charter of the French Language, updated by Bill 96). We build in both languages by default, and the French is written, not machine-translated." },
-        { "q": "Is the price from the chat binding?", "a": "It's a range, not a final quote. Angelique confirms the exact amount after a short conversation, and it won't exceed the range you were shown." },
-        { "q": "Who owns the site when it's done?", "a": "You do — code, design, content and accounts in your name.", "_todo_ownership": "TODO(angelique): confirm against the T&C wording (brief §5.7)" },
-        { "q": "What do you build on?", "a": "WordPress (with ACF or Elementor), Shopify, WooCommerce, or fully custom code when the project calls for it. We recommend the one that fits, not the one that pays us the most." },
-        { "q": "What happens after launch?", "a": "Run it yourself — we hand over with training — or put it on a maintenance plan (Light, Standard or Premium; ranges above)." },
-        { "q": "Do you work with businesses outside Quebec?", "a": "Yes, across Canada, in English or French.", "_todo_outsideQuebec": "TODO(angelique): confirm (brief §5.7)" }
+        {
+          "q": "How is the quote calculated?",
+          "a": "From the same framework our studio uses: a base tier for your type of site, then hours added for pages, languages, products and integrations, at {rate} an hour. The chat on monkeysat.work runs on the same numbers, so you'll get the same answer there."
+        },
+        {
+          "q": "Is the quote binding?",
+          "a": "It's a range, not a final quote. Angelique confirms the exact amount after a short email exchange, and it won't exceed the range you were shown."
+        },
+        {
+          "q": "How long does a website take?",
+          "a": "Most business sites take 4 to 8 weeks from kickoff; stores and custom builds longer. Your quote shows a timeline for your answers, and the rush option shortens it.",
+          "_todo_timeline": "TODO(angelique): confirm the 4 to 8 weeks timeline (brief §5.7)"
+        },
+        {
+          "q": "Does my Quebec website need to be in French?",
+          "a": "If you do business in Quebec, yes: your site has to be available in French, at least as prominently as any other language (the Charter of the French Language, updated by Bill 96). We build in both languages by default, and the French is written, not machine-translated."
+        },
+        {
+          "q": "Who owns the site when it's done?",
+          "a": "You do — code, design, content and accounts in your name.",
+          "_todo_ownership": "TODO(angelique): confirm against the T&C wording (brief §5.7)"
+        },
+        {
+          "q": "What do you build on?",
+          "a": "WordPress (with ACF or Elementor), Shopify, WooCommerce, or fully custom code when the project calls for it. We recommend the one that fits, not the one that pays us the most."
+        },
+        {
+          "q": "What isn't in the range?",
+          "a": "Photography, copywriting from scratch, paid plugins and apps, hosting, domains and taxes. Your quote lists what's included, so nothing shows up later."
+        },
+        {
+          "q": "What happens after launch?",
+          "a": "Run it yourself — we hand over with training — or put it on a maintenance plan (Light, Standard or Premium; ranges above)."
+        },
+        {
+          "q": "Do you work with businesses outside Quebec?",
+          "a": "Yes, across Canada, in English or French.",
+          "_todo_outsideQuebec": "TODO(angelique): confirm (brief §5.7)"
+        }
       ]
     },
     "form": {
-      "h2": "Still deciding?",
-      "intro": "Tell us what you're trying to build and we'll answer by email — no call unless you ask for one.",
-      "name": "Name",
-      "email": "Email",
-      "message": "What are you trying to build?",
-      "consent": "I agree that Monkeys at Work may store my details to answer this request. No newsletter, no sharing.",
-      "button": "Send my question",
-      "sending": "Sending your question…",
+      "h2": "Still have a question?",
+      "badge": "no robots here",
+      "intro": "Ask it here and a person answers by email within one business day, in English or French. No call unless you ask for one.",
+      "_todo_replyTime": "TODO(angelique): confirm the reply-time promise (brief §5.8)",
+      "name": "your name",
+      "email": "email",
+      "message": "what's on your mind",
+      "consent": "I agree that Monkeys at Work may store my details to answer this message. No newsletter, no sharing.",
+      "button": "Send it",
+      "sending": "Sending…",
+      "note": "no newsletter. we only reply to this message.",
       "errors": {
         "name": "Enter your name so we know who to reply to.",
         "email": "Enter an email address so we can reply.",
-        "message": "Tell us what you're trying to build, even in one line.",
+        "message": "Tell us what's on your mind, even in one line.",
         "consent": "Tick the box so we're allowed to keep your details and reply.",
         "tooFast": "That was quick. Give it a couple of seconds and send again.",
         "network": "We couldn't send that. Try again, or email {email} and we'll reply from there.",
@@ -203,25 +533,33 @@
     }
   },
   "guide": {
+    "eyebrow": "the guide · 10 minutes · no pitch",
     "breadcrumbHome": "Home",
     "breadcrumbGuides": "Guides",
     "byline": "{author} · Updated {date}",
-    "cta": "Get my exact range",
-    "ctaNote": "Opens our quote chat on monkeysat.work.",
+    "ctaHeading": "The shortcut",
+    "ctaText": "Answer the quote questions on the home page and get your own range in about three minutes.",
+    "cta": "Get my quote",
     "faqH2": "Questions",
-    "backHome": "Back to the price ranges"
+    "backHome": "Back to the quote tool"
   },
   "thanks": {
     "h1": "Got it.",
-    "text": "Angelique reads every one of these and replies within one business day.",
+    "text": "Angelique reads every one of these and replies within one business day, with the exact amount and the next steps.",
     "_todo_replyTime": "TODO(angelique): confirm the reply-time promise (brief §5.8)",
-    "back": "Back to the home page"
+    "received": "Your request",
+    "receivedValue": "received",
+    "back": "Back to the board",
+    "guide": "Read the guide meanwhile"
   },
   "notFound": {
-    "h1": "That page doesn't exist.",
-    "text": "The address may be out of date, or it never existed. The two pages that matter are below.",
-    "home": "See what a website costs",
-    "guide": "Read the guide: how much does a website cost in Canada"
+    "label": "error 404",
+    "h1": "This page isn't on the menu.",
+    "joke": "Page not found",
+    "jokeValue": "$0",
+    "text": "At least this one's free. The two pages that matter are below.",
+    "home": "Get a quote",
+    "guide": "Read the guide"
   },
   "privacy": {
     "h1": "Privacy",
@@ -232,29 +570,29 @@
       {
         "h2": "What we collect",
         "paragraphs": [
-          "When you send the form: your name, your email address and what you wrote. Nothing else.",
-          "If you accept analytics in the banner: which pages you visit, how you got here, your device and browser type and your approximate location, through Google Analytics 4. Until you accept, no analytics script loads and no cookie is set. If you decline, nothing is collected.",
-          "The quote chat runs on monkeysat.work, under that site's own privacy policy."
+          "The quote tool itself collects nothing: your answers stay in your browser until you decide to send them.",
+          "When you send a quote request or a question: your name, your email address, your phone and company if you gave them, your answers to the quote questions, the range you were shown and what you wrote. Nothing else.",
+          "If you accept analytics in the banner: which pages you visit, how you got here, your device and browser type and your approximate location, through Google Analytics 4. Until you accept, no analytics script loads and no cookie is set. If you decline, nothing is collected."
         ]
       },
       {
         "h2": "Why",
         "paragraphs": [
-          "The form details are used to answer your question. Nothing else — no newsletter, no sharing, no selling.",
+          "Quote requests are used to prepare and confirm your quote and to follow up on it. Questions are used to answer you. Nothing else — no newsletter, no sharing, no selling.",
           "Analytics tell us whether this site is useful and worth keeping up. That's it."
         ]
       },
       {
         "h2": "Where it goes",
         "paragraphs": [
-          "Form submissions go to HubSpot, the customer relationship tool Monkeys at Work uses, with a record of the consent you gave.",
+          "Quote requests go into Monkeys at Work's own systems: its lead database, HubSpot (the customer relationship tool) and ClickUp (the task tool), the same way a quote from the chat on monkeysat.work does. Questions go to HubSpot with a record of the consent you gave.",
           "Analytics data goes to Google Analytics 4, with IP addresses anonymized."
         ]
       },
       {
         "h2": "How long we keep it",
         "paragraphs": [
-          "Your analytics choice is remembered in your browser for 12 months. Form details are kept for as long as we need them to follow up with you, and deleted on request."
+          "Your analytics choice is remembered in your browser for 12 months. Quote requests and questions are kept for as long as we need them to follow up with you, and deleted on request."
         ]
       },
       {
@@ -278,7 +616,13 @@
     "siteName": "createawebsite.ca",
     "orgDescription": "Monkeys at Work is a web studio in Quebec building bilingual websites, online stores and custom web apps for small businesses across Canada.",
     "serviceName": "Website design and development",
-    "serviceDescription": "Bilingual websites, online stores, redesigns, fixes and custom web apps for small businesses in Quebec and across Canada, with public price ranges and a quote in about three minutes.",
-    "serviceTypes": ["Web design", "Web development", "E-commerce development", "Website redesign", "Website maintenance"]
+    "serviceDescription": "Bilingual websites, online stores, redesigns, fixes and custom web apps for small businesses in Quebec and across Canada, with public price ranges and an instant quote in about three minutes.",
+    "serviceTypes": [
+      "Web design",
+      "Web development",
+      "E-commerce development",
+      "Website redesign",
+      "Website maintenance"
+    ]
   }
 }

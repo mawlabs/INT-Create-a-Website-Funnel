@@ -1,85 +1,60 @@
 ---
-/**
- * Full wordmark (link to home), the domain name in Satoshi Bold, EN | FR switch (brief §5.1).
- * Thin Perfect Sunset rule under the header. Sticky on desktop only.
- */
-import { Image } from 'astro:assets';
-import wordmark from '../assets/maw-wordmark-dark.png';
+/** Header: the C mark + domain (home link), text nav, EN | FR as text, "Book a call". Sticky from 60 em. */
 import type { HeaderCopy } from '../lib/copy';
 import type { Locale } from '../lib/i18n';
+import Mark from './Mark.astro';
 
 interface Props {
   copy: HeaderCopy;
   siteName: string;
   locale: Locale;
   homePath: string;
+  guidePath: string;
+  bookUrl: string;
   alternates: Record<Locale, string>;
 }
-const { copy, siteName, locale, homePath, alternates } = Astro.props;
+const { copy, siteName, locale, homePath, guidePath, bookUrl, alternates } = Astro.props;
 const locales: Locale[] = ['en', 'fr'];
+const tag = (l: Locale) => (l === 'fr' ? 'fr-CA' : 'en-CA');
 ---
 <header class="site-header">
   <div class="wrap bar">
     <a class="brand" href={homePath} aria-label={copy.homeLabel}>
-      <Image src={wordmark} alt={copy.logoAlt} width="172" height="57" densities={[1, 2]} loading="eager" decoding="sync" />
+      <Mark size="38px" class="brand-mark" />
       <span class="domain" aria-hidden="true">{siteName}</span>
     </a>
-    <nav class="lang" aria-label={copy.switchLabel}>
-      {locales.map((l, i) => (
-        <>
-          {i > 0 && <span class="sep" aria-hidden="true">|</span>}
-          {l === locale
-            ? <span class="current" aria-current="page" lang={l === 'fr' ? 'fr-CA' : 'en-CA'}>{copy[l]}</span>
-            : <a href={alternates[l]} lang={l === 'fr' ? 'fr-CA' : 'en-CA'} hreflang={l === 'fr' ? 'fr-CA' : 'en-CA'} data-lang-switch={l}>{copy[l]}</a>}
-        </>
-      ))}
+    <nav class="nav" aria-label={copy.switchLabel}>
+      <a href={`${homePath}#prices`}>{copy.nav.prices}</a>
+      <a href={`${homePath}#how`}>{copy.nav.how}</a>
+      <a href={guidePath}>{copy.nav.guide}</a>
+      <span class="lang">
+        {locales.map((l, i) => (
+          <>
+            {i > 0 && <span class="sep" aria-hidden="true">|</span>}
+            {l === locale
+              ? <span class="current" aria-current="page" lang={tag(l)}>{copy[l]}</span>
+              : <a href={alternates[l]} lang={tag(l)} hreflang={tag(l)} data-lang-switch={l}>{copy[l]}</a>}
+          </>
+        ))}
+      </span>
+      <a class="btn btn-dark btn-small book" href={bookUrl} data-cta="book" data-book-call rel="noopener">{copy.book}</a>
     </nav>
   </div>
 </header>
 
 <style>
-  .site-header {
-    background: var(--color-bg);
-    border-bottom: 2px solid var(--color-accent);
-  }
-  @media (min-width: 60em) {
-    .site-header { position: sticky; top: 0; z-index: 20; }
-  }
-  .bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-2);
-    min-height: 4.25rem;
-    padding-block: var(--space-1);
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    text-decoration: none;
-    color: var(--color-heading);
-    min-width: 0;
-  }
-  .brand img { width: 8.6rem; height: auto; flex: none; }
-  .domain {
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: var(--step-0);
-    color: var(--color-heading);
-    white-space: nowrap;
-  }
-  @media (max-width: 30em) { .domain { display: none; } }
-  .lang {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: var(--step-0);
-    flex: none;
-  }
-  .lang a, .lang .current { padding: 0.35em 0.4em; }
-  .lang .current { color: var(--color-text); text-decoration: none; }
-  .lang .sep { color: var(--color-rule); }
+  .site-header { background: var(--color-bg); border-bottom: 1px solid var(--color-rule); }
+  @media (min-width: 60em) { .site-header { position: sticky; top: 0; z-index: 20; } }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); padding-block: 0.875rem; }
+  .brand { display: inline-flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--color-heading); }
+  .brand :global(.brand-mark .square) { box-shadow: 3px 3px 0 var(--color-leader); }
+  .domain { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
+  .nav { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) 1.375rem; font-family: var(--font-body); font-weight: 600; font-size: 0.95rem; }
+  .nav > a:not(.book) { text-decoration: none; padding: 0.35em 0; }
+  .nav > a:not(.book):hover { text-decoration: underline; }
+  .lang { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-display); font-weight: 700; }
+  .lang .current { text-decoration: none; }
+  .lang .sep { opacity: 0.5; }
+  .book { margin-inline-start: 0.25rem; }
+  @media (max-width: 30em) { .domain { display: none; } .nav { font-size: 0.9rem; gap: var(--space-1) 1rem; } }
 </style>

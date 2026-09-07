@@ -1,0 +1,23 @@
+---
+/**
+ * The createawebsite.ca mark: a square with a lowercase "c" in Satoshi Black and the brand dot in Perfect Sunset.
+ * Typographic, so it scales with CSS. `inverted` for dark grounds. Decorative unless a label is given.
+ */
+interface Props { inverted?: boolean; size?: string; label?: string; class?: string }
+const { inverted = false, size = '38px', label, class: className } = Astro.props;
+---
+<span class:list={['mark', { inverted }, className]} style={`--mark-size:${size}`} role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'}>
+  <span class="square">c</span><span class="brand-dot"></span>
+</span>
+
+<style>
+  .mark { display: inline-flex; align-items: flex-end; gap: calc(var(--mark-size) * 0.08); line-height: 0; }
+  .square {
+    display: grid; place-items: center;
+    width: var(--mark-size); height: var(--mark-size);
+    background: var(--color-dark); color: var(--color-ink-on-dark);
+    font-family: var(--font-display); font-weight: 900; font-size: calc(var(--mark-size) * 0.45); line-height: 1;
+  }
+  .brand-dot { width: calc(var(--mark-size) * 0.14); height: calc(var(--mark-size) * 0.14); border-radius: 50%; background: var(--color-accent); margin-bottom: calc(var(--mark-size) * 0.08); }
+  .inverted .square { background: var(--color-ink-on-dark); color: var(--color-dark); }
+</style>

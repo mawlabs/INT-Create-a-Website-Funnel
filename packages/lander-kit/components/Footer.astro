@@ -1,43 +1,54 @@
 ---
-/** Icon mark left, one line, links (brief §5.9). No social icons, no newsletter. */
+/** Footer: charcoal with the Sunset awning, inverted C mark, text links, then the parent line with the MAW wordmark. */
 import { Image } from 'astro:assets';
-import icon from '../assets/maw-icon.png';
+import wordmark from '../assets/maw-wordmark-dark.png';
 import type { FooterCopy } from '../lib/copy';
 import type { Locale } from '../lib/i18n';
+import Mark from './Mark.astro';
 
 interface Props {
   copy: FooterCopy;
   locale: Locale;
   privacyPath: string;
+  guidePath: string;
+  bookUrl: string;
   alternates: Record<Locale, string>;
   langLabels: { en: string; fr: string };
+  mawUrl: string;
 }
-const { copy, locale, privacyPath, alternates, langLabels } = Astro.props;
+const { copy, locale, privacyPath, guidePath, bookUrl, alternates, langLabels, mawUrl } = Astro.props;
 const other: Locale = locale === 'en' ? 'fr' : 'en';
+const [before, after] = copy.line.split('{maw}');
 ---
-<footer class="site-footer">
+<footer class="site-footer on-dark">
+  <div class="awning sunset" aria-hidden="true"></div>
   <div class="wrap inner">
-    <Image src={icon} alt={copy.iconAlt} width="22" height="40" densities={[1, 2]} loading="lazy" class="mark" />
-    <div class="text">
-      <p>{copy.line}</p>
+    <div class="row">
+      <Mark inverted size="34px" />
       <ul class="links" role="list">
-        <li><a href="https://monkeysat.work/">{copy.links.site}</a></li>
-        <li><a href="https://monkeysat.work/portfolio">{copy.links.portfolio}</a></li>
-        <li><a href="https://meetings.hubspot.com/ange1">{copy.links.book}</a></li>
+        <li><a href={guidePath}>{copy.links.guide}</a></li>
         <li><a href={privacyPath}>{copy.links.privacy}</a></li>
+        <li><a href={bookUrl} data-book-call rel="noopener">{copy.links.book}</a></li>
         <li><a href={alternates[other]} lang={other === 'fr' ? 'fr-CA' : 'en-CA'} hreflang={other === 'fr' ? 'fr-CA' : 'en-CA'} data-lang-switch={other}>{langLabels[other]}</a></li>
+        <li><a href={`mailto:${copy.links.email}`}>{copy.links.email}</a></li>
       </ul>
+    </div>
+    <div class="parent">
+      <a class="maw" href={mawUrl} aria-label={copy.mawName}>
+        <Image src={wordmark} alt={copy.iconAlt} width="112" height="37" densities={[1, 2]} loading="lazy" />
+      </a>
+      <p class="line">{before}<a href={mawUrl}>{copy.mawName}</a>{after} © 2026</p>
     </div>
   </div>
 </footer>
 
 <style>
-  .site-footer {
-    border-top: 1px solid var(--color-rule);
-    padding-block: var(--space-4) var(--space-5);
-    font-size: var(--step--1);
-  }
-  .inner { display: flex; gap: var(--space-3); align-items: flex-start; }
-  .mark { width: 1.4rem; height: auto; flex: none; margin-top: 0.2rem; }
-  .links { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin-top: var(--space-2); }
+  .site-footer { margin-top: var(--section-pad); }
+  .inner { padding-block: var(--space-4) var(--space-5); font-size: var(--step--1); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .links { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); font-weight: 600; }
+  .parent { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-4); padding-top: var(--space-3); border-top: 2px dotted var(--color-rule-on-dark); }
+  .maw { display: inline-block; background: var(--maw-not-exactly-white); padding: 0.35rem 0.6rem; line-height: 0; }
+  .maw img { width: 7rem; height: auto; }
+  .line { margin: 0; max-width: none; }
 </style>

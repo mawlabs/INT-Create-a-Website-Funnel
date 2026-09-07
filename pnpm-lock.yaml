@@ -11,6 +11,9 @@ importers:
       '@lhci/cli':
         specifier: ^0.15.1
         version: 0.15.1
+      esbuild:
+        specifier: ^0.28.2
+        version: 0.28.2
       playwright-core:
         specifier: ^1.58.0
         version: 1.63.0

@@ -1,5 +1,7 @@
 ---
+/** 404 — the one page that inverts: charcoal ground, awning stripe, and the joke that only works because of the price device. */
 import Layout from '@maw/lander-kit/components/Layout.astro';
+import LeaderLine from '@maw/lander-kit/components/LeaderLine.astro';
 import type { Locale } from '@maw/lander-kit/lib/i18n';
 import { copy } from '../i18n';
 import { layoutProps, pageMeta } from '../lib/page';
@@ -10,21 +12,24 @@ const { locale } = Astro.props;
 const c = copy[locale];
 const meta = pageMeta('notFound', locale, c.meta.notFound, { noindex: true });
 ---
-<Layout {...layoutProps(locale)} meta={meta}>
-  <section class="page">
-    <div class="wrap flow">
-      <h1>{c.notFound.h1}</h1>
+<Layout {...layoutProps(locale)} meta={meta} bodyClass="inverted">
+  <div class="awning" aria-hidden="true"></div>
+  <section class="page on-dark">
+    <div class="wrap wrap-text">
+      <p class="meta signage on-dark">{c.notFound.label}</p>
+      <h1 class="dot">{c.notFound.h1.replace(/\.$/, '')}</h1>
+      <LeaderLine label={c.notFound.joke} value={c.notFound.jokeValue} size="small" class="joke" />
       <p>{c.notFound.text}</p>
-      <ul>
-        <li><a href={routes.home[locale]}>{c.notFound.home}</a></li>
-        <li><a href={routes.guide[locale]}>{c.notFound.guide}</a></li>
-      </ul>
+      <p class="btn-row">
+        <a class="btn" href={`${routes.home[locale]}#quote`}>{c.notFound.home}</a>
+        <a class="btn btn-outline" href={routes.guide[locale]}>{c.notFound.guide}</a>
+      </p>
     </div>
   </section>
 </Layout>
 
 <style>
-  .page { padding-block: var(--space-6); min-height: 50vh; }
-  ul { padding-inline-start: 1.2em; }
-  li + li { margin-top: var(--space-1); }
+  .page { padding-block: var(--space-6); min-height: 60vh; }
+  .page > .wrap { display: grid; gap: var(--space-3); }
+  .joke { max-width: 24rem; }
 </style>

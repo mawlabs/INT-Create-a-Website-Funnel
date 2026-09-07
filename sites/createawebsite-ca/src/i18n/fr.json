@@ -3,17 +3,29 @@
   "skipLink": "Aller au contenu",
   "header": {
     "_review": true,
-    "logoAlt": "Monkeys at Work",
-    "homeLabel": "Accueil de createawebsite.ca",
+    "logoAlt": "create a website",
+    "homeLabel": "create a website — accueil",
     "switchLabel": "Langue",
     "en": "EN",
-    "fr": "FR"
+    "fr": "FR",
+    "nav": {
+      "prices": "Prix",
+      "how": "Comment ça marche",
+      "guide": "Le guide"
+    },
+    "book": "Réserver un appel"
   },
   "footer": {
     "_review": true,
-    "iconAlt": "Icône Monkeys at Work",
-    "line": "createawebsite.ca est un site de Monkeys at Work, un studio web au Québec.",
-    "links": { "site": "monkeysat.work", "portfolio": "Portfolio", "book": "Prendre rendez-vous", "privacy": "Confidentialité" }
+    "iconAlt": "Monkeys at Work",
+    "line": "createawebsite.ca est un site de {maw}, un studio web au Québec.",
+    "mawName": "Monkeys at Work",
+    "links": {
+      "guide": "Le guide",
+      "privacy": "Confidentialité",
+      "book": "Réserver un appel",
+      "email": "support@monkeysat.work"
+    }
   },
   "langBar": {
     "_review": true,
@@ -32,161 +44,444 @@
   "meta": {
     "home": {
       "_review": true,
-      "title": "Créer un site web au Québec : vrais prix, conseils honnêtes",
-      "description": "Combien coûte vraiment un site web au Québec, quand le faire soi-même ou engager un studio, et une fourchette de prix exacte en trois minutes avec Monkeys at Work."
+      "title": "Créer un site web : une vraie soumission en trois minutes — Québec",
+      "description": "Répondez aux questions que notre studio pose à chaque client et obtenez une fourchette de prix sur-le-champ, avec les heures derrière. Bilingue, sans appel de vente. Par Monkeys at Work."
     },
     "privacy": {
       "_review": true,
       "title": "Confidentialité — createawebsite.ca",
-      "description": "Ce que createawebsite.ca recueille, pourquoi, où ça va et comment retirer votre consentement. Statistiques seulement après votre accord. Un site de Monkeys at Work."
+      "description": "Ce que createawebsite.ca recueille quand vous demandez une soumission, pourquoi, où ça va et comment retirer votre consentement. Statistiques seulement après votre accord. Un site de Monkeys at Work."
     },
     "thanks": {
       "_review": true,
       "title": "Bien reçu — createawebsite.ca",
-      "description": "Votre question est en route vers Monkeys at Work."
+      "description": "Votre demande de soumission est en route vers Monkeys at Work."
     },
     "notFound": {
       "_review": true,
       "title": "Page introuvable — createawebsite.ca",
-      "description": "Cette page n'existe pas. Rendez-vous à l'accueil ou au guide sur le coût d'un site web au Québec."
+      "description": "Cette page n'est pas au menu. Retournez à l'outil de soumission ou au guide sur le coût d'un site web au Québec."
     }
   },
   "home": {
     "hero": {
       "_review": true,
-      "h1": "Un vrai prix pour un vrai site web, en trois minutes.",
-      "sub": "Choisissez ce qu'il vous faut et on vous montre ce que ça coûte d'habitude. Vous voulez une fourchette exacte? Notre clavardage de soumission pose une dizaine de questions et vous en donne une — sans appel de vente, et la soumission finale ne la dépassera pas. Si un outil de création en ligne est le meilleur choix pour vous, on vous le dira.",
+      "pill": "sites web · Québec · vraies soumissions",
+      "h1": "Une vraie soumission pour votre site web. Tout de suite.",
+      "sub": "Répondez aux questions que notre studio pose à chaque client et obtenez une fourchette de prix sur-le-champ, avec les heures derrière. Pas d'appel de vente, pas de « contactez-nous pour les prix ». La soumission finale ne dépasse jamais la fourchette qu'on vous montre.",
       "_todo_promise": "TODO(angelique): confirmer la promesse « la soumission finale ne dépassera pas la fourchette » sur une page publique (brief §13 #6)",
-      "panelHeading": "De quoi avez-vous besoin?",
-      "tiles": [
-        { "id": "business", "label": "Un site web pour mon entreprise", "reveal": "La plupart des sites d'entreprise se situent entre {min:websites.basic} et {max:websites.intermediate} ({h:websites.basic..websites.intermediate} heures). Un site entièrement sur mesure va de {price:websites.custom}." },
-        { "id": "ecommerce", "label": "Une boutique en ligne", "reveal": "Boutiques Shopify de {price:shopify.basic..shopify.intermediate}, WooCommerce de {price:woocommerce.basic..woocommerce.intermediate} ({h:shopify.basic..shopify.intermediate} heures). Les grosses boutiques sur mesure coûtent plus." },
-        { "id": "redesign", "label": "Une refonte de mon site actuel", "reveal": "Un rafraîchissement visuel : {price:redesign.refresh}. Une refonte complète : {price:redesign.full}. Avec changement de plateforme : {price:redesign.migration}." },
-        { "id": "changes", "label": "Une correction ou une mise à jour", "reveal": "Corrections rapides et mises à jour : {price:fixes.fixes} ({h:fixes.fixes} heures)." },
-        { "id": "custom", "label": "Une application ou une intégration sur mesure", "reveal": "Ça commence par une phase de découverte payante, {price:custom.discovery} ({h:custom.discovery} heures). La soumission pour le développement vient ensuite." }
-      ],
-      "placeholder": "Choisissez une option pour voir une fourchette typique.",
-      "cta": "Obtenir ma fourchette exacte",
-      "ctaNote": "Ouvre notre clavardage de soumission sur monkeysat.work.",
-      "caption": "Fourchettes approximatives en dollars canadiens. Le clavardage les ajuste à votre projet; la soumission finale reste dans la fourchette qu'il vous donne."
+      "lines": [
+        {
+          "label": "Une soumission, du début à la fin",
+          "value": "3 minutes"
+        },
+        {
+          "label": "Appel de vente requis",
+          "value": "aucun"
+        },
+        {
+          "label": "Soumission finale au-dessus de la fourchette",
+          "value": "jamais"
+        }
+      ]
     },
-    "compare": {
+    "quote": {
       "_review": true,
-      "h2": "Avez-vous besoin de nous?",
-      "intro": "Parfois, la réponse est non. Voici comment se comparent les trois façons d'avoir un site web.",
-      "columns": ["Outil de création (Wix, Squarespace, thème Shopify)", "Pigiste", "Monkeys at Work"],
-      "rows": [
-        { "label": "Coût", "cells": ["20 $ à 60 $ par mois, plus vos soirées", "1 000 $ à 4 000 $ en général", "{price:websites.basic..websites.custom} (fourchettes plus bas)"], "_todo_freelancerCost": "TODO(angelique): confirmer la cellule du coût pigiste (brief §5.3)" },
-        { "label": "Délai pour une première version", "cells": ["Une fin de semaine à quelques semaines", "3 à 8 semaines", "4 à 10 semaines"], "_todo_timelines": "TODO(angelique): confirmer les délais pigiste et MAW (brief §5.3)" },
-        { "label": "Qui fait le travail", "cells": ["Vous", "Une personne", "Une équipe : design, développement, contenu, assurance qualité"] },
-        { "label": "Le bon choix quand", "cells": ["Un site simple, un budget serré, et vous aimez bricoler", "Un petit site avec un mandat clair", "Bilingue, boutique en ligne, fonctions sur mesure, ou un site dont vos revenus dépendent"], "highlight": true },
-        { "label": "Attention à", "cells": ["Les gabarits ont l'air de gabarits; le français, le référencement et les intégrations sont à votre charge; les abonnements s'additionnent avec les années", "La disponibilité, la passation, et qui corrige quoi dans un an", "Pas l'option la moins chère — et on vous le dira si vous n'avez pas besoin de nous"] }
-      ],
-      "no": {
+      "sticker": "instantané",
+      "panelLabel": "Soumission instantanée",
+      "progress": "Question {n} sur {total}",
+      "back": "Question précédente",
+      "continue": "Continuer",
+      "startOver": "Recommencer",
+      "multiHint": "Cochez tout ce qui s'applique.",
+      "steps": {
         "_review": true,
-        "title": "Vous n'avez probablement pas besoin de nous si",
-        "items": [
-          "vous voulez un site d'une page pour un passe-temps ou un projet parallèle et un outil de création vous convient",
-          "vous n'avez ni ventes en ligne, ni fonctions sur mesure, ni besoin du français et de l'anglais",
-          "vous préférez investir du temps plutôt que de l'argent en ce moment"
-        ]
-      },
-      "yes": {
-        "_review": true,
-        "title": "Vous en avez probablement besoin si",
-        "items": [
-          "le site doit rapporter (ventes, réservations, clients potentiels)",
-          "vous êtes au Québec et il doit fonctionner correctement dans les deux langues",
-          "il doit se connecter à quelque chose (paiements, CRM, réservations, inventaire)"
-        ]
-      }
-    },
-    "pricing": {
-      "_review": true,
-      "h2": "Ce que ça coûte",
-      "intro": "De vraies fourchettes, en dollars canadiens, à partir de notre taux de {rate} l'heure. La plupart des agences ne les publient pas. On pense que vous devriez les voir avant de parler à qui que ce soit.",
-      "_todo_rate": "TODO(angelique): confirmer la publication du taux horaire (brief §5.4)",
-      "headers": { "tier": "Niveau", "price": "Prix", "hours": "Heures", "includes": "Ce qui est inclus" },
-      "quotedLater": "Soumission après la phase de découverte.",
-      "groups": {
-        "websites": {
-          "_review": true,
-          "title": "Sites web (WordPress avec ACF ou Elementor)",
-          "tiers": {
-            "basic": { "name": "De base", "includes": "Design sur mesure à partir de composants, 5 à 10 pages, formulaires de base" },
-            "intermediate": { "name": "Intermédiaire", "includes": "Design sur mesure plus fonctions et relations personnalisées, CMS, fonctionnalités avancées" },
-            "custom": { "name": "Entièrement sur mesure", "includes": "Phase de découverte, intégrations complexes, fonctionnalités avancées" }
+        "projectType": {
+          "q": "Qu'est-ce que vous voulez bâtir?",
+          "hint": "Choisissez une option. Quelques questions de plus et on vous donne un prix.",
+          "options": {
+            "business": "Un site web pour mon entreprise",
+            "blog": "Un blogue ou un site de nouvelles",
+            "landing": "Une page d'atterrissage",
+            "ecommerce": "Une boutique en ligne",
+            "redesign": "Une refonte de mon site actuel",
+            "changes": "Des modifications à mon site actuel",
+            "custom": "Une application, un outil ou une intégration IA sur mesure"
           }
         },
-        "shopify": {
-          "_review": true,
-          "title": "Boutiques en ligne — Shopify",
-          "tiers": {
-            "basic": { "name": "De base", "includes": "Thème acheté, mise en page à votre image, jusqu'à 50 produits" },
-            "intermediate": { "name": "Intermédiaire", "includes": "Gabarits personnalisés dans le thème, personnalisations codées" },
-            "custom": { "name": "Entièrement sur mesure", "includes": "Thème sur mesure, passage à la caisse complexe, intégrations d'applications" }
+        "platform": {
+          "q": "Quelle plateforme voulez-vous utiliser?",
+          "options": {
+            "wordpress": "WordPress",
+            "shopify": "Shopify",
+            "woocommerce": "WooCommerce",
+            "fullyCustom": "Code entièrement sur mesure",
+            "other": "Autre, ou je ne sais pas"
           }
         },
-        "woocommerce": {
-          "_review": true,
-          "title": "Boutiques en ligne — WooCommerce",
-          "tiers": {
-            "basic": { "name": "De base", "includes": "Design ACF ou Elementor, WooCommerce standard, jusqu'à 50 produits" },
-            "intermediate": { "name": "Intermédiaire", "includes": "Types de produits personnalisés, passage à la caisse adapté, règles de livraison et de taxes" },
-            "custom": { "name": "Entièrement sur mesure", "includes": "B2B et vente en gros, abonnements, intégrations ERP" }
+        "currentPlatform": {
+          "q": "Sur quelle plateforme est votre site actuel?",
+          "options": {
+            "wordpress": "WordPress",
+            "shopify": "Shopify",
+            "woocommerce": "WooCommerce",
+            "other": "Autre, ou je ne sais pas"
           }
         },
-        "redesign": {
-          "_review": true,
-          "title": "Refontes",
-          "tiers": {
-            "refresh": { "name": "Rafraîchissement (visuel seulement)", "includes": "Nouveau design sur la structure existante" },
-            "full": { "name": "Refonte complète", "includes": "Nouvelle structure, réorganisation du contenu, référencement" },
-            "migration": { "name": "Changement de plateforme + refonte", "includes": "Nouvelle plateforme, migration des données, redirections" }
+        "approach": {
+          "q": "Quel type de développement convient le mieux?",
+          "options": {
+            "builder": "Avec un constructeur (Elementor, composants ACF)",
+            "customTheme": "Thème codé sur mesure",
+            "themeStore": "Boutique sur un thème",
+            "customizedStore": "Boutique personnalisée",
+            "customCodedStore": "Boutique codée sur mesure",
+            "refresh": "Rafraîchissement visuel, même structure",
+            "fullRedesign": "Refonte complète, nouvelle structure",
+            "migration": "Refonte et changement de plateforme"
           }
         },
-        "custom": {
-          "_review": true,
-          "title": "Applications, extensions et tableaux de bord sur mesure",
-          "tiers": {
-            "discovery": { "name": "Phase de découverte", "includes": "Un plan complet et une feuille de route" },
-            "build": { "name": "Développement", "includes": "" }
+        "design": {
+          "q": "Avez-vous un design ou des inspirations à partager?",
+          "options": {
+            "ready": "Oui, j'ai un design prêt",
+            "inspiration": "J'ai des inspirations et des exemples",
+            "scratch": "Non, il me faut le design de A à Z"
           }
         },
-        "fixes": {
-          "_review": true,
-          "title": "Corrections rapides et mises à jour",
-          "tiers": {
-            "fixes": { "name": "Correction ou mise à jour", "includes": "De une à huit heures de travail à {rate} l'heure" }
+        "multilingual": {
+          "q": "Le site doit-il être en plus d'une langue?",
+          "options": {
+            "bilingual": "Oui, français et anglais",
+            "multi": "Oui, plusieurs langues",
+            "single": "Non, une seule langue"
           }
         },
-        "maintenance": {
-          "_review": true,
-          "title": "Après le lancement — forfaits d'entretien à {maintenanceRate} l'heure",
-          "priceLabel": "Prix par mois",
-          "tiers": {
-            "light": { "name": "Léger", "includes": "{hours:maintenance.light} par mois" },
-            "standard": { "name": "Standard", "includes": "{hours:maintenance.standard} par mois" },
-            "premium": { "name": "Premium", "includes": "{hours:maintenance.premium} par mois" }
+        "integrations": {
+          "q": "À quoi le site doit-il se connecter?",
+          "options": {
+            "analytics": "Statistiques",
+            "crm": "CRM",
+            "newsletter": "Infolettre",
+            "liveChat": "Clavardage en direct",
+            "booking": "Réservations",
+            "other": "Autre chose",
+            "none": "Rien pour l'instant"
+          }
+        },
+        "shopIntegrations": {
+          "q": "À quoi la boutique doit-elle se connecter?",
+          "options": {
+            "payments": "Passerelle de paiement",
+            "shipping": "Livraison et expédition",
+            "subscriptions": "Abonnements",
+            "reviews": "Avis clients",
+            "marketing": "Marketing par courriel ou texto",
+            "other": "Autre chose",
+            "none": "Rien pour l'instant"
+          }
+        },
+        "newIntegrations": {
+          "q": "Ajouterez-vous de nouvelles intégrations?",
+          "options": {
+            "analytics": "Statistiques",
+            "crm": "CRM",
+            "newsletter": "Infolettre",
+            "liveChat": "Clavardage en direct",
+            "booking": "Réservations",
+            "other": "Autre chose",
+            "none": "Pas de nouvelle intégration"
+          }
+        },
+        "pages": {
+          "q": "Combien de pages vous faut-il?",
+          "options": {
+            "p1_5": "1 à 5 pages",
+            "p6_10": "6 à 10 pages",
+            "p11_20": "11 à 20 pages",
+            "p20plus": "Plus de 20 pages"
+          }
+        },
+        "blog": {
+          "q": "Avez-vous besoin d'un blogue?",
+          "options": {
+            "yes": "Oui",
+            "no": "Non",
+            "later": "Peut-être plus tard"
+          }
+        },
+        "categories": {
+          "q": "Combien de catégories ou de sections vous faut-il?",
+          "options": {
+            "c1_3": "1 à 3",
+            "c4_8": "4 à 8",
+            "c9plus": "9 ou plus"
+          }
+        },
+        "templates": {
+          "q": "Vous faut-il des gabarits différents selon le type d'article?",
+          "options": {
+            "multi": "Oui, plusieurs gabarits",
+            "one": "Non, un seul suffit",
+            "unsure": "Pas encore sûr"
+          }
+        },
+        "affiliate": {
+          "q": "Le blogue servira-t-il au marketing d'affiliation?",
+          "options": {
+            "yes": "Oui",
+            "no": "Non",
+            "later": "Peut-être plus tard"
+          }
+        },
+        "products": {
+          "q": "Environ combien de produits aurez-vous?",
+          "options": {
+            "under50": "Moins de 50",
+            "p50_200": "50 à 200",
+            "p200_1000": "200 à 1 000",
+            "p1000plus": "Plus de 1 000"
+          }
+        },
+        "productHelp": {
+          "q": "Aurez-vous besoin d'aide pour ajouter les produits?",
+          "options": {
+            "full": "Oui, tous les produits",
+            "few": "Juste quelques produits",
+            "none": "Non, je m'en occupe"
+          }
+        },
+        "international": {
+          "q": "Vendrez-vous à l'international?",
+          "options": {
+            "multi": "Oui, plusieurs pays",
+            "caUs": "Canada et États-Unis",
+            "local": "Non, local seulement"
+          }
+        },
+        "morePages": {
+          "q": "Ajouterez-vous des pages?",
+          "options": {
+            "few": "Oui, quelques-unes",
+            "many": "Oui, beaucoup",
+            "same": "Non, les mêmes pages"
+          }
+        },
+        "changeTypes": {
+          "q": "Quel genre de modifications vous faut-il?",
+          "options": {
+            "features": "Ajouter des fonctionnalités",
+            "design": "Mettre à jour le design ou la mise en page",
+            "fixes": "Corriger des problèmes ou des bogues",
+            "content": "Mises à jour de contenu",
+            "performance": "Vitesse et performance",
+            "other": "Autre chose"
+          }
+        },
+        "users": {
+          "q": "Qui va l'utiliser?",
+          "options": {
+            "internal": "Mon équipe, à l'interne",
+            "customers": "Mes clients",
+            "both": "Les deux",
+            "other": "Pas encore sûr"
+          }
+        },
+        "timeline": {
+          "q": "Et votre échéancier?",
+          "hint": "Un travail urgent, c'est du vrai travail : ça coûte de 20 à 30 pour cent de plus.",
+          "options": {
+            "standard": "L'échéancier habituel me convient",
+            "rush": "J'en ai besoin rapidement",
+            "flexible": "Ça peut prendre plus de temps au besoin"
           }
         }
       },
-      "line": "Les fourchettes couvrent la portée habituelle. Le clavardage de soumission les ajuste à votre projet en trois minutes environ.",
-      "cta": "Obtenir ma fourchette exacte",
-      "ctaNote": "Ouvre notre clavardage de soumission sur monkeysat.work."
+      "result": {
+        "_review": true,
+        "heading": "Votre soumission approximative",
+        "priceLabel": "Fourchette de prix",
+        "hoursLabel": "Heures estimées",
+        "hoursUnit": "h",
+        "breakdown": {
+          "design": "Design",
+          "development": "Développement",
+          "content": "Contenu",
+          "contentShop": "Contenu et produits",
+          "testing": "Tests et lancement"
+        },
+        "timelineLabel": "Échéancier",
+        "weeks": "{low} à {high} semaines",
+        "rushNote": "Échéancier accéléré inclus.",
+        "provideHeading": "Ce que vous devrez fournir",
+        "provide": {
+          "designFiles": "Vos fichiers de design",
+          "brand": "Logo, couleurs et les photos que vous avez",
+          "content": "Les textes des pages, ou la décision qu'on les rédige",
+          "products": "Liste des produits, prix et images",
+          "access": "L'accès à votre site actuel et à l'hébergement",
+          "translations": "Le contenu dans chaque langue, ou la décision qu'on traduise"
+        },
+        "guarantee": "C'est une approximation. Angelique confirme le montant exact avec vous, et la soumission finale ne dépassera pas cette fourchette.",
+        "_todo_promise": "TODO(angelique): confirmer la promesse « la soumission finale ne dépassera pas la fourchette » sur une page publique (brief §13 #6)",
+        "taxes": "Dollars canadiens. Taxes en sus.",
+        "discovery": {
+          "heading": "Le sur mesure commence par une phase de découverte",
+          "text": "Les applications, outils et intégrations IA sur mesure sont cadrés dans une phase de découverte payante : {price} ({hours} heures) pour un plan complet et une feuille de route. La soumission pour le développement vient ensuite, à partir de ce plan.",
+          "cta": "Réserver un appel découverte",
+          "or": "ou",
+          "send": "Envoyez-moi les détails"
+        },
+        "actions": {
+          "accept": "Parfait, on commence",
+          "book": "Réserver un appel découverte",
+          "budget": "Hors budget",
+          "chat": "Vous préférez en discuter? Continuez dans le clavardage de Monkeys at Work."
+        }
+      },
+      "intake": {
+        "_review": true,
+        "heading": "Presque terminé.",
+        "intro": "Laissez vos coordonnées et Angelique confirme le montant exact par courriel. Vos réponses et cette fourchette l'accompagnent.",
+        "followUpHeading": "On se reparle dans un mois.",
+        "followUpIntro": "Laissez vos coordonnées et Angelique vous écrira dans environ un mois. Aucune pression d'ici là.",
+        "name": "votre nom",
+        "email": "courriel",
+        "phone": "téléphone (facultatif)",
+        "company": "entreprise (facultatif)",
+        "notes": "autre chose à savoir? (facultatif)",
+        "consent": "J'accepte que Monkeys at Work conserve mes coordonnées et ces réponses pour préparer ma soumission. Pas d'infolettre, pas de partage.",
+        "button": "Envoyer ma demande de soumission",
+        "followUpButton": "Me recontacter dans un mois",
+        "sending": "Envoi…",
+        "errors": {
+          "_review": true,
+          "name": "Entrez votre nom pour qu'on sache à qui écrire.",
+          "email": "Entrez une adresse courriel pour qu'Angelique puisse vous répondre.",
+          "consent": "Cochez la case pour qu'on ait le droit de garder vos coordonnées et de vous répondre.",
+          "tooFast": "C'était rapide. Attendez quelques secondes et renvoyez.",
+          "network": "L'envoi n'a pas fonctionné. Réessayez, ou écrivez à {email} avec vos réponses et on prend le relais.",
+          "notConfigured": "Le circuit de soumission n'est pas encore branché. Écrivez à {email} et on vous répond avec votre soumission."
+        }
+      },
+      "budget": {
+        "_review": true,
+        "heading": "Les budgets sont parfois serrés.",
+        "text": "On est flexibles et on trouve généralement une solution. Réservez un court appel avec Angelique pour voir ce qu'on peut arranger ensemble, ou demandez-nous de revenir vers vous dans un mois.",
+        "book": "Réserver un appel découverte",
+        "later": "Me recontacter dans un mois",
+        "back": "Retour à ma soumission"
+      },
+      "nojs": {
+        "_review": true,
+        "text": "L'outil de soumission a besoin de JavaScript. Vous pouvez obtenir la même soumission dans le clavardage de Monkeys at Work :",
+        "link": "Ouvrir le clavardage sur monkeysat.work"
+      },
+      "summary": {
+        "_review": true,
+        "heading": "Vos réponses",
+        "edit": "Modifier"
+      }
+    },
+    "board": {
+      "_review": true,
+      "label": "Le menu",
+      "h2": "Ce que ça coûte.",
+      "intro": "Les fourchettes derrière l'outil de soumission, en dollars canadiens à {rate} l'heure. La plupart des agences ne les publient pas. On pense que vous devriez les voir avant de parler à qui que ce soit.",
+      "_todo_rate": "TODO(angelique): confirmer la publication du taux horaire (brief §5.4)",
+      "stamp": "taxes en sus — évidemment",
+      "groups": {
+        "_review": true,
+        "websites": {
+          "title": "Sites web — WordPress",
+          "tiers": {
+            "basic": "De base, 5 à 10 pages, design à partir de composants",
+            "intermediate": "Intermédiaire, fonctions personnalisées et CMS",
+            "custom": "Entièrement sur mesure, découverte et intégrations complexes"
+          }
+        },
+        "landing": {
+          "title": "Pages d'atterrissage",
+          "tiers": {
+            "builder": "Avec un constructeur",
+            "customTheme": "Codée sur mesure",
+            "custom": "Code entièrement sur mesure"
+          }
+        },
+        "shopify": {
+          "title": "Boutiques en ligne — Shopify",
+          "tiers": {
+            "basic": "De base, thème acheté, jusqu'à 50 produits",
+            "intermediate": "Intermédiaire, gabarits personnalisés",
+            "custom": "Thème et passage à la caisse entièrement sur mesure"
+          }
+        },
+        "woocommerce": {
+          "title": "Boutiques en ligne — WooCommerce",
+          "tiers": {
+            "basic": "De base, WooCommerce standard, jusqu'à 50 produits",
+            "intermediate": "Intermédiaire, types de produits et caisse personnalisés",
+            "custom": "Entièrement sur mesure, B2B, abonnements, ERP"
+          }
+        },
+        "redesign": {
+          "title": "Refontes",
+          "tiers": {
+            "refresh": "Rafraîchissement visuel sur la structure existante",
+            "full": "Refonte complète, nouvelle structure et référencement",
+            "migration": "Refonte et changement de plateforme"
+          }
+        },
+        "fixes": {
+          "title": "Corrections et modifications",
+          "tiers": {
+            "fixes": "Corrections rapides et mises à jour, 1 à 8 heures"
+          }
+        },
+        "custom": {
+          "title": "Applications, outils, IA sur mesure",
+          "tiers": {
+            "discovery": "Phase de découverte, plan et feuille de route",
+            "build": "Le développement"
+          }
+        },
+        "maintenance": {
+          "title": "Après le lancement — entretien à {maintenanceRate} l'heure",
+          "suffix": "par mois",
+          "tiers": {
+            "light": "Léger, 10 à 18 heures",
+            "standard": "Standard, 18 à 30 heures",
+            "premium": "Premium, 30 à 50 heures"
+          }
+        }
+      },
+      "quotedLater": "soumission après la découverte",
+      "line": "Si votre projet sort de ces fourchettes, la soumission le dira, avec le pourquoi.",
+      "cta": "Obtenir ma soumission"
     },
     "steps": {
       "_review": true,
       "h2": "Comment ça marche",
       "items": [
-        { "title": "Répondez à une dizaine de questions", "text": "Dans le clavardage de soumission : ce que vous voulez bâtir, la plateforme, les pages, les langues, les intégrations, l'échéancier." },
-        { "title": "Recevez une fourchette de prix sur-le-champ", "text": "Avec les heures réparties entre le design, le développement, le contenu, puis les tests et le lancement." },
-        { "title": "Angelique confirme le montant exact avec vous", "text": "La soumission finale reste dans la fourchette qu'on vous a donnée." }
+        {
+          "title": "Répondez aux questions",
+          "text": "Les mêmes que notre studio pose à chaque client : ce que vous bâtissez, la plateforme, les pages, les langues, les intégrations, l'échéancier. Environ trois minutes, sur votre téléphone."
+        },
+        {
+          "title": "Recevez votre fourchette sur-le-champ",
+          "text": "Une fourchette de prix et les heures derrière, réparties entre le design, le développement, le contenu, puis les tests et le lancement."
+        },
+        {
+          "title": "Angelique confirme le montant exact",
+          "text": "Par courriel, dans un délai d'un jour ouvrable. La soumission finale reste dans la fourchette qu'on vous a montrée.",
+          "_todo_replyTime": "TODO(angelique): confirmer la promesse de délai de réponse (brief §5.8)"
+        }
       ]
     },
     "work": {
       "_review": true,
       "h2": "Ce qu'on a livré",
+      "aside": "noms en attente d'approbation des clients",
       "linkLabel": "Lire l'étude de cas sur monkeysat.work",
       "quotesHeading": "Ce que disent nos clients"
     },
@@ -194,31 +489,65 @@
       "_review": true,
       "h2": "Questions",
       "items": [
-        { "q": "Combien coûte un site web?", "a": "La plupart des sites d'entreprise coûtent {price:websites.basic..websites.intermediate}; les boutiques et les projets sur mesure, davantage. Les fourchettes complètes sont plus haut, et le guide {guideLink} explique ce qui fait bouger le chiffre." },
-        { "q": "Combien de temps ça prend?", "a": "La plupart des sites d'entreprise prennent de 4 à 8 semaines à partir du lancement du projet; les boutiques et les projets sur mesure, plus longtemps. Le clavardage vous donne un échéancier avec votre soumission.", "_todo_timeline": "TODO(angelique): confirmer le délai de 4 à 8 semaines (brief §5.7)" },
-        { "q": "Mon site web au Québec doit-il être en français?", "a": "Si vous faites affaire au Québec, oui : votre site doit être offert en français, au moins aussi visiblement que dans toute autre langue (la Charte de la langue française, mise à jour par la loi 96). On bâtit dans les deux langues par défaut, et le français est rédigé, pas traduit par une machine." },
-        { "q": "Le prix du clavardage est-il ferme?", "a": "C'est une fourchette, pas une soumission finale. Angelique confirme le montant exact après une courte conversation, et il ne dépassera pas la fourchette qu'on vous a montrée." },
-        { "q": "À qui appartient le site une fois terminé?", "a": "À vous — le code, le design, le contenu et les comptes sont à votre nom.", "_todo_ownership": "TODO(angelique): confirmer selon le libellé des conditions générales (brief §5.7)" },
-        { "q": "Avec quoi bâtissez-vous?", "a": "WordPress (avec ACF ou Elementor), Shopify, WooCommerce, ou du code entièrement sur mesure quand le projet le demande. On recommande ce qui convient, pas ce qui nous rapporte le plus." },
-        { "q": "Que se passe-t-il après le lancement?", "a": "Gérez-le vous-même — on fait la passation avec une formation — ou prenez un forfait d'entretien (Léger, Standard ou Premium; fourchettes plus haut)." },
-        { "q": "Travaillez-vous avec des entreprises hors Québec?", "a": "Oui, partout au Canada, en français ou en anglais.", "_todo_outsideQuebec": "TODO(angelique): confirmer (brief §5.7)" }
+        {
+          "q": "Comment la soumission est-elle calculée?",
+          "a": "Avec le même cadre que notre studio utilise : un niveau de base pour votre type de site, puis des heures ajoutées pour les pages, les langues, les produits et les intégrations, à {rate} l'heure. Le clavardage sur monkeysat.work fonctionne avec les mêmes chiffres : vous y obtiendrez la même réponse."
+        },
+        {
+          "q": "La soumission est-elle ferme?",
+          "a": "C'est une fourchette, pas une soumission finale. Angelique confirme le montant exact après un court échange par courriel, et il ne dépassera pas la fourchette qu'on vous a montrée."
+        },
+        {
+          "q": "Combien de temps prend un site web?",
+          "a": "La plupart des sites d'entreprise prennent de 4 à 8 semaines à partir du lancement du projet; les boutiques et les projets sur mesure, plus longtemps. Votre soumission affiche un échéancier selon vos réponses, et l'option accélérée le raccourcit.",
+          "_todo_timeline": "TODO(angelique): confirmer le délai de 4 à 8 semaines (brief §5.7)"
+        },
+        {
+          "q": "Mon site web au Québec doit-il être en français?",
+          "a": "Si vous faites affaire au Québec, oui : votre site doit être offert en français, au moins aussi visiblement que dans toute autre langue (la Charte de la langue française, mise à jour par la loi 96). On bâtit dans les deux langues par défaut, et le français est rédigé, pas traduit par une machine."
+        },
+        {
+          "q": "À qui appartient le site une fois terminé?",
+          "a": "À vous — le code, le design, le contenu et les comptes sont à votre nom.",
+          "_todo_ownership": "TODO(angelique): confirmer selon le libellé des conditions générales (brief §5.7)"
+        },
+        {
+          "q": "Avec quoi bâtissez-vous?",
+          "a": "WordPress (avec ACF ou Elementor), Shopify, WooCommerce, ou du code entièrement sur mesure quand le projet le demande. On recommande ce qui convient, pas ce qui nous rapporte le plus."
+        },
+        {
+          "q": "Qu'est-ce qui n'est pas dans la fourchette?",
+          "a": "La photographie, la rédaction de A à Z, les extensions et applications payantes, l'hébergement, le nom de domaine et les taxes. Votre soumission liste ce qui est inclus, pour que rien n'apparaisse plus tard."
+        },
+        {
+          "q": "Que se passe-t-il après le lancement?",
+          "a": "Gérez-le vous-même — on fait la passation avec une formation — ou prenez un forfait d'entretien (Léger, Standard ou Premium; fourchettes plus haut)."
+        },
+        {
+          "q": "Travaillez-vous avec des entreprises hors Québec?",
+          "a": "Oui, partout au Canada, en français ou en anglais.",
+          "_todo_outsideQuebec": "TODO(angelique): confirmer (brief §5.7)"
+        }
       ]
     },
     "form": {
       "_review": true,
-      "h2": "Vous hésitez encore?",
-      "intro": "Dites-nous ce que vous voulez bâtir et on vous répond par courriel — pas d'appel, sauf si vous en demandez un.",
-      "name": "Nom",
-      "email": "Courriel",
-      "message": "Qu'est-ce que vous voulez bâtir?",
-      "consent": "J'accepte que Monkeys at Work conserve mes coordonnées pour répondre à cette demande. Pas d'infolettre, pas de partage.",
-      "button": "Envoyer ma question",
-      "sending": "Envoi de votre question…",
+      "h2": "Une question avant de commencer?",
+      "badge": "pas de robots ici",
+      "intro": "Posez-la ici et une personne vous répond par courriel dans un délai d'un jour ouvrable, en français ou en anglais. Pas d'appel, sauf si vous en demandez un.",
+      "_todo_replyTime": "TODO(angelique): confirmer la promesse de délai de réponse (brief §5.8)",
+      "name": "votre nom",
+      "email": "courriel",
+      "message": "ce qui vous trotte dans la tête",
+      "consent": "J'accepte que Monkeys at Work conserve mes coordonnées pour répondre à ce message. Pas d'infolettre, pas de partage.",
+      "button": "Envoyer",
+      "sending": "Envoi…",
+      "note": "pas d'infolettre. on répond seulement à ce message.",
       "errors": {
         "_review": true,
         "name": "Entrez votre nom pour qu'on sache à qui répondre.",
         "email": "Entrez une adresse courriel pour qu'on puisse vous répondre.",
-        "message": "Dites-nous ce que vous voulez bâtir, même en une ligne.",
+        "message": "Dites-nous ce qui vous trotte dans la tête, même en une ligne.",
         "consent": "Cochez la case pour qu'on ait le droit de garder vos coordonnées et de vous répondre.",
         "tooFast": "C'était rapide. Attendez quelques secondes et renvoyez.",
         "network": "L'envoi n'a pas fonctionné. Réessayez, ou écrivez à {email} et on vous répondra de là.",
@@ -229,27 +558,35 @@
   },
   "guide": {
     "_review": true,
+    "eyebrow": "le guide · 10 minutes · sans discours de vente",
     "breadcrumbHome": "Accueil",
     "breadcrumbGuides": "Guides",
     "byline": "{author} · Mis à jour le {date}",
-    "cta": "Obtenir ma fourchette exacte",
-    "ctaNote": "Ouvre notre clavardage de soumission sur monkeysat.work.",
+    "ctaHeading": "Le raccourci",
+    "ctaText": "Répondez aux questions de l'outil de soumission sur la page d'accueil et obtenez votre propre fourchette en trois minutes environ.",
+    "cta": "Obtenir ma soumission",
     "faqH2": "Questions",
-    "backHome": "Retour aux fourchettes de prix"
+    "backHome": "Retour à l'outil de soumission"
   },
   "thanks": {
     "_review": true,
     "h1": "Bien reçu.",
-    "text": "Angelique lit chacun de ces messages et répond dans un délai d'un jour ouvrable.",
+    "text": "Angelique lit chacune de ces demandes et répond dans un délai d'un jour ouvrable, avec le montant exact et les prochaines étapes.",
     "_todo_replyTime": "TODO(angelique): confirmer la promesse de délai de réponse (brief §5.8)",
-    "back": "Retour à l'accueil"
+    "received": "Votre demande",
+    "receivedValue": "reçue",
+    "back": "Retour au menu",
+    "guide": "Lire le guide en attendant"
   },
   "notFound": {
     "_review": true,
-    "h1": "Cette page n'existe pas.",
-    "text": "L'adresse est peut-être périmée, ou elle n'a jamais existé. Les deux pages qui comptent sont ci-dessous.",
-    "home": "Voir ce que coûte un site web",
-    "guide": "Lire le guide : combien coûte un site web au Québec"
+    "label": "erreur 404",
+    "h1": "Cette page n'est pas au menu.",
+    "joke": "Page introuvable",
+    "jokeValue": "0 $",
+    "text": "Au moins, celle-là est gratuite. Les deux pages qui comptent sont ci-dessous.",
+    "home": "Obtenir une soumission",
+    "guide": "Lire le guide"
   },
   "privacy": {
     "_review": true,
@@ -262,16 +599,16 @@
         "_review": true,
         "h2": "Ce qu'on recueille",
         "paragraphs": [
-          "Quand vous envoyez le formulaire : votre nom, votre adresse courriel et ce que vous avez écrit. Rien d'autre.",
-          "Si vous acceptez les statistiques dans la bannière : les pages que vous visitez, comment vous êtes arrivé ici, votre type d'appareil et de navigateur, et votre emplacement approximatif, par Google Analytics 4. Tant que vous n'acceptez pas, aucun script de statistiques ne se charge et aucun témoin n'est déposé. Si vous refusez, rien n'est recueilli.",
-          "Le clavardage de soumission fonctionne sur monkeysat.work, selon la politique de confidentialité de ce site."
+          "L'outil de soumission lui-même ne recueille rien : vos réponses restent dans votre navigateur jusqu'à ce que vous décidiez de les envoyer.",
+          "Quand vous envoyez une demande de soumission ou une question : votre nom, votre adresse courriel, votre téléphone et votre entreprise si vous les avez donnés, vos réponses aux questions, la fourchette qu'on vous a montrée et ce que vous avez écrit. Rien d'autre.",
+          "Si vous acceptez les statistiques dans la bannière : les pages que vous visitez, comment vous êtes arrivé ici, votre type d'appareil et de navigateur, et votre emplacement approximatif, par Google Analytics 4. Tant que vous n'acceptez pas, aucun script de statistiques ne se charge et aucun témoin n'est déposé. Si vous refusez, rien n'est recueilli."
         ]
       },
       {
         "_review": true,
         "h2": "Pourquoi",
         "paragraphs": [
-          "Les coordonnées du formulaire servent à répondre à votre question. Rien d'autre — pas d'infolettre, pas de partage, pas de vente.",
+          "Les demandes de soumission servent à préparer et à confirmer votre soumission, puis à en faire le suivi. Les questions servent à vous répondre. Rien d'autre — pas d'infolettre, pas de partage, pas de vente.",
           "Les statistiques nous disent si ce site est utile et vaut la peine d'être maintenu. C'est tout."
         ]
       },
@@ -279,7 +616,7 @@
         "_review": true,
         "h2": "Où ça va",
         "paragraphs": [
-          "Les envois du formulaire vont dans HubSpot, l'outil de gestion de la relation client de Monkeys at Work, avec une trace du consentement que vous avez donné.",
+          "Les demandes de soumission entrent dans les systèmes de Monkeys at Work : sa base de données de demandes, HubSpot (l'outil de gestion de la relation client) et ClickUp (l'outil de gestion des tâches), exactement comme une soumission faite dans le clavardage de monkeysat.work. Les questions vont dans HubSpot avec une trace du consentement que vous avez donné.",
           "Les données de statistiques vont dans Google Analytics 4, avec les adresses IP anonymisées."
         ]
       },
@@ -287,7 +624,7 @@
         "_review": true,
         "h2": "Combien de temps on les garde",
         "paragraphs": [
-          "Votre choix pour les statistiques est retenu dans votre navigateur pendant 12 mois. Les coordonnées du formulaire sont conservées le temps de faire le suivi avec vous, et supprimées sur demande."
+          "Votre choix pour les statistiques est retenu dans votre navigateur pendant 12 mois. Les demandes et les questions sont conservées le temps de faire le suivi avec vous, et supprimées sur demande."
         ]
       },
       {
@@ -314,7 +651,13 @@
     "siteName": "createawebsite.ca",
     "orgDescription": "Monkeys at Work est un studio web au Québec qui bâtit des sites web bilingues, des boutiques en ligne et des applications web sur mesure pour les petites entreprises partout au Canada.",
     "serviceName": "Conception et développement de sites web",
-    "serviceDescription": "Sites web bilingues, boutiques en ligne, refontes, corrections et applications web sur mesure pour les petites entreprises au Québec et partout au Canada, avec des fourchettes de prix publiques et une soumission en trois minutes environ.",
-    "serviceTypes": ["Conception web", "Développement web", "Développement de commerce en ligne", "Refonte de site web", "Entretien de site web"]
+    "serviceDescription": "Sites web bilingues, boutiques en ligne, refontes, corrections et applications web sur mesure pour les petites entreprises au Québec et partout au Canada, avec des fourchettes de prix publiques et une soumission instantanée en trois minutes environ.",
+    "serviceTypes": [
+      "Conception web",
+      "Développement web",
+      "Développement de commerce en ligne",
+      "Refonte de site web",
+      "Entretien de site web"
+    ]
   }
 }

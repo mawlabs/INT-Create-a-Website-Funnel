@@ -14,7 +14,7 @@ const updated = interpolate(c.privacy.updated, { date: formatDate(new Date('2026
 ---
 <Layout {...layoutProps(locale)} meta={meta} jsonLd={schema.graph(baseNodes(locale))}>
   <article class="page">
-    <div class="wrap flow">
+    <div class="wrap wrap-text flow">
       <h1>{c.privacy.h1}</h1>
       <p class="small">{updated}</p>
       <p>{c.privacy.intro}</p>
@@ -36,15 +36,8 @@ const updated = interpolate(c.privacy.updated, { date: formatDate(new Date('2026
   .page { padding-block: var(--space-4) var(--space-6); }
   .page h1 { font-size: var(--step-3); }
   .page h2 { font-size: var(--step-2); }
-  .reset {
-    padding: 0.5em 0.9em;
-    border-radius: var(--radius);
-    border: 2px solid var(--color-heading);
-    background: var(--color-surface);
-    color: var(--color-heading);
-    font-family: var(--font-heading);
-    font-weight: 700;
-  }
+  .reset { padding: 0.5em 0.9em; border: var(--border); background: var(--color-surface); color: var(--color-heading); font-family: var(--font-display); font-weight: 700; box-shadow: var(--shadow-2); }
+  .reset:hover { background: var(--color-leader); }
 </style>
 
 <script>

@@ -1,50 +1,36 @@
 ---
-/** "How it works" — a genuine three-step sequence, so numbering is appropriate here and only here (brief §5.5). */
+/** "How it works" — a genuine three-step sequence, oversized numerals (brief §5.5). */
 import type { StepsCopy } from '../lib/copy';
-
 interface Props { copy: StepsCopy; id?: string }
 const { copy, id = 'how' } = Astro.props;
 ---
-<section class="section" id={id} aria-labelledby={`${id}-h`}>
+<section class="section steps-section" id={id} aria-labelledby={`${id}-h`}>
   <div class="wrap">
     <h2 id={`${id}-h`}>{copy.h2}</h2>
     <ol class="steps">
-      {copy.items.map((s) => (
+      {copy.items.map((s, i) => (
         <li>
+          <span class="numeral" aria-hidden="true"><span class:list={['disc', `disc-${i + 1}`]}></span>{i + 1}</span>
           <h3>{s.title}</h3>
           <p>{s.text}</p>
         </li>
       ))}
     </ol>
   </div>
+  <div class="ghost" aria-hidden="true"></div>
 </section>
 
 <style>
-  .steps {
-    list-style: none;
-    padding: 0;
-    counter-reset: step;
-    display: grid;
-    gap: var(--space-3);
-  }
-  @media (min-width: 45em) { .steps { grid-template-columns: repeat(3, 1fr); gap: var(--space-4); } }
-  .steps li {
-    counter-increment: step;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    column-gap: var(--space-2);
-    align-items: baseline;
-    max-width: none;
-  }
-  .steps li::before {
-    content: counter(step);
-    grid-row: 1 / span 2;
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: var(--step-3);
-    line-height: 1;
-    color: var(--color-heading);
-  }
-  .steps h3 { color: var(--color-heading); }
-  .steps p { grid-column: 2; margin-top: var(--space-1); }
+  .steps-section { position: relative; overflow: hidden; }
+  .steps { list-style: none; padding: 0; display: grid; gap: var(--space-4); margin-top: var(--space-3); position: relative; z-index: 1; }
+  @media (min-width: 45em) { .steps { grid-template-columns: repeat(3, 1fr); } }
+  .steps li { max-width: none; }
+  .numeral { position: relative; display: inline-block; font-family: var(--font-display); font-weight: 900; font-size: var(--step-numeral); line-height: 0.9; letter-spacing: -0.04em; color: var(--color-heading); }
+  .disc { position: absolute; z-index: -1; width: 0.6em; height: 0.6em; border-radius: 50%; left: -0.12em; top: 0.12em; }
+  .disc-1 { background: var(--color-leader); }
+  .disc-2 { background: var(--color-confirm); opacity: 0.6; }
+  .disc-3 { background: var(--color-accent); opacity: 0.7; }
+  .steps h3 { margin-top: -0.35rem; }
+  .steps p { margin-top: var(--space-1); }
+  .ghost { position: absolute; right: -6rem; bottom: -8rem; width: 22rem; height: 22rem; border-radius: 50%; border: 3px dotted var(--color-accent); opacity: 0.45; pointer-events: none; }
 </style>

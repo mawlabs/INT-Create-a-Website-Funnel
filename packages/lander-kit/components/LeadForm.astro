@@ -24,10 +24,12 @@ const messages = { ...copy.errors, sending: copy.sending };
 delete (messages as Record<string, unknown>)._review;
 const noscriptText = interpolate(copy.noscript, { email: '' }).trim();
 ---
-<section class="section" id={id} aria-labelledby={`${id}-h`}>
-  <div class="wrap">
-    <h2 id={`${id}-h`}>{copy.h2}</h2>
-    <p class="intro">{copy.intro}</p>
+<section class="section form-section" id={id} aria-labelledby={`${id}-h`}>
+  <div class="wrap wrap-text">
+    <div class="block card card-paper">
+      <span class="badge" aria-hidden="true">{copy.badge}</span>
+      <h2 id={`${id}-h`}>{copy.h2}</h2>
+      <p class="intro">{copy.intro}</p>
 
     <form
       class="lead-form"
@@ -70,17 +72,22 @@ const noscriptText = interpolate(copy.noscript, { email: '' }).trim();
         <input id={`${id}-website`} name="website" type="text" tabindex="-1" autocomplete="off" />
       </div>
       <button type="submit" class="btn" data-submit>{copy.button}</button>
+      <p class="meta note">{copy.note}</p>
       <p class="form-status" role="alert" data-status hidden></p>
     </form>
 
     <noscript>
       <p>{noscriptText} <a href={`mailto:${supportEmail}`}>{supportEmail}</a></p>
     </noscript>
+    </div>
   </div>
 </section>
 
 <style>
-  .lead-form { max-width: var(--measure); }
+  .block { position: relative; padding: var(--space-4) var(--space-3); }
+  .block .badge { position: absolute; top: -0.9rem; left: var(--space-3); }
+  .lead-form { max-width: var(--measure); margin-top: var(--space-3); }
+  .note { margin-top: var(--space-2); letter-spacing: 0.04em; }
   .hp { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
   .lead-form[hidden] { display: none; }
 </style>

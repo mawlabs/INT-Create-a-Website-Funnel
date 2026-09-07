@@ -1,0 +1,8 @@
+---
+/** The signature device: name → dotted leader → value, baseline-aligned; wraps the value under the label on narrow screens. */
+interface Props { label: string; value: string; size?: 'board' | 'small' | 'faint'; class?: string }
+const { label, value, size = 'board', class: className } = Astro.props;
+---
+<div class:list={['leader-line', size !== 'board' && size, className]}>
+  <span class="label">{label}</span><span class="leader" aria-hidden="true"></span><span class="value price">{value}</span>
+</div>

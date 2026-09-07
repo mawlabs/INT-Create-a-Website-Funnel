@@ -11,6 +11,13 @@ export const site = {
     formFr: (import.meta.env.PUBLIC_HUBSPOT_FORM_FR as string | undefined) ?? '',       // TODO(angelique): FR form GUID (brief §13 #2)
   },
   supportEmail: 'support@monkeysat.work',
+  /**
+   * Quote leads go to the MAW `process-lead` edge function (same pipeline as the chat: Supabase → HubSpot → ClickUp).
+   * TODO(angelique): confirm the function URL and CORS with Karim or Hamza before launch; the host below is the
+   * project host documented for the ClickUp webhook (MAW360 documentation §17.4).
+   */
+  leadEndpoint: (import.meta.env.PUBLIC_MAW_LEAD_ENDPOINT as string | undefined) || 'https://jkuhsxbylrrtdcbkmtec.supabase.co/functions/v1/process-lead',
+  termsUrl: 'https://monkeysat.work/terms', // TODO(angelique): confirm the public URL of the MAW terms & conditions
   bookUrl: 'https://meetings.hubspot.com/ange1',
   org: {
     name: 'Monkeys at Work',

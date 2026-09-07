@@ -84,10 +84,10 @@ function spanning(data: PricingData, a: string, b: string, key: 'price' | 'hours
  *   {maintenanceRate}                 → $75
  */
 export function renderPricing(template: string, data: PricingData, locale: Locale): string {
-  return template.replace(/\{(price|hours|h|min|max|rate|maintenanceRate)(?::([a-z0-9_.]+))?\}/g, (_m, kind: string, ref?: string) => {
+  return template.replace(/\{(price|hours|h|min|max|rate|maintenanceRate)(?::([a-z0-9_.]+))?\}/g, (m, kind: string, ref?: string) => {
     if (kind === 'rate') return formatMoney(data.hourlyRate, locale);
     if (kind === 'maintenanceRate') return formatMoney(data.maintenanceRate, locale);
-    if (!ref) throw new Error(`pricing: token "${kind}" needs a tier reference`);
+    if (!ref) return m; // a plain {price} / {hours} is a runtime placeholder, not a pricing token
     const key = kind === 'hours' || kind === 'h' ? 'hours' : 'price';
     let range: Range | null;
     if (ref.includes('..')) {
