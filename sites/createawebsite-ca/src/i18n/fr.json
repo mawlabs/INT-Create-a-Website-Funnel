@@ -1,0 +1,320 @@
+{
+  "siteName": "createawebsite.ca",
+  "skipLink": "Aller au contenu",
+  "header": {
+    "_review": true,
+    "logoAlt": "Monkeys at Work",
+    "homeLabel": "Accueil de createawebsite.ca",
+    "switchLabel": "Langue",
+    "en": "EN",
+    "fr": "FR"
+  },
+  "footer": {
+    "_review": true,
+    "iconAlt": "Icône Monkeys at Work",
+    "line": "createawebsite.ca est un site de Monkeys at Work, un studio web au Québec.",
+    "links": { "site": "monkeysat.work", "portfolio": "Portfolio", "book": "Prendre rendez-vous", "privacy": "Confidentialité" }
+  },
+  "langBar": {
+    "_review": true,
+    "text": "Ce site est aussi en français.",
+    "link": "Lire en français",
+    "dismiss": "Fermer"
+  },
+  "consent": {
+    "_review": true,
+    "label": "Consentement aux statistiques",
+    "text": "Peut-on compter votre visite avec Google Analytics? Rien ne se charge avant votre accord.",
+    "accept": "Accepter les statistiques",
+    "decline": "Refuser",
+    "privacy": "Confidentialité"
+  },
+  "meta": {
+    "home": {
+      "_review": true,
+      "title": "Créer un site web au Québec : vrais prix, conseils honnêtes",
+      "description": "Combien coûte vraiment un site web au Québec, quand le faire soi-même ou engager un studio, et une fourchette de prix exacte en trois minutes avec Monkeys at Work."
+    },
+    "privacy": {
+      "_review": true,
+      "title": "Confidentialité — createawebsite.ca",
+      "description": "Ce que createawebsite.ca recueille, pourquoi, où ça va et comment retirer votre consentement. Statistiques seulement après votre accord. Un site de Monkeys at Work."
+    },
+    "thanks": {
+      "_review": true,
+      "title": "Bien reçu — createawebsite.ca",
+      "description": "Votre question est en route vers Monkeys at Work."
+    },
+    "notFound": {
+      "_review": true,
+      "title": "Page introuvable — createawebsite.ca",
+      "description": "Cette page n'existe pas. Rendez-vous à l'accueil ou au guide sur le coût d'un site web au Québec."
+    }
+  },
+  "home": {
+    "hero": {
+      "_review": true,
+      "h1": "Un vrai prix pour un vrai site web, en trois minutes.",
+      "sub": "Choisissez ce qu'il vous faut et on vous montre ce que ça coûte d'habitude. Vous voulez une fourchette exacte? Notre clavardage de soumission pose une dizaine de questions et vous en donne une — sans appel de vente, et la soumission finale ne la dépassera pas. Si un outil de création en ligne est le meilleur choix pour vous, on vous le dira.",
+      "_todo_promise": "TODO(angelique): confirmer la promesse « la soumission finale ne dépassera pas la fourchette » sur une page publique (brief §13 #6)",
+      "panelHeading": "De quoi avez-vous besoin?",
+      "tiles": [
+        { "id": "business", "label": "Un site web pour mon entreprise", "reveal": "La plupart des sites d'entreprise se situent entre {min:websites.basic} et {max:websites.intermediate} ({h:websites.basic..websites.intermediate} heures). Un site entièrement sur mesure va de {price:websites.custom}." },
+        { "id": "ecommerce", "label": "Une boutique en ligne", "reveal": "Boutiques Shopify de {price:shopify.basic..shopify.intermediate}, WooCommerce de {price:woocommerce.basic..woocommerce.intermediate} ({h:shopify.basic..shopify.intermediate} heures). Les grosses boutiques sur mesure coûtent plus." },
+        { "id": "redesign", "label": "Une refonte de mon site actuel", "reveal": "Un rafraîchissement visuel : {price:redesign.refresh}. Une refonte complète : {price:redesign.full}. Avec changement de plateforme : {price:redesign.migration}." },
+        { "id": "changes", "label": "Une correction ou une mise à jour", "reveal": "Corrections rapides et mises à jour : {price:fixes.fixes} ({h:fixes.fixes} heures)." },
+        { "id": "custom", "label": "Une application ou une intégration sur mesure", "reveal": "Ça commence par une phase de découverte payante, {price:custom.discovery} ({h:custom.discovery} heures). La soumission pour le développement vient ensuite." }
+      ],
+      "placeholder": "Choisissez une option pour voir une fourchette typique.",
+      "cta": "Obtenir ma fourchette exacte",
+      "ctaNote": "Ouvre notre clavardage de soumission sur monkeysat.work.",
+      "caption": "Fourchettes approximatives en dollars canadiens. Le clavardage les ajuste à votre projet; la soumission finale reste dans la fourchette qu'il vous donne."
+    },
+    "compare": {
+      "_review": true,
+      "h2": "Avez-vous besoin de nous?",
+      "intro": "Parfois, la réponse est non. Voici comment se comparent les trois façons d'avoir un site web.",
+      "columns": ["Outil de création (Wix, Squarespace, thème Shopify)", "Pigiste", "Monkeys at Work"],
+      "rows": [
+        { "label": "Coût", "cells": ["20 $ à 60 $ par mois, plus vos soirées", "1 000 $ à 4 000 $ en général", "{price:websites.basic..websites.custom} (fourchettes plus bas)"], "_todo_freelancerCost": "TODO(angelique): confirmer la cellule du coût pigiste (brief §5.3)" },
+        { "label": "Délai pour une première version", "cells": ["Une fin de semaine à quelques semaines", "3 à 8 semaines", "4 à 10 semaines"], "_todo_timelines": "TODO(angelique): confirmer les délais pigiste et MAW (brief §5.3)" },
+        { "label": "Qui fait le travail", "cells": ["Vous", "Une personne", "Une équipe : design, développement, contenu, assurance qualité"] },
+        { "label": "Le bon choix quand", "cells": ["Un site simple, un budget serré, et vous aimez bricoler", "Un petit site avec un mandat clair", "Bilingue, boutique en ligne, fonctions sur mesure, ou un site dont vos revenus dépendent"], "highlight": true },
+        { "label": "Attention à", "cells": ["Les gabarits ont l'air de gabarits; le français, le référencement et les intégrations sont à votre charge; les abonnements s'additionnent avec les années", "La disponibilité, la passation, et qui corrige quoi dans un an", "Pas l'option la moins chère — et on vous le dira si vous n'avez pas besoin de nous"] }
+      ],
+      "no": {
+        "_review": true,
+        "title": "Vous n'avez probablement pas besoin de nous si",
+        "items": [
+          "vous voulez un site d'une page pour un passe-temps ou un projet parallèle et un outil de création vous convient",
+          "vous n'avez ni ventes en ligne, ni fonctions sur mesure, ni besoin du français et de l'anglais",
+          "vous préférez investir du temps plutôt que de l'argent en ce moment"
+        ]
+      },
+      "yes": {
+        "_review": true,
+        "title": "Vous en avez probablement besoin si",
+        "items": [
+          "le site doit rapporter (ventes, réservations, clients potentiels)",
+          "vous êtes au Québec et il doit fonctionner correctement dans les deux langues",
+          "il doit se connecter à quelque chose (paiements, CRM, réservations, inventaire)"
+        ]
+      }
+    },
+    "pricing": {
+      "_review": true,
+      "h2": "Ce que ça coûte",
+      "intro": "De vraies fourchettes, en dollars canadiens, à partir de notre taux de {rate} l'heure. La plupart des agences ne les publient pas. On pense que vous devriez les voir avant de parler à qui que ce soit.",
+      "_todo_rate": "TODO(angelique): confirmer la publication du taux horaire (brief §5.4)",
+      "headers": { "tier": "Niveau", "price": "Prix", "hours": "Heures", "includes": "Ce qui est inclus" },
+      "quotedLater": "Soumission après la phase de découverte.",
+      "groups": {
+        "websites": {
+          "_review": true,
+          "title": "Sites web (WordPress avec ACF ou Elementor)",
+          "tiers": {
+            "basic": { "name": "De base", "includes": "Design sur mesure à partir de composants, 5 à 10 pages, formulaires de base" },
+            "intermediate": { "name": "Intermédiaire", "includes": "Design sur mesure plus fonctions et relations personnalisées, CMS, fonctionnalités avancées" },
+            "custom": { "name": "Entièrement sur mesure", "includes": "Phase de découverte, intégrations complexes, fonctionnalités avancées" }
+          }
+        },
+        "shopify": {
+          "_review": true,
+          "title": "Boutiques en ligne — Shopify",
+          "tiers": {
+            "basic": { "name": "De base", "includes": "Thème acheté, mise en page à votre image, jusqu'à 50 produits" },
+            "intermediate": { "name": "Intermédiaire", "includes": "Gabarits personnalisés dans le thème, personnalisations codées" },
+            "custom": { "name": "Entièrement sur mesure", "includes": "Thème sur mesure, passage à la caisse complexe, intégrations d'applications" }
+          }
+        },
+        "woocommerce": {
+          "_review": true,
+          "title": "Boutiques en ligne — WooCommerce",
+          "tiers": {
+            "basic": { "name": "De base", "includes": "Design ACF ou Elementor, WooCommerce standard, jusqu'à 50 produits" },
+            "intermediate": { "name": "Intermédiaire", "includes": "Types de produits personnalisés, passage à la caisse adapté, règles de livraison et de taxes" },
+            "custom": { "name": "Entièrement sur mesure", "includes": "B2B et vente en gros, abonnements, intégrations ERP" }
+          }
+        },
+        "redesign": {
+          "_review": true,
+          "title": "Refontes",
+          "tiers": {
+            "refresh": { "name": "Rafraîchissement (visuel seulement)", "includes": "Nouveau design sur la structure existante" },
+            "full": { "name": "Refonte complète", "includes": "Nouvelle structure, réorganisation du contenu, référencement" },
+            "migration": { "name": "Changement de plateforme + refonte", "includes": "Nouvelle plateforme, migration des données, redirections" }
+          }
+        },
+        "custom": {
+          "_review": true,
+          "title": "Applications, extensions et tableaux de bord sur mesure",
+          "tiers": {
+            "discovery": { "name": "Phase de découverte", "includes": "Un plan complet et une feuille de route" },
+            "build": { "name": "Développement", "includes": "" }
+          }
+        },
+        "fixes": {
+          "_review": true,
+          "title": "Corrections rapides et mises à jour",
+          "tiers": {
+            "fixes": { "name": "Correction ou mise à jour", "includes": "De une à huit heures de travail à {rate} l'heure" }
+          }
+        },
+        "maintenance": {
+          "_review": true,
+          "title": "Après le lancement — forfaits d'entretien à {maintenanceRate} l'heure",
+          "priceLabel": "Prix par mois",
+          "tiers": {
+            "light": { "name": "Léger", "includes": "{hours:maintenance.light} par mois" },
+            "standard": { "name": "Standard", "includes": "{hours:maintenance.standard} par mois" },
+            "premium": { "name": "Premium", "includes": "{hours:maintenance.premium} par mois" }
+          }
+        }
+      },
+      "line": "Les fourchettes couvrent la portée habituelle. Le clavardage de soumission les ajuste à votre projet en trois minutes environ.",
+      "cta": "Obtenir ma fourchette exacte",
+      "ctaNote": "Ouvre notre clavardage de soumission sur monkeysat.work."
+    },
+    "steps": {
+      "_review": true,
+      "h2": "Comment ça marche",
+      "items": [
+        { "title": "Répondez à une dizaine de questions", "text": "Dans le clavardage de soumission : ce que vous voulez bâtir, la plateforme, les pages, les langues, les intégrations, l'échéancier." },
+        { "title": "Recevez une fourchette de prix sur-le-champ", "text": "Avec les heures réparties entre le design, le développement, le contenu, puis les tests et le lancement." },
+        { "title": "Angelique confirme le montant exact avec vous", "text": "La soumission finale reste dans la fourchette qu'on vous a donnée." }
+      ]
+    },
+    "work": {
+      "_review": true,
+      "h2": "Ce qu'on a livré",
+      "linkLabel": "Lire l'étude de cas sur monkeysat.work",
+      "quotesHeading": "Ce que disent nos clients"
+    },
+    "faq": {
+      "_review": true,
+      "h2": "Questions",
+      "items": [
+        { "q": "Combien coûte un site web?", "a": "La plupart des sites d'entreprise coûtent {price:websites.basic..websites.intermediate}; les boutiques et les projets sur mesure, davantage. Les fourchettes complètes sont plus haut, et le guide {guideLink} explique ce qui fait bouger le chiffre." },
+        { "q": "Combien de temps ça prend?", "a": "La plupart des sites d'entreprise prennent de 4 à 8 semaines à partir du lancement du projet; les boutiques et les projets sur mesure, plus longtemps. Le clavardage vous donne un échéancier avec votre soumission.", "_todo_timeline": "TODO(angelique): confirmer le délai de 4 à 8 semaines (brief §5.7)" },
+        { "q": "Mon site web au Québec doit-il être en français?", "a": "Si vous faites affaire au Québec, oui : votre site doit être offert en français, au moins aussi visiblement que dans toute autre langue (la Charte de la langue française, mise à jour par la loi 96). On bâtit dans les deux langues par défaut, et le français est rédigé, pas traduit par une machine." },
+        { "q": "Le prix du clavardage est-il ferme?", "a": "C'est une fourchette, pas une soumission finale. Angelique confirme le montant exact après une courte conversation, et il ne dépassera pas la fourchette qu'on vous a montrée." },
+        { "q": "À qui appartient le site une fois terminé?", "a": "À vous — le code, le design, le contenu et les comptes sont à votre nom.", "_todo_ownership": "TODO(angelique): confirmer selon le libellé des conditions générales (brief §5.7)" },
+        { "q": "Avec quoi bâtissez-vous?", "a": "WordPress (avec ACF ou Elementor), Shopify, WooCommerce, ou du code entièrement sur mesure quand le projet le demande. On recommande ce qui convient, pas ce qui nous rapporte le plus." },
+        { "q": "Que se passe-t-il après le lancement?", "a": "Gérez-le vous-même — on fait la passation avec une formation — ou prenez un forfait d'entretien (Léger, Standard ou Premium; fourchettes plus haut)." },
+        { "q": "Travaillez-vous avec des entreprises hors Québec?", "a": "Oui, partout au Canada, en français ou en anglais.", "_todo_outsideQuebec": "TODO(angelique): confirmer (brief §5.7)" }
+      ]
+    },
+    "form": {
+      "_review": true,
+      "h2": "Vous hésitez encore?",
+      "intro": "Dites-nous ce que vous voulez bâtir et on vous répond par courriel — pas d'appel, sauf si vous en demandez un.",
+      "name": "Nom",
+      "email": "Courriel",
+      "message": "Qu'est-ce que vous voulez bâtir?",
+      "consent": "J'accepte que Monkeys at Work conserve mes coordonnées pour répondre à cette demande. Pas d'infolettre, pas de partage.",
+      "button": "Envoyer ma question",
+      "sending": "Envoi de votre question…",
+      "errors": {
+        "_review": true,
+        "name": "Entrez votre nom pour qu'on sache à qui répondre.",
+        "email": "Entrez une adresse courriel pour qu'on puisse vous répondre.",
+        "message": "Dites-nous ce que vous voulez bâtir, même en une ligne.",
+        "consent": "Cochez la case pour qu'on ait le droit de garder vos coordonnées et de vous répondre.",
+        "tooFast": "C'était rapide. Attendez quelques secondes et renvoyez.",
+        "network": "L'envoi n'a pas fonctionné. Réessayez, ou écrivez à {email} et on vous répondra de là.",
+        "notConfigured": "Ce formulaire n'est pas encore branché. Écrivez à {email} et on vous répondra de là."
+      },
+      "noscript": "Ce formulaire a besoin de JavaScript. Envoyez plutôt votre question par courriel :"
+    }
+  },
+  "guide": {
+    "_review": true,
+    "breadcrumbHome": "Accueil",
+    "breadcrumbGuides": "Guides",
+    "byline": "{author} · Mis à jour le {date}",
+    "cta": "Obtenir ma fourchette exacte",
+    "ctaNote": "Ouvre notre clavardage de soumission sur monkeysat.work.",
+    "faqH2": "Questions",
+    "backHome": "Retour aux fourchettes de prix"
+  },
+  "thanks": {
+    "_review": true,
+    "h1": "Bien reçu.",
+    "text": "Angelique lit chacun de ces messages et répond dans un délai d'un jour ouvrable.",
+    "_todo_replyTime": "TODO(angelique): confirmer la promesse de délai de réponse (brief §5.8)",
+    "back": "Retour à l'accueil"
+  },
+  "notFound": {
+    "_review": true,
+    "h1": "Cette page n'existe pas.",
+    "text": "L'adresse est peut-être périmée, ou elle n'a jamais existé. Les deux pages qui comptent sont ci-dessous.",
+    "home": "Voir ce que coûte un site web",
+    "guide": "Lire le guide : combien coûte un site web au Québec"
+  },
+  "privacy": {
+    "_review": true,
+    "h1": "Confidentialité",
+    "intro": "createawebsite.ca est un site de Monkeys at Work. Cette page dit ce que le site recueille, pourquoi, où ça va et comment changer d'idée.",
+    "updated": "Mis à jour le {date}",
+    "_todo_policy": "TODO(angelique): confirmer selon la politique de monkeysat.work et nommer la personne responsable de la protection des renseignements personnels exigée par la loi 25 (brief §11)",
+    "sections": [
+      {
+        "_review": true,
+        "h2": "Ce qu'on recueille",
+        "paragraphs": [
+          "Quand vous envoyez le formulaire : votre nom, votre adresse courriel et ce que vous avez écrit. Rien d'autre.",
+          "Si vous acceptez les statistiques dans la bannière : les pages que vous visitez, comment vous êtes arrivé ici, votre type d'appareil et de navigateur, et votre emplacement approximatif, par Google Analytics 4. Tant que vous n'acceptez pas, aucun script de statistiques ne se charge et aucun témoin n'est déposé. Si vous refusez, rien n'est recueilli.",
+          "Le clavardage de soumission fonctionne sur monkeysat.work, selon la politique de confidentialité de ce site."
+        ]
+      },
+      {
+        "_review": true,
+        "h2": "Pourquoi",
+        "paragraphs": [
+          "Les coordonnées du formulaire servent à répondre à votre question. Rien d'autre — pas d'infolettre, pas de partage, pas de vente.",
+          "Les statistiques nous disent si ce site est utile et vaut la peine d'être maintenu. C'est tout."
+        ]
+      },
+      {
+        "_review": true,
+        "h2": "Où ça va",
+        "paragraphs": [
+          "Les envois du formulaire vont dans HubSpot, l'outil de gestion de la relation client de Monkeys at Work, avec une trace du consentement que vous avez donné.",
+          "Les données de statistiques vont dans Google Analytics 4, avec les adresses IP anonymisées."
+        ]
+      },
+      {
+        "_review": true,
+        "h2": "Combien de temps on les garde",
+        "paragraphs": [
+          "Votre choix pour les statistiques est retenu dans votre navigateur pendant 12 mois. Les coordonnées du formulaire sont conservées le temps de faire le suivi avec vous, et supprimées sur demande."
+        ]
+      },
+      {
+        "_review": true,
+        "h2": "Comment retirer votre consentement",
+        "paragraphs": [
+          "Pour consulter, corriger ou supprimer ce qu'on détient sur vous, écrivez à support@monkeysat.work. On vous confirme quand c'est fait.",
+          "Pour changer votre choix pour les statistiques, utilisez le bouton ci-dessous et la bannière vous reposera la question."
+        ]
+      },
+      {
+        "_review": true,
+        "h2": "Contact",
+        "paragraphs": [
+          "Monkeys at Work, Québec, Canada. support@monkeysat.work."
+        ]
+      }
+    ],
+    "reset": "Changer mon choix pour les statistiques",
+    "resetDone": "C'est fait. La bannière vous reposera la question."
+  },
+  "schema": {
+    "_review": true,
+    "siteName": "createawebsite.ca",
+    "orgDescription": "Monkeys at Work est un studio web au Québec qui bâtit des sites web bilingues, des boutiques en ligne et des applications web sur mesure pour les petites entreprises partout au Canada.",
+    "serviceName": "Conception et développement de sites web",
+    "serviceDescription": "Sites web bilingues, boutiques en ligne, refontes, corrections et applications web sur mesure pour les petites entreprises au Québec et partout au Canada, avec des fourchettes de prix publiques et une soumission en trois minutes environ.",
+    "serviceTypes": ["Conception web", "Développement web", "Développement de commerce en ligne", "Refonte de site web", "Entretien de site web"]
+  }
+}

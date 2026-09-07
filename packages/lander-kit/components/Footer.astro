@@ -1,0 +1,43 @@
+---
+/** Icon mark left, one line, links (brief §5.9). No social icons, no newsletter. */
+import { Image } from 'astro:assets';
+import icon from '../assets/maw-icon.png';
+import type { FooterCopy } from '../lib/copy';
+import type { Locale } from '../lib/i18n';
+
+interface Props {
+  copy: FooterCopy;
+  locale: Locale;
+  privacyPath: string;
+  alternates: Record<Locale, string>;
+  langLabels: { en: string; fr: string };
+}
+const { copy, locale, privacyPath, alternates, langLabels } = Astro.props;
+const other: Locale = locale === 'en' ? 'fr' : 'en';
+---
+<footer class="site-footer">
+  <div class="wrap inner">
+    <Image src={icon} alt={copy.iconAlt} width="22" height="40" densities={[1, 2]} loading="lazy" class="mark" />
+    <div class="text">
+      <p>{copy.line}</p>
+      <ul class="links" role="list">
+        <li><a href="https://monkeysat.work/">{copy.links.site}</a></li>
+        <li><a href="https://monkeysat.work/portfolio">{copy.links.portfolio}</a></li>
+        <li><a href="https://meetings.hubspot.com/ange1">{copy.links.book}</a></li>
+        <li><a href={privacyPath}>{copy.links.privacy}</a></li>
+        <li><a href={alternates[other]} lang={other === 'fr' ? 'fr-CA' : 'en-CA'} hreflang={other === 'fr' ? 'fr-CA' : 'en-CA'} data-lang-switch={other}>{langLabels[other]}</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--color-rule);
+    padding-block: var(--space-4) var(--space-5);
+    font-size: var(--step--1);
+  }
+  .inner { display: flex; gap: var(--space-3); align-items: flex-start; }
+  .mark { width: 1.4rem; height: auto; flex: none; margin-top: 0.2rem; }
+  .links { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin-top: var(--space-2); }
+</style>

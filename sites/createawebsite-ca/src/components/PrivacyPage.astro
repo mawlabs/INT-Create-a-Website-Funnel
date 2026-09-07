@@ -1,0 +1,60 @@
+---
+import Layout from '@maw/lander-kit/components/Layout.astro';
+import type { Locale } from '@maw/lander-kit/lib/i18n';
+import { interpolate } from '@maw/lander-kit/lib/i18n';
+import * as schema from '@maw/lander-kit/lib/schema';
+import { copy, formatDate } from '../i18n';
+import { baseNodes, layoutProps, pageMeta } from '../lib/page';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const c = copy[locale];
+const meta = pageMeta('privacy', locale, c.meta.privacy);
+const updated = interpolate(c.privacy.updated, { date: formatDate(new Date('2026-09-07'), locale) });
+---
+<Layout {...layoutProps(locale)} meta={meta} jsonLd={schema.graph(baseNodes(locale))}>
+  <article class="page">
+    <div class="wrap flow">
+      <h1>{c.privacy.h1}</h1>
+      <p class="small">{updated}</p>
+      <p>{c.privacy.intro}</p>
+      {c.privacy.sections.map((s) => (
+        <>
+          <h2>{s.h2}</h2>
+          {s.paragraphs.map((p) => <p set:html={p.replace(/support@monkeysat\.work/g, '<a href="mailto:support@monkeysat.work">support@monkeysat.work</a>')} />)}
+        </>
+      ))}
+      <p>
+        <button type="button" class="reset" data-consent-reset data-done={c.privacy.resetDone}>{c.privacy.reset}</button>
+        <span class="form-status" data-consent-reset-status role="status"></span>
+      </p>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .page { padding-block: var(--space-4) var(--space-6); }
+  .page h1 { font-size: var(--step-3); }
+  .page h2 { font-size: var(--step-2); }
+  .reset {
+    padding: 0.5em 0.9em;
+    border-radius: var(--radius);
+    border: 2px solid var(--color-heading);
+    background: var(--color-surface);
+    color: var(--color-heading);
+    font-family: var(--font-heading);
+    font-weight: 700;
+  }
+</style>
+
+<script>
+  import { CONSENT_KEY } from '@maw/lander-kit/lib/analytics';
+  document.querySelector<HTMLButtonElement>('[data-consent-reset]')?.addEventListener('click', (ev) => {
+    const btn = ev.currentTarget as HTMLButtonElement;
+    try { localStorage.removeItem(CONSENT_KEY); } catch { /* ignore */ }
+    const status = document.querySelector<HTMLElement>('[data-consent-reset-status]');
+    if (status) status.textContent = btn.dataset.done ?? '';
+    const banner = document.querySelector<HTMLElement>('[data-consent]');
+    if (banner) banner.hidden = false;
+  });
+</script>

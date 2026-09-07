@@ -1,0 +1,181 @@
+---
+/**
+ * The hero is the first question of the MAW quote chat, made tangible (brief §5.2).
+ * Native radios in a fieldset, an aria-live reveal panel, then the CTA with `project` pre-selected.
+ * Works without JavaScript (CSS :has reveals the text; the link still opens the chat without `project`).
+ */
+import type { HeroCopy } from '../lib/copy';
+import { chatUrl } from '../lib/chat';
+import type { Locale } from '../lib/i18n';
+import { renderPricing, type PricingData } from '../lib/pricing';
+
+interface Props {
+  copy: HeroCopy;
+  locale: Locale;
+  pricing: PricingData;
+  source?: string;
+}
+const { copy, locale, pricing, source } = Astro.props;
+const baseHref = chatUrl({ lang: locale, section: 'hero', source });
+const tiles = copy.tiles.map((t) => ({ ...t, reveal: renderPricing(t.reveal, pricing, locale) }));
+---
+<section class="hero" data-hero data-source={source ?? ''} data-lang={locale}>
+  <div class="wrap grid">
+    <div class="copy">
+      <h1>{copy.h1}</h1>
+      <p class="sub">{copy.sub}</p>
+    </div>
+    <div class="panel-wrap">
+      <form class="panel" action={baseHref} method="get" data-hero-form>
+        <fieldset>
+          <legend>{copy.panelHeading}</legend>
+          <div class="tiles">
+            {tiles.map((t) => (
+              <label class="tile">
+                <input type="radio" name="project" value={t.id} />
+                <span>{t.label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <div class="reveal" data-reveal>
+          <div class="reveal-text" aria-live="polite" data-reveal-live>
+            <p data-reveal-empty>{copy.placeholder}</p>
+            {tiles.map((t) => <p data-project={t.id} hidden>{t.reveal}</p>)}
+          </div>
+          <p class="cta" data-cta-wrap hidden>
+            <a class="btn" href={baseHref} data-cta="hero">{copy.cta}</a>
+            <span class="btn-note">{copy.ctaNote}</span>
+          </p>
+        </div>
+      </form>
+      <p class="caption">{copy.caption}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero { padding-block: var(--space-5) var(--space-6); }
+  .grid { display: grid; gap: var(--space-4); align-items: start; }
+  @media (min-width: 60em) {
+    .grid { grid-template-columns: 7fr 5fr; gap: var(--space-5); }
+    .hero { padding-block: var(--space-6); }
+  }
+  .sub { margin-top: var(--space-3); font-size: var(--step-1); line-height: 1.4; max-width: 34ch; }
+  @media (min-width: 60em) { .sub { max-width: var(--measure); } }
+
+  .panel {
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    padding: var(--space-3);
+  }
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+  legend {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: var(--step-1);
+    color: var(--color-heading);
+    padding: 0;
+    margin-bottom: var(--space-2);
+  }
+  .tiles { display: grid; gap: var(--space-1); }
+  .tile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0.8em var(--space-2);
+    border: 1px solid var(--color-rule);
+    border-inline-start: 4px solid transparent;
+    border-radius: var(--radius);
+    font-weight: 600;
+    color: var(--color-heading);
+    cursor: pointer;
+    max-width: none;
+  }
+  .tile input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    flex: none;
+    accent-color: var(--maw-power-blue);
+  }
+  .tile:hover { border-color: color-mix(in srgb, var(--maw-power-blue) 40%, transparent); }
+  .tile:has(input:checked) { border-inline-start-color: var(--color-accent); background: var(--color-bg); }
+  .tile:has(input:focus-visible) { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+  .tile input:focus-visible { outline: none; }
+
+  .reveal {
+    margin-top: var(--space-3);
+    padding-inline-start: var(--space-2);
+    border-inline-start: 3px solid var(--color-accent);
+    min-height: 4.5rem;
+    transition: opacity 150ms ease;
+  }
+  .reveal.is-fading { opacity: 0; }
+  .reveal-text p { margin: 0; }
+  .cta { margin-top: var(--space-2); max-width: none; }
+  .caption { margin-top: var(--space-2); font-size: var(--step--1); }
+
+  /* No-JS reveal: the checked tile shows its range. Disabled once the island runs (html.js). */
+  html:not(.js) .hero:has(input[name="project"]:checked) [data-reveal-empty] { display: none; }
+  html:not(.js) .hero:has(input[name="project"]:checked) [data-cta-wrap] { display: block; }
+  html:not(.js) .hero:has(input[value="business"]:checked) [data-project="business"],
+  html:not(.js) .hero:has(input[value="ecommerce"]:checked) [data-project="ecommerce"],
+  html:not(.js) .hero:has(input[value="redesign"]:checked) [data-project="redesign"],
+  html:not(.js) .hero:has(input[value="changes"]:checked) [data-project="changes"],
+  html:not(.js) .hero:has(input[value="custom"]:checked) [data-project="custom"] { display: block; }
+</style>
+
+<script>
+  /* PriceReveal island: vanilla TS. Rewrites the CTA's `project` value, crossfades the reveal, fires price_reveal. */
+  import { track } from '../lib/analytics';
+  import { isProject } from '../lib/chat';
+
+  document.documentElement.classList.add('js');
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-hero]')) {
+    const form = root.querySelector<HTMLFormElement>('[data-hero-form]');
+    const radios = root.querySelectorAll<HTMLInputElement>('input[name="project"]');
+    const reveal = root.querySelector<HTMLElement>('[data-reveal]');
+    const empty = root.querySelector<HTMLElement>('[data-reveal-empty]');
+    const texts = root.querySelectorAll<HTMLElement>('[data-project]');
+    const ctaWrap = root.querySelector<HTMLElement>('[data-cta-wrap]');
+    const cta = root.querySelector<HTMLAnchorElement>('a[data-cta="hero"]');
+    if (!form || !reveal || !cta) continue;
+
+    // The form's GET action would submit to the chat with project=… even without JS; with JS, the link does it.
+    form.addEventListener('submit', (e) => e.preventDefault());
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const baseHref = cta.href;
+    let pending: number | undefined;
+
+    const show = (project: string) => {
+      empty?.setAttribute('hidden', '');
+      texts.forEach((el) => { el.hidden = el.dataset.project !== project; });
+      if (ctaWrap) ctaWrap.hidden = false;
+      const url = new URL(baseHref);
+      url.searchParams.set('project', project);
+      cta.href = url.toString();
+      cta.dataset.project = project;
+    };
+
+    const select = (project: string) => {
+      if (!isProject(project)) return;
+      track('price_reveal', { project });
+      if (reduced.matches) { show(project); return; }
+      window.clearTimeout(pending);
+      reveal.classList.add('is-fading');
+      pending = window.setTimeout(() => {
+        show(project);
+        reveal.classList.remove('is-fading');
+      }, 150);
+    };
+
+    radios.forEach((r) => r.addEventListener('change', () => { if (r.checked) select(r.value); }));
+    // Restore a selection the browser kept across reload/back navigation.
+    const checked = Array.from(radios).find((r) => r.checked);
+    if (checked) show(checked.value);
+  }
+</script>

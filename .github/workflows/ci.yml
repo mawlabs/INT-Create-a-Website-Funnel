@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build, check, Lighthouse
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: astro check (every site)
+        run: pnpm -r --filter './sites/*' check
+
+      - name: Copy status (FR-review count, TODO(angelique) count)
+        # Informational on pull requests; blocking on main (CLAUDE.md #2).
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            node scripts/check-copy.mjs --strict --list
+          else
+            node scripts/check-copy.mjs --list
+          fi
+
+      - name: Build every site
+        run: pnpm -r --filter './sites/*' build
+        env:
+          PUBLIC_SITE_URL: https://createawebsite.ca
+
+      - name: Lighthouse CI (brief §10.5 budgets)
+        run: node scripts/lhci.mjs
+        env:
+          CHROME_PATH: ""
+
+      - name: Upload built sites (PR preview artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: sites-dist
+          path: sites/*/dist
+          retention-days: 14
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse
+          path: .lighthouseci
+          retention-days: 14

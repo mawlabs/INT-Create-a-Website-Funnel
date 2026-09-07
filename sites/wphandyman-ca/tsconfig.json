@@ -1,0 +1,10 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*", "../../packages/lander-kit/**/*"],
+  "exclude": ["dist"],
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    "allowJs": true
+  }
+}

@@ -1,0 +1,185 @@
+---
+/**
+ * "Still deciding?" (brief §5.8, §7.2). Native form; on submit, POST JSON to the HubSpot Forms API
+ * (no HubSpot script). Honeypot + 3-second timing guard, no CAPTCHA. <noscript> fallback with the public address.
+ */
+import type { FormCopy } from '../lib/copy';
+import { hubspotEndpoint } from '../lib/hubspot';
+import type { Locale } from '../lib/i18n';
+import { interpolate } from '../lib/i18n';
+
+interface Props {
+  copy: FormCopy;
+  locale: Locale;
+  portalId: string;
+  formGuid: string;
+  thanksPath: string;
+  pageName: string;
+  supportEmail?: string;
+  id?: string;
+}
+const { copy, locale, portalId, formGuid, thanksPath, pageName, supportEmail = 'support@monkeysat.work', id = 'form' } = Astro.props;
+const endpoint = portalId && formGuid ? hubspotEndpoint({ portalId, formGuid }) : '';
+const messages = { ...copy.errors, sending: copy.sending };
+delete (messages as Record<string, unknown>)._review;
+const noscriptText = interpolate(copy.noscript, { email: '' }).trim();
+---
+<section class="section" id={id} aria-labelledby={`${id}-h`}>
+  <div class="wrap">
+    <h2 id={`${id}-h`}>{copy.h2}</h2>
+    <p class="intro">{copy.intro}</p>
+
+    <form
+      class="lead-form"
+      data-lead-form
+      data-endpoint={endpoint}
+      data-redirect={thanksPath}
+      data-page-name={pageName}
+      data-locale={locale}
+      data-messages={JSON.stringify(messages)}
+      data-consent-text={copy.consent}
+      data-support={supportEmail}
+      novalidate
+      hidden
+    >
+      <div class="field">
+        <label for={`${id}-name`}>{copy.name}</label>
+        <input id={`${id}-name`} name="firstname" type="text" autocomplete="name" required aria-describedby={`${id}-name-err`} />
+        <p class="field-error" id={`${id}-name-err`} data-error hidden></p>
+      </div>
+      <div class="field">
+        <label for={`${id}-email`}>{copy.email}</label>
+        <input id={`${id}-email`} name="email" type="email" autocomplete="email" inputmode="email" required aria-describedby={`${id}-email-err`} />
+        <p class="field-error" id={`${id}-email-err`} data-error hidden></p>
+      </div>
+      <div class="field">
+        <label for={`${id}-message`}>{copy.message}</label>
+        <textarea id={`${id}-message`} name="message" rows="5" required aria-describedby={`${id}-message-err`}></textarea>
+        <p class="field-error" id={`${id}-message-err`} data-error hidden></p>
+      </div>
+      <div class="field">
+        <div class="field-check">
+          <input id={`${id}-consent`} name="consent" type="checkbox" required aria-describedby={`${id}-consent-err`} />
+          <label for={`${id}-consent`}>{copy.consent}</label>
+        </div>
+        <p class="field-error" id={`${id}-consent-err`} data-error hidden></p>
+      </div>
+      <!-- Honeypot: hidden from people, filled by bots. -->
+      <div class="hp" aria-hidden="true">
+        <label for={`${id}-website`} tabindex="-1">Website</label>
+        <input id={`${id}-website`} name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+      <button type="submit" class="btn" data-submit>{copy.button}</button>
+      <p class="form-status" role="alert" data-status hidden></p>
+    </form>
+
+    <noscript>
+      <p>{noscriptText} <a href={`mailto:${supportEmail}`}>{supportEmail}</a></p>
+    </noscript>
+  </div>
+</section>
+
+<style>
+  .lead-form { max-width: var(--measure); }
+  .hp { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+  .lead-form[hidden] { display: none; }
+</style>
+
+<script>
+  /* LeadForm island: vanilla TS. */
+  import { buildSubmission, readHutk, submitLead } from '../lib/hubspot';
+  import { readConsent } from '../lib/analytics';
+
+  type Messages = Record<'name' | 'email' | 'message' | 'consent' | 'tooFast' | 'network' | 'notConfigured' | 'sending', string>;
+
+  for (const form of document.querySelectorAll<HTMLFormElement>('[data-lead-form]')) {
+    form.hidden = false; // JS is here: show the form, the <noscript> line stays for everyone else
+    const loadedAt = Date.now();
+    const msgs = JSON.parse(form.dataset.messages ?? '{}') as Messages;
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const submitBtn = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const endpoint = form.dataset.endpoint ?? '';
+    const support = form.dataset.support ?? '';
+
+    type Key = 'name' | 'email' | 'message' | 'consent';
+    const inputName = (key: Key) => (key === 'name' ? 'firstname' : key);
+    const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement;
+    const errorFor = (key: Key) => field(inputName(key)).closest<HTMLElement>('.field')!;
+
+    const setError = (key: Key, text: string | null) => {
+      const wrap = errorFor(key);
+      const p = wrap.querySelector<HTMLElement>('[data-error]')!;
+      const input = field(inputName(key));
+      if (text) {
+        p.textContent = text;
+        p.hidden = false;
+        wrap.dataset.invalid = 'true';
+        input.setAttribute('aria-invalid', 'true');
+      } else {
+        p.textContent = '';
+        p.hidden = true;
+        delete wrap.dataset.invalid;
+        input.removeAttribute('aria-invalid');
+      }
+    };
+
+    const say = (text: string) => { status.textContent = text; status.hidden = !text; };
+
+    const validate = (): boolean => {
+      let first: HTMLElement | null = null;
+      const check = (key: Key, ok: boolean) => {
+        setError(key, ok ? null : msgs[key]);
+        if (!ok && !first) first = field(inputName(key));
+      };
+      check('name', field('firstname').value.trim().length > 0);
+      const email = field('email').value.trim();
+      check('email', /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email));
+      check('message', field('message').value.trim().length > 0);
+      check('consent', (field('consent') as HTMLInputElement).checked);
+      if (first) (first as HTMLElement).focus();
+      return !first;
+    };
+
+    for (const key of ['name', 'email', 'message', 'consent'] as Key[]) {
+      field(inputName(key)).addEventListener('input', () => setError(key, null));
+    }
+
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      say('');
+      if (!validate()) return;
+      if ((form.elements.namedItem('website') as HTMLInputElement).value) {
+        // Honeypot filled: pretend success, send nothing.
+        window.location.assign(form.dataset.redirect ?? '/');
+        return;
+      }
+      if (Date.now() - loadedAt < 3000) { say(msgs.tooFast); return; }
+      if (!endpoint) { say(msgs.notConfigured.replace('{email}', support)); return; }
+
+      submitBtn.disabled = true;
+      say(msgs.sending);
+      const consentText = form.dataset.consentText ?? '';
+      const context = {
+        pageUri: window.location.href,
+        pageName: form.dataset.pageName ?? document.title,
+        ...(readConsent()?.analytics === 'granted' && readHutk() ? { hutk: readHutk() } : {}),
+      };
+      const body = buildSubmission(
+        {
+          email: field('email').value.trim(),
+          firstname: field('firstname').value.trim(),
+          message: field('message').value.trim(),
+        },
+        context,
+        consentText,
+      );
+      const res = await submitLead(endpoint, body);
+      if (res.ok) {
+        window.location.assign(form.dataset.redirect ?? '/');
+        return;
+      }
+      submitBtn.disabled = false;
+      say(msgs.network.replace('{email}', support));
+    });
+  }
+</script>

@@ -1,0 +1,284 @@
+{
+  "siteName": "createawebsite.ca",
+  "skipLink": "Skip to content",
+  "header": {
+    "logoAlt": "Monkeys at Work",
+    "homeLabel": "createawebsite.ca home",
+    "switchLabel": "Language",
+    "en": "EN",
+    "fr": "FR"
+  },
+  "footer": {
+    "iconAlt": "Monkeys at Work icon",
+    "line": "createawebsite.ca is run by Monkeys at Work, a web studio in Quebec.",
+    "links": { "site": "monkeysat.work", "portfolio": "Portfolio", "book": "Book a call", "privacy": "Privacy" }
+  },
+  "langBar": {
+    "text": "This site is also in English.",
+    "link": "Read it in English",
+    "dismiss": "Dismiss"
+  },
+  "consent": {
+    "label": "Analytics consent",
+    "text": "Can we count your visit with Google Analytics? Nothing loads until you say yes.",
+    "accept": "Accept analytics",
+    "decline": "Decline",
+    "privacy": "Privacy"
+  },
+  "meta": {
+    "home": {
+      "title": "Create a website: real prices, honest advice — Canada",
+      "description": "See what a website really costs in Canada, whether to DIY or hire, and get an exact price range from Monkeys at Work's quote chat in about three minutes."
+    },
+    "privacy": {
+      "title": "Privacy — createawebsite.ca",
+      "description": "What createawebsite.ca collects, why, where it goes, and how to withdraw. Analytics only after consent. Run by Monkeys at Work."
+    },
+    "thanks": {
+      "title": "Got it — createawebsite.ca",
+      "description": "Your question is on its way to Monkeys at Work."
+    },
+    "notFound": {
+      "title": "Page not found — createawebsite.ca",
+      "description": "That page doesn't exist. Head to the home page or the guide on what a website costs in Canada."
+    }
+  },
+  "home": {
+    "hero": {
+      "h1": "A real price for a real website, in about three minutes.",
+      "sub": "Pick what you need and we'll show you what it usually costs. Want an exact range? Our quote chat asks about ten questions and gives you one — no sales call, and the final quote won't go above it. If a DIY builder is the better call for you, we'll say so.",
+      "_todo_promise": "TODO(angelique): confirm the 'final quote won't exceed the range' promise on a public page (brief §13 #6)",
+      "panelHeading": "What do you need?",
+      "tiles": [
+        { "id": "business", "label": "A website for my business", "reveal": "Most business sites land between {min:websites.basic} and {max:websites.intermediate} ({h:websites.basic..websites.intermediate} hours). Fully custom builds run {price:websites.custom}." },
+        { "id": "ecommerce", "label": "An online store", "reveal": "Shopify stores {price:shopify.basic..shopify.intermediate}, WooCommerce {price:woocommerce.basic..woocommerce.intermediate} ({h:shopify.basic..shopify.intermediate} hours). Big custom stores go higher." },
+        { "id": "redesign", "label": "A redesign of my current site", "reveal": "A visual refresh {price:redesign.refresh}. A full redesign {price:redesign.full}. Changing platform too, {price:redesign.migration}." },
+        { "id": "changes", "label": "A fix or an update", "reveal": "Quick fixes and updates {price:fixes.fixes} ({h:fixes.fixes} hours)." },
+        { "id": "custom", "label": "A custom app or integration", "reveal": "Starts with a paid discovery phase, {price:custom.discovery} ({h:custom.discovery} hours). The build quote comes after that." }
+      ],
+      "placeholder": "Pick one to see a typical range.",
+      "cta": "Get my exact range",
+      "ctaNote": "Opens our quote chat on monkeysat.work.",
+      "caption": "Ballpark ranges in Canadian dollars. The chat narrows it to your project; the final quote stays within the range it gives you."
+    },
+    "compare": {
+      "h2": "Do you need us?",
+      "intro": "Sometimes the answer is no. Here's how the three ways to get a website compare.",
+      "columns": ["DIY builder (Wix, Squarespace, Shopify theme)", "Freelancer", "Monkeys at Work"],
+      "rows": [
+        { "label": "Cost", "cells": ["$20–$60 a month, plus your evenings", "$1,000–$4,000 typical", "{price:websites.basic..websites.custom} (ranges below)"], "_todo_freelancerCost": "TODO(angelique): confirm the freelancer cost cell (brief §5.3)" },
+        { "label": "Time to first version", "cells": ["A weekend to a few weeks", "3–8 weeks", "4–10 weeks"], "_todo_timelines": "TODO(angelique): confirm the freelancer and MAW timeline cells (brief §5.3)" },
+        { "label": "Who does the work", "cells": ["You", "One person", "A team: design, development, content, QA"] },
+        { "label": "Best when", "cells": ["A simple site, a tight budget, and you like tinkering", "A small site with a clear brief", "Bilingual, e-commerce, custom features, or a site your revenue depends on"], "highlight": true },
+        { "label": "Watch out for", "cells": ["Templates look like templates; French, SEO and integrations are on you; subscriptions add up over years", "Availability, hand-off, and who fixes it in a year", "Not the cheapest option — and we'll say so if you don't need us"] }
+      ],
+      "no": {
+        "title": "You probably don't need us if",
+        "items": [
+          "you want a one-page site for a hobby or side project and you're fine with a builder",
+          "you have no online sales, no custom features and no need for French and English",
+          "you'd rather spend time than money right now"
+        ]
+      },
+      "yes": {
+        "title": "You probably do if",
+        "items": [
+          "the site has to earn its keep (sales, bookings, leads)",
+          "you're in Quebec and it has to work properly in both languages",
+          "it needs to connect to something (payments, CRM, booking, inventory)"
+        ]
+      }
+    },
+    "pricing": {
+      "h2": "What things cost",
+      "intro": "Real ranges, in Canadian dollars, from our rate of {rate} an hour. Most agencies won't publish these. We think you should see them before you talk to anyone.",
+      "_todo_rate": "TODO(angelique): confirm publishing the hourly rate (brief §5.4)",
+      "headers": { "tier": "Tier", "price": "Price", "hours": "Hours", "includes": "What's included" },
+      "quotedLater": "Quoted after discovery.",
+      "groups": {
+        "websites": {
+          "title": "Websites (WordPress with ACF or Elementor)",
+          "tiers": {
+            "basic": { "name": "Basic", "includes": "Custom design from components, 5–10 pages, basic forms" },
+            "intermediate": { "name": "Intermediate", "includes": "Custom design plus custom functions and relations, CMS, enhanced features" },
+            "custom": { "name": "Fully custom", "includes": "Discovery phase, complex integrations, advanced functionality" }
+          }
+        },
+        "shopify": {
+          "title": "Online stores — Shopify",
+          "tiers": {
+            "basic": { "name": "Basic", "includes": "Purchased theme, on-brand styling, up to 50 products" },
+            "intermediate": { "name": "Intermediate", "includes": "Custom templates within the theme, hard-coded customizations" },
+            "custom": { "name": "Fully custom", "includes": "Custom theme, complex checkout, app integrations" }
+          }
+        },
+        "woocommerce": {
+          "title": "Online stores — WooCommerce",
+          "tiers": {
+            "basic": { "name": "Basic", "includes": "ACF/Elementor design, standard WooCommerce, up to 50 products" },
+            "intermediate": { "name": "Intermediate", "includes": "Custom product types, tailored checkout, shipping and tax rules" },
+            "custom": { "name": "Fully custom", "includes": "B2B/wholesale, subscriptions, ERP integrations" }
+          }
+        },
+        "redesign": {
+          "title": "Redesigns",
+          "tiers": {
+            "refresh": { "name": "Refresh (UI only)", "includes": "New design on the existing structure" },
+            "full": { "name": "Full redesign", "includes": "New structure, content restructuring, SEO" },
+            "migration": { "name": "Platform migration + redesign", "includes": "New platform, data migration, redirects" }
+          }
+        },
+        "custom": {
+          "title": "Custom apps, plugins, dashboards",
+          "tiers": {
+            "discovery": { "name": "Discovery phase", "includes": "A full plan and roadmap" },
+            "build": { "name": "Build", "includes": "" }
+          }
+        },
+        "fixes": {
+          "title": "Quick fixes and updates",
+          "tiers": {
+            "fixes": { "name": "Fix or update", "includes": "One to eight hours of work at {rate} an hour" }
+          }
+        },
+        "maintenance": {
+          "title": "After launch — maintenance plans at {maintenanceRate} an hour",
+          "priceLabel": "Price a month",
+          "tiers": {
+            "light": { "name": "Light", "includes": "{hours:maintenance.light} a month" },
+            "standard": { "name": "Standard", "includes": "{hours:maintenance.standard} a month" },
+            "premium": { "name": "Premium", "includes": "{hours:maintenance.premium} a month" }
+          }
+        }
+      },
+      "line": "Ranges cover the typical scope. The quote chat narrows them to your project in about three minutes.",
+      "cta": "Get my exact range",
+      "ctaNote": "Opens our quote chat on monkeysat.work."
+    },
+    "steps": {
+      "h2": "How it works",
+      "items": [
+        { "title": "Answer about ten questions", "text": "In the quote chat: what you're building, platform, pages, languages, integrations, timeline." },
+        { "title": "Get a price range on the spot", "text": "With the hours split across design, development, content, and testing and launch." },
+        { "title": "Angelique confirms the exact amount with you", "text": "The final quote stays within the range you were given." }
+      ]
+    },
+    "work": {
+      "h2": "Work we've shipped",
+      "linkLabel": "Read the case study on monkeysat.work",
+      "quotesHeading": "What clients say"
+    },
+    "faq": {
+      "h2": "Questions",
+      "items": [
+        { "q": "How much does a website cost?", "a": "Most business sites cost {price:websites.basic..websites.intermediate}; stores and custom builds more. The full ranges are above, and the guide {guideLink} walks through what moves the number." },
+        { "q": "How long does it take?", "a": "Most business sites take 4 to 8 weeks from kickoff; stores and custom builds longer. The chat gives you a timeline with your quote.", "_todo_timeline": "TODO(angelique): confirm the 4 to 8 weeks timeline (brief §5.7)" },
+        { "q": "Does my Quebec website need to be in French?", "a": "If you do business in Quebec, yes: your site has to be available in French, at least as prominently as any other language (the Charter of the French Language, updated by Bill 96). We build in both languages by default, and the French is written, not machine-translated." },
+        { "q": "Is the price from the chat binding?", "a": "It's a range, not a final quote. Angelique confirms the exact amount after a short conversation, and it won't exceed the range you were shown." },
+        { "q": "Who owns the site when it's done?", "a": "You do — code, design, content and accounts in your name.", "_todo_ownership": "TODO(angelique): confirm against the T&C wording (brief §5.7)" },
+        { "q": "What do you build on?", "a": "WordPress (with ACF or Elementor), Shopify, WooCommerce, or fully custom code when the project calls for it. We recommend the one that fits, not the one that pays us the most." },
+        { "q": "What happens after launch?", "a": "Run it yourself — we hand over with training — or put it on a maintenance plan (Light, Standard or Premium; ranges above)." },
+        { "q": "Do you work with businesses outside Quebec?", "a": "Yes, across Canada, in English or French.", "_todo_outsideQuebec": "TODO(angelique): confirm (brief §5.7)" }
+      ]
+    },
+    "form": {
+      "h2": "Still deciding?",
+      "intro": "Tell us what you're trying to build and we'll answer by email — no call unless you ask for one.",
+      "name": "Name",
+      "email": "Email",
+      "message": "What are you trying to build?",
+      "consent": "I agree that Monkeys at Work may store my details to answer this request. No newsletter, no sharing.",
+      "button": "Send my question",
+      "sending": "Sending your question…",
+      "errors": {
+        "name": "Enter your name so we know who to reply to.",
+        "email": "Enter an email address so we can reply.",
+        "message": "Tell us what you're trying to build, even in one line.",
+        "consent": "Tick the box so we're allowed to keep your details and reply.",
+        "tooFast": "That was quick. Give it a couple of seconds and send again.",
+        "network": "We couldn't send that. Try again, or email {email} and we'll reply from there.",
+        "notConfigured": "This form isn't connected yet. Email {email} and we'll reply from there."
+      },
+      "noscript": "This form needs JavaScript. Email your question instead:"
+    }
+  },
+  "guide": {
+    "breadcrumbHome": "Home",
+    "breadcrumbGuides": "Guides",
+    "byline": "{author} · Updated {date}",
+    "cta": "Get my exact range",
+    "ctaNote": "Opens our quote chat on monkeysat.work.",
+    "faqH2": "Questions",
+    "backHome": "Back to the price ranges"
+  },
+  "thanks": {
+    "h1": "Got it.",
+    "text": "Angelique reads every one of these and replies within one business day.",
+    "_todo_replyTime": "TODO(angelique): confirm the reply-time promise (brief §5.8)",
+    "back": "Back to the home page"
+  },
+  "notFound": {
+    "h1": "That page doesn't exist.",
+    "text": "The address may be out of date, or it never existed. The two pages that matter are below.",
+    "home": "See what a website costs",
+    "guide": "Read the guide: how much does a website cost in Canada"
+  },
+  "privacy": {
+    "h1": "Privacy",
+    "intro": "createawebsite.ca is run by Monkeys at Work. This page says what the site collects, why, where it goes and how to change your mind.",
+    "updated": "Updated {date}",
+    "_todo_policy": "TODO(angelique): confirm against monkeysat.work's policy and name the privacy officer Law 25 requires (brief §11)",
+    "sections": [
+      {
+        "h2": "What we collect",
+        "paragraphs": [
+          "When you send the form: your name, your email address and what you wrote. Nothing else.",
+          "If you accept analytics in the banner: which pages you visit, how you got here, your device and browser type and your approximate location, through Google Analytics 4. Until you accept, no analytics script loads and no cookie is set. If you decline, nothing is collected.",
+          "The quote chat runs on monkeysat.work, under that site's own privacy policy."
+        ]
+      },
+      {
+        "h2": "Why",
+        "paragraphs": [
+          "The form details are used to answer your question. Nothing else — no newsletter, no sharing, no selling.",
+          "Analytics tell us whether this site is useful and worth keeping up. That's it."
+        ]
+      },
+      {
+        "h2": "Where it goes",
+        "paragraphs": [
+          "Form submissions go to HubSpot, the customer relationship tool Monkeys at Work uses, with a record of the consent you gave.",
+          "Analytics data goes to Google Analytics 4, with IP addresses anonymized."
+        ]
+      },
+      {
+        "h2": "How long we keep it",
+        "paragraphs": [
+          "Your analytics choice is remembered in your browser for 12 months. Form details are kept for as long as we need them to follow up with you, and deleted on request."
+        ]
+      },
+      {
+        "h2": "How to withdraw",
+        "paragraphs": [
+          "To see, correct or delete what we hold about you, email support@monkeysat.work. We'll confirm when it's done.",
+          "To change your analytics choice, use the button below and the banner will ask again."
+        ]
+      },
+      {
+        "h2": "Contact",
+        "paragraphs": [
+          "Monkeys at Work, Quebec, Canada. support@monkeysat.work."
+        ]
+      }
+    ],
+    "reset": "Change my analytics choice",
+    "resetDone": "Done. The banner will ask again."
+  },
+  "schema": {
+    "siteName": "createawebsite.ca",
+    "orgDescription": "Monkeys at Work is a web studio in Quebec building bilingual websites, online stores and custom web apps for small businesses across Canada.",
+    "serviceName": "Website design and development",
+    "serviceDescription": "Bilingual websites, online stores, redesigns, fixes and custom web apps for small businesses in Quebec and across Canada, with public price ranges and a quote in about three minutes.",
+    "serviceTypes": ["Web design", "Web development", "E-commerce development", "Website redesign", "Website maintenance"]
+  }
+}

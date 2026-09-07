@@ -1,0 +1,72 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  matrix:
+    name: Read sites.json
+    runs-on: ubuntu-latest
+    outputs:
+      sites: ${{ steps.read.outputs.sites }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        run: echo "sites=$(jq -c '[.[] | select(.deploy == true)]' sites.json)" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: Deploy ${{ matrix.site.domain }}
+    needs: matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        site: ${{ fromJson(needs.matrix.outputs.sites) }}
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Gate: no un-reviewed French, no open TODO(angelique)
+        run: node scripts/check-copy.mjs --strict --list
+
+      - name: Build ${{ matrix.site.name }}
+        run: pnpm --filter ${{ matrix.site.name }} build
+        env:
+          PUBLIC_SITE_URL: https://${{ matrix.site.domain }}
+          PUBLIC_GA4_ID: ${{ vars.PUBLIC_GA4_ID }}
+          PUBLIC_HUBSPOT_PORTAL_ID: ${{ vars.PUBLIC_HUBSPOT_PORTAL_ID }}
+          PUBLIC_HUBSPOT_FORM_EN: ${{ vars.PUBLIC_HUBSPOT_FORM_EN }}
+          PUBLIC_HUBSPOT_FORM_FR: ${{ vars.PUBLIC_HUBSPOT_FORM_FR }}
+          PUBLIC_GSC_VERIFICATION: ${{ vars.PUBLIC_GSC_VERIFICATION }}
+
+      - name: SSH key
+        # TODO(angelique): create the site in Site Tools, enable SSH, add the deploy key, share host/user (brief §12).
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SG_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${SG_PORT:-18765}" -H "${{ secrets.SG_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: rsync to SiteGround
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/id_ed25519 -p ${SG_PORT:-18765}" \
+            "sites/${{ matrix.site.name }}/dist/" \
+            "${{ secrets.SG_USER }}@${{ secrets.SG_HOST }}:~/${{ matrix.site.docroot }}/"

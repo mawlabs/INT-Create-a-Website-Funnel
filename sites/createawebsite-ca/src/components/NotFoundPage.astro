@@ -1,0 +1,30 @@
+---
+import Layout from '@maw/lander-kit/components/Layout.astro';
+import type { Locale } from '@maw/lander-kit/lib/i18n';
+import { copy } from '../i18n';
+import { layoutProps, pageMeta } from '../lib/page';
+import { routes } from '../site';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const c = copy[locale];
+const meta = pageMeta('notFound', locale, c.meta.notFound, { noindex: true });
+---
+<Layout {...layoutProps(locale)} meta={meta}>
+  <section class="page">
+    <div class="wrap flow">
+      <h1>{c.notFound.h1}</h1>
+      <p>{c.notFound.text}</p>
+      <ul>
+        <li><a href={routes.home[locale]}>{c.notFound.home}</a></li>
+        <li><a href={routes.guide[locale]}>{c.notFound.guide}</a></li>
+      </ul>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .page { padding-block: var(--space-6); min-height: 50vh; }
+  ul { padding-inline-start: 1.2em; }
+  li + li { margin-top: var(--space-1); }
+</style>

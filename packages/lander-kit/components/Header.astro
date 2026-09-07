@@ -1,0 +1,85 @@
+---
+/**
+ * Full wordmark (link to home), the domain name in Satoshi Bold, EN | FR switch (brief §5.1).
+ * Thin Perfect Sunset rule under the header. Sticky on desktop only.
+ */
+import { Image } from 'astro:assets';
+import wordmark from '../assets/maw-wordmark-dark.png';
+import type { HeaderCopy } from '../lib/copy';
+import type { Locale } from '../lib/i18n';
+
+interface Props {
+  copy: HeaderCopy;
+  siteName: string;
+  locale: Locale;
+  homePath: string;
+  alternates: Record<Locale, string>;
+}
+const { copy, siteName, locale, homePath, alternates } = Astro.props;
+const locales: Locale[] = ['en', 'fr'];
+---
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href={homePath} aria-label={copy.homeLabel}>
+      <Image src={wordmark} alt={copy.logoAlt} width="172" height="57" densities={[1, 2]} loading="eager" decoding="sync" />
+      <span class="domain" aria-hidden="true">{siteName}</span>
+    </a>
+    <nav class="lang" aria-label={copy.switchLabel}>
+      {locales.map((l, i) => (
+        <>
+          {i > 0 && <span class="sep" aria-hidden="true">|</span>}
+          {l === locale
+            ? <span class="current" aria-current="page" lang={l === 'fr' ? 'fr-CA' : 'en-CA'}>{copy[l]}</span>
+            : <a href={alternates[l]} lang={l === 'fr' ? 'fr-CA' : 'en-CA'} hreflang={l === 'fr' ? 'fr-CA' : 'en-CA'} data-lang-switch={l}>{copy[l]}</a>}
+        </>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    background: var(--color-bg);
+    border-bottom: 2px solid var(--color-accent);
+  }
+  @media (min-width: 60em) {
+    .site-header { position: sticky; top: 0; z-index: 20; }
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    min-height: 4.25rem;
+    padding-block: var(--space-1);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    text-decoration: none;
+    color: var(--color-heading);
+    min-width: 0;
+  }
+  .brand img { width: 8.6rem; height: auto; flex: none; }
+  .domain {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: var(--step-0);
+    color: var(--color-heading);
+    white-space: nowrap;
+  }
+  @media (max-width: 30em) { .domain { display: none; } }
+  .lang {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: var(--step-0);
+    flex: none;
+  }
+  .lang a, .lang .current { padding: 0.35em 0.4em; }
+  .lang .current { color: var(--color-text); text-decoration: none; }
+  .lang .sep { color: var(--color-rule); }
+</style>

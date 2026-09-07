@@ -1,0 +1,52 @@
+---
+/** Native <details>/<summary> FAQ; first item open (brief §5.7). The page emits FAQPage JSON-LD from the same items. */
+import type { FaqItemCopy } from '../lib/copy';
+
+interface Props {
+  h2: string;
+  items: { q: string; a: string }[] | FaqItemCopy[];
+  id?: string;
+  /** Optional link inserted where an answer contains {guideLink}. */
+  guide?: { href: string; label: string };
+}
+const { h2, items, id = 'faq', guide } = Astro.props;
+
+function split(a: string): { before: string; after: string | null } {
+  const i = a.indexOf('{guideLink}');
+  return i === -1 ? { before: a, after: null } : { before: a.slice(0, i), after: a.slice(i + '{guideLink}'.length) };
+}
+---
+<section class="section" id={id} aria-labelledby={`${id}-h`}>
+  <div class="wrap">
+    <h2 id={`${id}-h`}>{h2}</h2>
+    <div class="faq">
+      {items.map((it, i) => {
+        const parts = split(it.a);
+        return (
+          <details open={i === 0}>
+            <summary>{it.q}</summary>
+            <p>
+              {parts.before}
+              {parts.after !== null && guide && <a href={guide.href}><em>{guide.label}</em></a>}
+              {parts.after}
+            </p>
+          </details>
+        );
+      })}
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq { border-top: 1px solid var(--color-rule); }
+  details { border-bottom: 1px solid var(--color-rule); padding-block: var(--space-2); }
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--color-heading);
+    font-size: var(--step-0);
+    padding: 0.25em 0;
+  }
+  summary::marker { color: var(--color-accent); }
+  details p { margin-top: var(--space-2); padding-inline-start: 1.1em; }
+</style>

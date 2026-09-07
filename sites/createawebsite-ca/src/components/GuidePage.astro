@@ -1,0 +1,94 @@
+---
+/** Cornerstone guide (brief §6): Article + BreadcrumbList JSON-LD, FAQ reused from the home copy, CTA with project omitted. */
+import CtaLink from '@maw/lander-kit/components/CtaLink.astro';
+import Faq from '@maw/lander-kit/components/Faq.astro';
+import Layout from '@maw/lander-kit/components/Layout.astro';
+import type { Locale } from '@maw/lander-kit/lib/i18n';
+import { absoluteUrl, interpolate } from '@maw/lander-kit/lib/i18n';
+import { renderPricing } from '@maw/lander-kit/lib/pricing';
+import * as schema from '@maw/lander-kit/lib/schema';
+import { render, type CollectionEntry } from 'astro:content';
+import { pricing } from '../data/pricing';
+import { copy, formatDate } from '../i18n';
+import { baseNodes, guideMeta, layoutProps } from '../lib/page';
+import { routes, site } from '../site';
+
+interface Props {
+  entry: CollectionEntry<'guides'>;
+  paths: Record<Locale, string>;
+}
+const { entry, paths } = Astro.props;
+const locale = entry.data.lang;
+if (paths.en !== routes.guide.en || paths.fr !== routes.guide.fr) {
+  throw new Error(`guide paths ${JSON.stringify(paths)} do not match src/routes.ts guide entry; keep them in sync for hreflang and the sitemap`);
+}
+const c = copy[locale];
+const { Content } = await render(entry);
+const meta = guideMeta(locale, { title: entry.data.title, description: entry.data.description }, paths);
+const url = absoluteUrl(site.origin, paths[locale]);
+const words = (entry.body ?? '').split(/\s+/).filter(Boolean).length;
+
+const faqItems = c.home.faq.items.slice(0, 4).map((it) => ({
+  q: it.q,
+  a: renderPricing(it.a, pricing, locale).replace('{guideLink}', entry.data.title),
+}));
+const jsonLd = schema.graph([
+  ...baseNodes(locale),
+  schema.article({
+    headline: entry.data.title,
+    description: entry.data.description,
+    url,
+    image: absoluteUrl(site.origin, `/og-${locale}.png`),
+    datePublished: entry.data.datePublished.toISOString().slice(0, 10),
+    dateModified: entry.data.dateModified.toISOString().slice(0, 10),
+    authorName: entry.data.author,
+    authorUrl: site.org.url,
+    locale,
+    wordCount: words,
+  }),
+  schema.breadcrumbs([
+    { name: c.guide.breadcrumbHome, url: absoluteUrl(site.origin, routes.home[locale]) },
+    { name: entry.data.title, url },
+  ]),
+  schema.faqPage(faqItems),
+]);
+const byline = interpolate(c.guide.byline, { author: entry.data.author, date: formatDate(entry.data.dateModified, locale) });
+---
+<Layout {...layoutProps(locale)} meta={meta} jsonLd={jsonLd}>
+  <article class="guide">
+    <div class="wrap">
+      <nav class="crumbs" aria-label={c.guide.breadcrumbGuides}>
+        <a href={routes.home[locale]}>{c.guide.breadcrumbHome}</a>
+      </nav>
+      <h1>{entry.data.title}</h1>
+      <p class="byline">{byline}</p>
+      <div class="flow body">
+        <Content />
+      </div>
+      <div class="cta-block">
+        <CtaLink label={c.guide.cta} note={c.guide.ctaNote} locale={locale} section="guide" source={site.domain} />
+      </div>
+    </div>
+  </article>
+  <Faq h2={c.guide.faqH2} items={faqItems.map((f) => ({ q: f.q, a: f.a.replace(entry.data.title, '{guideLink}') }))} guide={{ href: paths[locale], label: entry.data.title }} id="guide-faq" />
+  <section class="section">
+    <div class="wrap"><p><a href={routes.home[locale]}>{c.guide.backHome}</a></p></div>
+  </section>
+</Layout>
+
+<style>
+  .guide { padding-block: var(--space-4) var(--space-5); }
+  .crumbs { font-size: var(--step--1); margin-bottom: var(--space-3); }
+  .guide h1 { font-size: var(--step-3); }
+  .byline { margin-top: var(--space-2); font-size: var(--step--1); }
+  .body { margin-top: var(--space-4); }
+  .cta-block { margin-top: var(--space-4); }
+</style>
+
+<style is:global>
+  .guide .body h2 { font-size: var(--step-2); }
+  .guide .body h3 { font-size: var(--step-1); }
+  .guide .body ul, .guide .body ol { padding-inline-start: 1.2em; max-width: var(--measure); }
+  .guide .body li + li { margin-top: var(--space-1); }
+  .guide .body table { margin-block: var(--space-2); }
+</style>

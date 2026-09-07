@@ -1,0 +1,81 @@
+---
+/**
+ * Quebec Law 25 consent banner (brief §11): small, bottom, Accept analytics / Decline, link to privacy.
+ * Choice stored in localStorage for 12 months. GA4 loads only on accept. This script also wires the
+ * page-level analytics listeners (CTA clicks, language switch, thanks-page conversion).
+ */
+import type { ConsentCopy } from '../lib/copy';
+import type { Locale } from '../lib/i18n';
+
+interface Props {
+  copy: ConsentCopy;
+  locale: Locale;
+  privacyPath: string;
+  measurementId: string;
+}
+const { copy, locale, privacyPath, measurementId } = Astro.props;
+---
+<div class="consent" data-consent data-ga4={measurementId} data-locale={locale} role="region" aria-label={copy.label} hidden>
+  <div class="wrap inner">
+    <p>{copy.text} <a href={privacyPath}>{copy.privacy}</a></p>
+    <div class="actions">
+      <button type="button" class="accept" data-consent-accept>{copy.accept}</button>
+      <button type="button" class="decline" data-consent-decline>{copy.decline}</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .consent {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 30;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-rule);
+    font-size: var(--step--1);
+  }
+  .inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding-block: var(--space-2);
+  }
+  .inner p { margin: 0; }
+  .actions { display: flex; gap: var(--space-1); flex: none; }
+  button {
+    padding: 0.5em 0.9em;
+    border-radius: var(--radius);
+    border: 2px solid var(--color-heading);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1rem;
+    background: var(--color-surface);
+    color: var(--color-heading);
+  }
+  .accept { background: var(--color-heading); color: #FFFFFF; }
+</style>
+
+<script>
+  import { initAnalytics, loadGA4, readConsent, writeConsent } from '../lib/analytics';
+  import type { Locale } from '../lib/i18n';
+
+  const banner = document.querySelector<HTMLElement>('[data-consent]');
+  if (banner) {
+    const measurementId = banner.dataset.ga4 ?? '';
+    const locale = (banner.dataset.locale === 'fr' ? 'fr' : 'en') as Locale;
+    initAnalytics({ measurementId, locale });
+    if (!readConsent()) banner.hidden = false;
+    banner.querySelector('[data-consent-accept]')?.addEventListener('click', () => {
+      writeConsent('granted');
+      banner.hidden = true;
+      loadGA4(measurementId);
+    });
+    banner.querySelector('[data-consent-decline]')?.addEventListener('click', () => {
+      writeConsent('denied');
+      banner.hidden = true;
+    });
+  }
+</script>

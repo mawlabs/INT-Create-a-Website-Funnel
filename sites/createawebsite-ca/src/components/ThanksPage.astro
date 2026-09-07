@@ -1,0 +1,26 @@
+---
+/** Form success (brief §5.8). Fires form_submit through the analytics island via <body data-event>. Not indexed. */
+import Layout from '@maw/lander-kit/components/Layout.astro';
+import type { Locale } from '@maw/lander-kit/lib/i18n';
+import { copy } from '../i18n';
+import { layoutProps, pageMeta } from '../lib/page';
+import { routes } from '../site';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const c = copy[locale];
+const meta = pageMeta('thanks', locale, c.meta.thanks, { noindex: true });
+---
+<Layout {...layoutProps(locale)} meta={meta} bodyEvent="form_submit">
+  <section class="page">
+    <div class="wrap flow">
+      <h1>{c.thanks.h1}</h1>
+      <p>{c.thanks.text}</p>
+      <p><a href={routes.home[locale]}>{c.thanks.back}</a></p>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .page { padding-block: var(--space-6); min-height: 50vh; }
+</style>

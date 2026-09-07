@@ -1,0 +1,14 @@
+[
+  {
+    "name": "createawebsite-ca",
+    "domain": "createawebsite.ca",
+    "docroot": "www/createawebsite.ca/public_html",
+    "deploy": true
+  },
+  {
+    "name": "wphandyman-ca",
+    "domain": "wphandyman.ca",
+    "docroot": "www/wphandyman.ca/public_html",
+    "deploy": false
+  }
+]

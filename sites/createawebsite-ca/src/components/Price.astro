@@ -1,0 +1,15 @@
+---
+/** Inline price/hours from the pricing data, for use inside guides (MDX). Never retype numbers (brief §6). */
+import { renderPricing } from '@maw/lander-kit/lib/pricing';
+import type { Locale } from '@maw/lander-kit/lib/i18n';
+import { pricing } from '../data/pricing';
+
+interface Props {
+  /** A pricing token without braces, e.g. "price:websites.basic" or "h:fixes.fixes" or "rate". */
+  of: string;
+  lang?: Locale;
+}
+const { of, lang } = Astro.props;
+const locale: Locale = lang ?? (Astro.currentLocale === 'fr' ? 'fr' : 'en');
+const text = renderPricing(`{${of}}`, pricing, locale);
+---<span>{text}</span>

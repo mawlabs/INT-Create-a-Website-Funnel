@@ -1,0 +1,58 @@
+---
+/**
+ * "Work we've shipped" (brief §5.6): case studies + plain blockquote testimonials.
+ * Renders nothing until the site supplies real items — never fabricate.
+ */
+import { Image } from 'astro:assets';
+import type { CaseStudy, Testimonial, WorkCopy } from '../lib/copy';
+
+interface Props {
+  copy: WorkCopy;
+  items: CaseStudy[];
+  quotes: Testimonial[];
+  id?: string;
+}
+const { copy, items, quotes, id = 'work' } = Astro.props;
+---
+{(items.length > 0 || quotes.length > 0) && (
+  <section class="section" id={id} aria-labelledby={`${id}-h`}>
+    <div class="wrap">
+      <h2 id={`${id}-h`}>{copy.h2}</h2>
+      {items.length > 0 && (
+        <ul class="cases" role="list">
+          {items.map((c) => (
+            <li>
+              <Image src={c.image} alt={c.imageAlt} width="640" height="400" loading="lazy" />
+              <h3>{c.client}</h3>
+              <p>{c.job}</p>
+              <p>{c.result}</p>
+              <p><a href={c.url}>{copy.linkLabel}</a></p>
+            </li>
+          ))}
+        </ul>
+      )}
+      {quotes.length > 0 && (
+        <div class="quotes">
+          <h3 class="visually-hidden">{copy.quotesHeading}</h3>
+          {quotes.map((q) => (
+            <figure>
+              <blockquote><p>{q.quote}</p></blockquote>
+              <figcaption>{q.name}, {q.business}</figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+)}
+
+<style>
+  .cases { display: grid; gap: var(--space-4); }
+  @media (min-width: 45em) { .cases { grid-template-columns: repeat(3, 1fr); } }
+  .cases img { border-radius: var(--radius); margin-bottom: var(--space-2); }
+  .cases h3 { color: var(--color-heading); }
+  .cases p { margin-top: var(--space-1); }
+  .quotes { display: grid; gap: var(--space-3); margin-top: var(--space-4); }
+  @media (min-width: 45em) { .quotes { grid-template-columns: 1fr 1fr; } }
+  figcaption { margin-top: var(--space-1); font-weight: 600; color: var(--color-heading); }
+</style>

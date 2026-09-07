@@ -1,0 +1,43 @@
+---
+/**
+ * Meta, canonical, hreflang, Open Graph, Twitter, Search Console verification (brief §10.2).
+ */
+import type { PageMeta } from '../lib/seo';
+import { canonicalUrl, hreflangLinks } from '../lib/seo';
+import { OG_LOCALE, otherLocale } from '../lib/i18n';
+
+interface Props {
+  meta: PageMeta;
+  origin: string;
+  siteName: string;
+  gscVerification?: string;
+}
+
+const { meta, origin, siteName, gscVerification } = Astro.props;
+const canonical = canonicalUrl(origin, meta.path);
+const alternates = hreflangLinks(origin, meta.alternates);
+const ogImage = meta.ogImage
+  ? (meta.ogImage.startsWith('http') ? meta.ogImage : new URL(meta.ogImage, origin).toString())
+  : new URL(`/og-${meta.locale}.png`, origin).toString();
+---
+<title>{meta.title}</title>
+<meta name="description" content={meta.description} />
+<link rel="canonical" href={canonical} />
+{alternates.map((l) => <link rel="alternate" hreflang={l.hreflang} href={l.href} />)}
+{meta.noindex && <meta name="robots" content="noindex, nofollow" />}
+<meta property="og:type" content={meta.ogType ?? 'website'} />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:locale" content={OG_LOCALE[meta.locale]} />
+<meta property="og:locale:alternate" content={OG_LOCALE[otherLocale(meta.locale)]} />
+<meta property="og:title" content={meta.title} />
+<meta property="og:description" content={meta.description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={meta.title} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={meta.title} />
+<meta name="twitter:description" content={meta.description} />
+<meta name="twitter:image" content={ogImage} />
+{gscVerification && <meta name="google-site-verification" content={gscVerification} />}

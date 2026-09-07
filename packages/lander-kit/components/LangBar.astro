@@ -1,0 +1,51 @@
+---
+/**
+ * One-line "This site is also in English / Ce site est aussi en français" bar on first visit
+ * when the browser language matches the other locale (brief §4). Dismissed in localStorage.
+ * Text is written in the language it offers.
+ */
+import type { LangBarCopy } from '../lib/copy';
+import type { Locale } from '../lib/i18n';
+
+interface Props {
+  copy: LangBarCopy;
+  locale: Locale;       // current page locale
+  otherPath: string;    // same page in the other locale
+}
+const { copy, locale, otherPath } = Astro.props;
+const other: Locale = locale === 'en' ? 'fr' : 'en';
+const otherTag = other === 'fr' ? 'fr-CA' : 'en-CA';
+---
+<div class="langbar" data-langbar data-current={locale} data-other={other} hidden lang={otherTag}>
+  <div class="wrap inner">
+    <p>{copy.text} <a href={otherPath} hreflang={otherTag} data-lang-switch={other}>{copy.link}</a></p>
+    <button type="button" data-langbar-dismiss>{copy.dismiss}</button>
+  </div>
+</div>
+
+<style>
+  .langbar { background: var(--color-surface); border-bottom: 1px solid var(--color-rule); font-size: var(--step--1); }
+  .inner { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); padding-block: var(--space-1); }
+  .inner p { margin: 0; max-width: none; }
+  button { background: none; border: 1px solid var(--color-rule); border-radius: var(--radius); padding: 0.25em 0.6em; color: var(--color-heading); font-weight: 600; }
+</style>
+
+<script>
+  const KEY = 'maw-langbar-dismissed';
+  const bar = document.querySelector<HTMLElement>('[data-langbar]');
+  if (bar) {
+    let dismissed = false;
+    try { dismissed = localStorage.getItem(KEY) === '1'; } catch { /* ignore */ }
+    const other = bar.dataset.other ?? '';
+    const langs = navigator.languages?.length ? navigator.languages : [navigator.language];
+    const preferred = (langs[0] || '').toLowerCase().slice(0, 2);
+    if (!dismissed && preferred === other) bar.hidden = false;
+    bar.querySelector('[data-langbar-dismiss]')?.addEventListener('click', () => {
+      bar.hidden = true;
+      try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ }
+    });
+    bar.querySelector('a[data-lang-switch]')?.addEventListener('click', () => {
+      try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ }
+    });
+  }
+</script>

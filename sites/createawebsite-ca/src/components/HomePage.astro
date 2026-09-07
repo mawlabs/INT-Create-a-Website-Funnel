@@ -1,0 +1,53 @@
+---
+/** Home page (brief §5), rendered once per locale from the same copy shape. */
+import CompareTable from '@maw/lander-kit/components/CompareTable.astro';
+import CaseStudies from '@maw/lander-kit/components/CaseStudies.astro';
+import Faq from '@maw/lander-kit/components/Faq.astro';
+import Hero from '@maw/lander-kit/components/Hero.astro';
+import Layout from '@maw/lander-kit/components/Layout.astro';
+import LeadForm from '@maw/lander-kit/components/LeadForm.astro';
+import PricingTable from '@maw/lander-kit/components/PricingTable.astro';
+import Steps from '@maw/lander-kit/components/Steps.astro';
+import type { Locale } from '@maw/lander-kit/lib/i18n';
+import { renderPricing } from '@maw/lander-kit/lib/pricing';
+import * as schema from '@maw/lander-kit/lib/schema';
+import { getCollection } from 'astro:content';
+import { pricing } from '../data/pricing';
+import { caseStudies, testimonials } from '../data/work';
+import { copy } from '../i18n';
+import { baseNodes, layoutProps, pageMeta } from '../lib/page';
+import { routes, site } from '../site';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const c = copy[locale];
+const meta = pageMeta('home', locale, c.meta.home);
+
+const guides = await getCollection('guides', (g) => g.data.lang === locale);
+const guide = guides[0];
+const guideHref = guide ? routes.guide[locale] : routes.home[locale];
+const guideLabel = guide?.data.title ?? '';
+
+const faqItems = c.home.faq.items.map((it) => ({
+  q: it.q,
+  a: renderPricing(it.a, pricing, locale).replace('{guideLink}', guideLabel),
+}));
+const jsonLd = schema.graph([...baseNodes(locale), schema.faqPage(faqItems)]);
+---
+<Layout {...layoutProps(locale)} meta={meta} jsonLd={jsonLd}>
+  <Hero copy={c.home.hero} locale={locale} pricing={pricing} source={site.domain} />
+  <CompareTable copy={c.home.compare} locale={locale} pricing={pricing} />
+  <PricingTable copy={c.home.pricing} locale={locale} pricing={pricing} source={site.domain} />
+  <Steps copy={c.home.steps} />
+  <CaseStudies copy={c.home.work} items={caseStudies[locale]} quotes={testimonials[locale]} />
+  <Faq h2={c.home.faq.h2} items={c.home.faq.items.map((it) => ({ q: it.q, a: renderPricing(it.a, pricing, locale) }))} guide={{ href: guideHref, label: guideLabel }} />
+  <LeadForm
+    copy={c.home.form}
+    locale={locale}
+    portalId={site.hubspot.portalId}
+    formGuid={locale === 'fr' ? site.hubspot.formFr : site.hubspot.formEn}
+    thanksPath={routes.thanks[locale]}
+    pageName={c.meta.home.title}
+    supportEmail={site.supportEmail}
+  />
+</Layout>

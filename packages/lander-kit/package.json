@@ -1,0 +1,14 @@
+{
+  "name": "@maw/lander-kit",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Shared tokens, fonts, components and helpers for Monkeys at Work landing sites. No copy lives here.",
+  "type": "module",
+  "peerDependencies": {
+    "astro": "^7.0.0"
+  },
+  "dependencies": {
+    "opentype.js": "^2.0.0",
+    "sharp": "^0.35.4"
+  }
+}

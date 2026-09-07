@@ -1,0 +1,50 @@
+---
+/** "How it works" — a genuine three-step sequence, so numbering is appropriate here and only here (brief §5.5). */
+import type { StepsCopy } from '../lib/copy';
+
+interface Props { copy: StepsCopy; id?: string }
+const { copy, id = 'how' } = Astro.props;
+---
+<section class="section" id={id} aria-labelledby={`${id}-h`}>
+  <div class="wrap">
+    <h2 id={`${id}-h`}>{copy.h2}</h2>
+    <ol class="steps">
+      {copy.items.map((s) => (
+        <li>
+          <h3>{s.title}</h3>
+          <p>{s.text}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .steps {
+    list-style: none;
+    padding: 0;
+    counter-reset: step;
+    display: grid;
+    gap: var(--space-3);
+  }
+  @media (min-width: 45em) { .steps { grid-template-columns: repeat(3, 1fr); gap: var(--space-4); } }
+  .steps li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: var(--space-2);
+    align-items: baseline;
+    max-width: none;
+  }
+  .steps li::before {
+    content: counter(step);
+    grid-row: 1 / span 2;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: var(--step-3);
+    line-height: 1;
+    color: var(--color-heading);
+  }
+  .steps h3 { color: var(--color-heading); }
+  .steps p { grid-column: 2; margin-top: var(--space-1); }
+</style>
