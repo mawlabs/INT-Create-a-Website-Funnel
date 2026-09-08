@@ -1,0 +1,77 @@
+name: Staging deploy
+
+# A demo copy for the team: the same build as production, but noindexed everywhere, and the copy gate is a
+# warning rather than a blocker — the point of a demo is to look at work that is not finished yet.
+# Needs the same SiteGround secrets as deploy.yml, pointed at a separate docroot (a subdomain, not the live site).
+
+on:
+  workflow_dispatch:
+    inputs:
+      docroot:
+        description: 'SiteGround docroot, e.g. www/demo.monkeysat.work/public_html'
+        required: true
+      url:
+        description: 'Public URL of the demo, e.g. https://demo.monkeysat.work'
+        required: true
+      site:
+        description: 'Which site to deploy'
+        required: true
+        default: createawebsite-ca
+        type: choice
+        options: [createawebsite-ca, wphandyman-ca]
+
+concurrency:
+  group: staging-${{ inputs.docroot }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.site }} to ${{ inputs.url }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Copy status (informational on staging)
+        run: node scripts/check-copy.mjs --list
+
+      - name: Build (noindexed)
+        run: pnpm --filter ${{ inputs.site }} build
+        env:
+          PUBLIC_SITE_URL: ${{ inputs.url }}
+          PUBLIC_NOINDEX: '1'
+          PUBLIC_GA4_ID: ''
+          PUBLIC_HUBSPOT_PORTAL_ID: ${{ vars.PUBLIC_HUBSPOT_PORTAL_ID }}
+          PUBLIC_HUBSPOT_FORM_EN: ${{ vars.PUBLIC_HUBSPOT_FORM_EN }}
+          PUBLIC_HUBSPOT_FORM_FR: ${{ vars.PUBLIC_HUBSPOT_FORM_FR }}
+
+      - name: Refuse to publish an indexable staging build
+        run: |
+          grep -q 'Disallow: /' "sites/${{ inputs.site }}/dist/robots.txt" || { echo 'robots.txt is not disallowing; refusing'; exit 1; }
+          grep -q 'noindex' "sites/${{ inputs.site }}/dist/index.html" || { echo 'home page is missing noindex; refusing'; exit 1; }
+
+      - name: SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SG_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${SG_PORT:-18765}" -H "${{ secrets.SG_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: rsync to SiteGround
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/id_ed25519 -p ${SG_PORT:-18765}" \
+            "sites/${{ inputs.site }}/dist/" \
+            "${{ secrets.SG_USER }}@${{ secrets.SG_HOST }}:~/${{ inputs.docroot }}/"
+
+      - name: Where it landed
+        run: echo "Demo deployed to ${{ inputs.url }} — noindexed, and the site check needs PHP enabled on that docroot."

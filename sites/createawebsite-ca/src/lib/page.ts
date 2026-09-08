@@ -38,7 +38,7 @@ export const layoutProps = (locale: Locale) => ({
     consent: copy[locale].consent,
   },
   langBar: copy[locale === 'en' ? 'fr' : 'en'].langBar,
-  site: { origin: site.origin, ga4Id: site.ga4Id, gscVerification: site.gscVerification, bookUrl: site.bookUrl, mawUrl: site.org.url },
+  site: { origin: site.origin, ga4Id: site.ga4Id, gscVerification: site.gscVerification, bookUrl: site.bookUrl, mawUrl: site.org.url, noindex: site.noindex },
   paths: { home: routes.home[locale], privacy: routes.privacy[locale], guide: routes.guide[locale] },
 });
 

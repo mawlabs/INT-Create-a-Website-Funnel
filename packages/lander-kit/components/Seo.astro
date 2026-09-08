@@ -11,9 +11,12 @@ interface Props {
   origin: string;
   siteName: string;
   gscVerification?: string;
+  /** Build-level override: keeps a staging or demo copy out of search results entirely. */
+  noindex?: boolean;
 }
 
-const { meta, origin, siteName, gscVerification } = Astro.props;
+const { meta, origin, siteName, gscVerification, noindex = false } = Astro.props;
+const hidden = noindex || meta.noindex;
 const canonical = canonicalUrl(origin, meta.path);
 const alternates = hreflangLinks(origin, meta.alternates);
 const ogImage = meta.ogImage
@@ -24,7 +27,7 @@ const ogImage = meta.ogImage
 <meta name="description" content={meta.description} />
 <link rel="canonical" href={canonical} />
 {alternates.map((l) => <link rel="alternate" hreflang={l.hreflang} href={l.href} />)}
-{meta.noindex && <meta name="robots" content="noindex, nofollow" />}
+{hidden && <meta name="robots" content="noindex, nofollow" />}
 <meta property="og:type" content={meta.ogType ?? 'website'} />
 <meta property="og:site_name" content={siteName} />
 <meta property="og:locale" content={OG_LOCALE[meta.locale]} />

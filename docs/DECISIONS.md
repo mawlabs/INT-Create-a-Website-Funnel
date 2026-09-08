@@ -27,6 +27,30 @@ Run `pnpm check:copy -- --list` for the live list. As of 7 Sept 2026:
 | ● | FR review pass on every `_review: true` node (37 nodes) and the FR guide (`review: true` in frontmatter). `main` cannot deploy until the count is zero. | `fr.json`, `fr/*.mdx` | §13 #10 |
 | | Canonical host: `.htaccess` redirects `www` → bare domain. Confirm. | `public/.htaccess` | §10.4 |
 
+## How to get a live demo (8 Sept 2026)
+
+The site check cannot be demonstrated from a static file: a browser is not allowed to read another site's pages or
+headers, which is why `public/api/audit.php` exists. So a demo anyone can click needs the site on a host that runs
+PHP. SiteGround does, and the deploy already exists — what is missing is access.
+
+**Do not demo on `createawebsite.ca` itself.** The French is unreviewed (35 flagged nodes), `TODO(angelique)` items
+are still in the copy, and the production deploy blocks on both by design. A demo should be a separate subdomain.
+
+`.github/workflows/staging.yml` builds and deploys one: run it from the Actions tab with a docroot and a URL. It
+builds with `PUBLIC_NOINDEX=1`, so every page carries `noindex, nofollow` and `robots.txt` disallows everything, and
+it refuses to publish if either of those is missing from the built output. The copy gate prints its counts but does
+not block, because the point of a demo is to look at unfinished work.
+
+To make it run, Angelique needs to provide, once:
+
+1. a subdomain or staging site in SiteGround Site Tools (say `demo.monkeysat.work`), with **PHP enabled** on that
+   docroot — without PHP the pages work but the site check does not;
+2. SSH enabled, and the Actions deploy key added;
+3. three repository secrets: `SG_HOST`, `SG_USER`, `SG_SSH_KEY` (the same ones production will need).
+
+Everything else — the build, the noindex guard, the rsync — is already written. The same three secrets unlock the
+production deploy later, so this is not throwaway work.
+
 ## Open question for the team — where the site-check score comes from
 
 Raised 8 Sept 2026. Nothing is blocked by it except the last item, which is a launch blocker on its own.

@@ -4,7 +4,13 @@ export const site = {
   domain: 'createawebsite.ca',
   origin: (import.meta.env.PUBLIC_SITE_URL as string | undefined) || 'https://createawebsite.ca',
   ga4Id: (import.meta.env.PUBLIC_GA4_ID as string | undefined) ?? '',          // TODO(angelique): GA4 measurement ID (brief §13 #3)
-  gscVerification: (import.meta.env.PUBLIC_GSC_VERIFICATION as string | undefined) ?? '', // TODO(angelique): Search Console access (brief §13 #3)
+  gscVerification: (import.meta.env.PUBLIC_GSC_VERIFICATION as string | undefined) ?? '',
+  /**
+   * Set PUBLIC_NOINDEX=1 for a staging or demo build: every page carries noindex and robots.txt disallows
+   * everything. An unreviewed French site indexed under a Quebec business would be a real problem, not a cosmetic
+   * one, so this is a build-level switch rather than a per-page one.
+   */
+  noindex: (import.meta.env.PUBLIC_NOINDEX as string | undefined) === '1', // TODO(angelique): Search Console access (brief §13 #3)
   hubspot: {
     portalId: (import.meta.env.PUBLIC_HUBSPOT_PORTAL_ID as string | undefined) ?? '',   // TODO(angelique): portal ID (brief §13 #2)
     formEn: (import.meta.env.PUBLIC_HUBSPOT_FORM_EN as string | undefined) ?? '',       // TODO(angelique): EN form GUID (brief §13 #2)

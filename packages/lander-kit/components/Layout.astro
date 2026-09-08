@@ -18,7 +18,7 @@ interface Props {
   meta: PageMeta;
   chrome: ChromeCopy;
   langBar: LangBarCopy;
-  site: { origin: string; ga4Id: string; gscVerification: string; bookUrl: string; mawUrl: string };
+  site: { origin: string; ga4Id: string; gscVerification: string; bookUrl: string; mawUrl: string; noindex?: boolean };
   paths: { home: string; privacy: string; guide: string };
   jsonLd?: Record<string, unknown>;
   bodyEvent?: string;
@@ -32,7 +32,7 @@ const other: Locale = locale === 'en' ? 'fr' : 'en';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <Seo meta={meta} origin={site.origin} siteName={chrome.siteName} gscVerification={site.gscVerification} />
+    <Seo meta={meta} origin={site.origin} siteName={chrome.siteName} gscVerification={site.gscVerification} noindex={site.noindex} />
     <link rel="preload" href={satoshiBlackUrl} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={plexUrl} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
