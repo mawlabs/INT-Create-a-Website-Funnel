@@ -41,9 +41,22 @@ builds with `PUBLIC_NOINDEX=1`, so every page carries `noindex, nofollow` and `r
 it refuses to publish if either of those is missing from the built output. The copy gate prints its counts but does
 not block, because the point of a demo is to look at unfinished work.
 
+Any SiteGround domain works — `monkeysatwork.dev`, a demo domain, or a subdomain of either. The workflow takes the
+docroot and the URL as inputs; nothing is tied to `createawebsite.ca`. Two things decide the choice:
+
+- **One hosting account or two.** SiteGround SSH credentials are per hosting account, not per domain. Domains under
+  the same account share one set of secrets; a domain on a second account needs its own, and the secrets in this
+  repository can only hold one at a time.
+- **Whose name is on it.** The demo is a Monkeys at Work funnel with unreviewed French in it, so a domain that
+  reads as MAW's own workshop is safer than one that could be mistaken for a client's or a product's.
+
+The deploy leaves HubSpot disconnected unless the run asks for it, so a walkthrough does not leave test contacts in
+the CRM, and analytics are off entirely. After the rsync it calls the audit endpoint once and warns if PHP is not
+answering, since that is the failure everyone would otherwise discover during the demo itself.
+
 To make it run, Angelique needs to provide, once:
 
-1. a subdomain or staging site in SiteGround Site Tools (say `demo.monkeysat.work`), with **PHP enabled** on that
+1. a site or subdomain in SiteGround Site Tools (say `demo.monkeysatwork.dev`), with **PHP enabled** on that
    docroot — without PHP the pages work but the site check does not;
 2. SSH enabled, and the Actions deploy key added;
 3. three repository secrets: `SG_HOST`, `SG_USER`, `SG_SSH_KEY` (the same ones production will need).

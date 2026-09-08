@@ -19,6 +19,11 @@ on:
         default: createawebsite-ca
         type: choice
         options: [createawebsite-ca, wphandyman-ca]
+      hubspot:
+        description: 'Connect HubSpot? Off by default, so a walkthrough leaves no test contacts in the CRM.'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: staging-${{ inputs.docroot }}
@@ -50,9 +55,11 @@ jobs:
           PUBLIC_SITE_URL: ${{ inputs.url }}
           PUBLIC_NOINDEX: '1'
           PUBLIC_GA4_ID: ''
-          PUBLIC_HUBSPOT_PORTAL_ID: ${{ vars.PUBLIC_HUBSPOT_PORTAL_ID }}
-          PUBLIC_HUBSPOT_FORM_EN: ${{ vars.PUBLIC_HUBSPOT_FORM_EN }}
-          PUBLIC_HUBSPOT_FORM_FR: ${{ vars.PUBLIC_HUBSPOT_FORM_FR }}
+          # No analytics on a demo, and no CRM writes unless asked for. With HubSpot off the forms say plainly
+          # that they are not connected instead of pretending to send.
+          PUBLIC_HUBSPOT_PORTAL_ID: ${{ inputs.hubspot && vars.PUBLIC_HUBSPOT_PORTAL_ID || '' }}
+          PUBLIC_HUBSPOT_FORM_EN: ${{ inputs.hubspot && vars.PUBLIC_HUBSPOT_FORM_EN || '' }}
+          PUBLIC_HUBSPOT_FORM_FR: ${{ inputs.hubspot && vars.PUBLIC_HUBSPOT_FORM_FR || '' }}
 
       - name: Refuse to publish an indexable staging build
         run: |
@@ -72,6 +79,18 @@ jobs:
             -e "ssh -i ~/.ssh/id_ed25519 -p ${SG_PORT:-18765}" \
             "sites/${{ inputs.site }}/dist/" \
             "${{ secrets.SG_USER }}@${{ secrets.SG_HOST }}:~/${{ inputs.docroot }}/"
+
+      - name: Check PHP is really running on that docroot
+        run: |
+          curl -s -o /tmp/audit.json -w 'HTTP %{http_code}\n' -X POST \
+            -H 'Content-Type: application/json' -d '{"url":"http://127.0.0.1/"}' \
+            "${{ inputs.url }}/api/audit.php" || true
+          if grep -q 'url_private' /tmp/audit.json 2>/dev/null; then
+            echo 'PHP is running: the endpoint answered and refused a private address, as it should.'
+          else
+            echo '::warning::The site check endpoint did not answer as expected. Enable PHP on this docroot, or the audit will not work.'
+            head -c 300 /tmp/audit.json 2>/dev/null || true
+          fi
 
       - name: Where it landed
         run: echo "Demo deployed to ${{ inputs.url }} — noindexed, and the site check needs PHP enabled on that docroot."
