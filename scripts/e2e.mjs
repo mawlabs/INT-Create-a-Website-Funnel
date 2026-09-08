@@ -178,22 +178,72 @@ try {
   await page.waitForSelector('[data-audit-output] .report', { timeout: 5000 });
   const reportText = await page.textContent('[data-audit-output]');
   check('audit shows the platform and PHP version', reportText.includes('WordPress 5.9.3') && reportText.includes('PHP 7.4.33'), reportText.slice(0, 120));
-  check('audit flags the outdated CMS', reportText.includes('no longer supported'));
-  check('audit flags PHP end of life', reportText.includes('no longer gets security fixes'));
-  check('audit flags the missing French version', reportText.includes('no French version'));
-  check('audit groups findings by severity', (await page.locator('[data-audit-output] .finding[data-severity="critical"]').count()) >= 3);
+  check('audit leads with the urgent findings', reportText.includes('no longer supported') && reportText.includes('no longer gets security fixes'));
+  check('audit shows a counts row', (await page.locator('[data-audit-output] .counts li').count()) >= 2);
+  check('audit does not dump the small findings', !reportText.includes('Small things'), 'the info group should be in the file, not on the page');
+  check('audit shows at most four urgent items', (await page.locator('[data-audit-output] .findings .finding').count()) <= 4);
+  check('audit offers help with a recommendation', reportText.includes('Need help with this?'));
   const score = Number(await page.textContent('[data-audit-output] .score-num'));
-  check('audit score is a low number for this fixture', score >= 0 && score < 40, String(score));
+  check('audit score is a low number for this fixture', score > 0 && score < 40, String(score));
   check('audit focus moves to the report heading', await page.evaluate(() => document.activeElement?.classList.contains('report-h')));
   check('audit summary kept for the lead', (await page.evaluate(() => sessionStorage.getItem('caw-audit') ?? '')).includes('vieuxsite.ca'));
 
-  // The recommendation hands over to the quote flow
-  await page.click('[data-audit-output] .rec button.btn');
-  await page.waitForTimeout(600);
-  const afterHandoff = await question(page);
-  check('audit prefills the quote and skips the answered questions', !afterHandoff.includes('What are you building'), afterHandoff);
-  const answers = await page.evaluate(() => JSON.parse(sessionStorage.getItem('caw-quote') ?? '{}').answers ?? {});
-  check('prefilled answers carry the project type and platform', answers.projectType === 'redesign' && answers.currentPlatform === 'wordpress', JSON.stringify(answers));
+  // The full report is behind an email, and following up is opt-in
+  await page.locator('[data-audit-output] .rec button', { hasText: 'Get the full report' }).click();
+  await page.waitForTimeout(200);
+  check('email gate shown', (await page.textContent('[data-audit-output] .report-h')).includes('Get the full report'));
+  check('follow-up is opt-in and unticked by default', !(await page.isChecked('#audit-followup')));
+  check('gate states what the address is used for', (await page.textContent('[data-audit-output] .purpose')).includes('No newsletter'));
+  await page.click('[data-audit-output] button[type="submit"]');
+  check('gate needs a real address', (await page.textContent('#audit-email-err')).includes('where to send it'));
+  await page.fill('#audit-email', 'owner@example.ca');
+  await page.waitForTimeout(3200);   // clear the anti-bot timing guard, as a reader would
+  await page.click('[data-audit-output] button[type="submit"]');
+  await page.waitForTimeout(200);
+  const gateStatus = await page.textContent('[data-audit-output] .form-status');
+  check('gate refuses to pretend it sent anything while HubSpot is unconfigured', gateStatus.includes('support@monkeysat.work'), gateStatus);
+
+  // With HubSpot configured the gate sends, downloads the report and offers a call.
+  // The ids are injected into the served HTML, because the site ships without them until Angelique supplies them.
+  await page.route('**/api.hsforms.com/**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{"inlineMessage":"ok"}' }));
+  await page.route(`${origin}/`, async (route) => {
+    const res = await route.fetch();
+    const body = (await res.text())
+      .replace('&quot;portalId&quot;:&quot;&quot;', '&quot;portalId&quot;:&quot;1234&quot;')
+      .replace('&quot;formGuid&quot;:&quot;&quot;', '&quot;formGuid&quot;:&quot;abcd&quot;');
+    await route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body });
+  });
+  // Downloads are recorded rather than performed.
+  await page.addInitScript(() => {
+    window.__downloads = [];
+    const realClick = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function () {
+      if (this.download) { window.__downloads.push(this.download); return; }
+      return realClick.call(this);
+    };
+  });
+  await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
+  check('hubspot ids reached the island', (await page.evaluate(() => JSON.parse(document.querySelector('[data-audit-panel]').dataset.config).hubspot.portalId)) === '1234');
+  await page.fill('[data-audit-url]', 'vieuxsite.ca');
+  await page.click('[data-audit-panel] button[type="submit"]');
+  await page.waitForSelector('[data-audit-output] .report');
+  await page.locator('[data-audit-output] .rec button', { hasText: 'Get the full report' }).click();
+  await page.waitForTimeout(3200);
+  await page.fill('#audit-email', 'owner@example.ca');
+  await page.check('#audit-followup');
+  const hubspotPosts = [];
+  page.on('request', (r) => { if (r.url().includes('hsforms.com')) hubspotPosts.push(r.postData() ?? ''); });
+  await page.click('[data-audit-output] button[type="submit"]');
+  await page.waitForSelector('[data-audit-output] .sent', { timeout: 5000 });
+  const sent = await page.textContent('[data-audit-output]');
+  check('sent view confirms and promises follow-up when asked', sent.includes('On its way') && sent.includes('get back to you'));
+  check('sent view offers a call', sent.includes('Want it walked through'));
+  check('booking link goes to the meeting page', (await page.getAttribute('[data-audit-output] a[data-cta="book"]', 'href')).includes('meetings.hubspot.com/ange1'));
+  const downloads = await page.evaluate(() => window.__downloads ?? []);
+  check('the full report downloads as a file', downloads.some((d) => d.startsWith('site-check-vieuxsite.ca')), JSON.stringify(downloads));
+  check('the lead carries the findings and the follow-up choice', hubspotPosts.some((b) => b.includes('vieuxsite.ca') && b.includes('wordpress.outdated') && b.includes('follow up')), hubspotPosts.join('').slice(0, 200));
+  await page.unroute('**/api.hsforms.com/**');
+  await page.unroute(`${origin}/`);
 
   // Endpoint refusals are worded, not raw codes
   await page.goto(`${origin}/`, { waitUntil: 'networkidle' });

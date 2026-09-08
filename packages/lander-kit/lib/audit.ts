@@ -391,6 +391,16 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   return { url: snap.url, finalUrl: snap.finalUrl, platform, platformVersion, phpVersion, score, counts, findings, recommendation };
 }
 
+const PLATFORM_NAMES: Record<Platform, string> = {
+  wordpress: 'WordPress', woocommerce: 'WooCommerce', shopify: 'Shopify', 'shopify-headless': 'Shopify',
+  wix: 'Wix', squarespace: 'Squarespace', webflow: 'Webflow', drupal: 'Drupal', joomla: 'Joomla', unknown: '',
+};
+
+/** How a platform is spelled in the interface. Empty for an unrecognized one: the copy supplies that wording. */
+export function platformLabel(platform: Platform): string {
+  return PLATFORM_NAMES[platform] ?? '';
+}
+
 /** A one-line, copy-free summary for the lead record. */
 export function summarize(report: AuditReport): string[] {
   return [

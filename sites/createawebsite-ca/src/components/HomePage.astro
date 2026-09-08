@@ -40,7 +40,16 @@ const jsonLd = schema.graph([...baseNodes(locale), schema.faqPage(faqItems)]);
       domain: site.domain,
     }}
   />
-  <SiteAudit copy={c.home.audit} locale={locale} versions={versions} endpoint={site.auditEndpoint} supportEmail={site.supportEmail} />
+  <SiteAudit
+    copy={c.home.audit}
+    locale={locale}
+    versions={versions}
+    endpoint={site.auditEndpoint}
+    supportEmail={site.supportEmail}
+    bookUrl={site.bookUrl}
+    pageName={c.meta.home.title}
+    hubspot={{ portalId: site.hubspot.portalId, formGuid: locale === 'fr' ? site.hubspot.formFr : site.hubspot.formEn }}
+  />
   <Steps copy={c.home.steps} />
   <CaseStudies copy={c.home.work} items={caseStudies[locale]} quotes={testimonials[locale]} />
   <Faq h2={c.home.faq.h2} items={faqItems} />

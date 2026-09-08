@@ -394,7 +394,7 @@
     },
     "audit": {
       "h2": "Already have a site? Check it.",
-      "intro": "We look at your home page the way a search engine and a security scanner would, and tell you in plain words what's out of date, what's missing and what it would take to fix. Nothing is stored, and you don't need to leave an email.",
+      "intro": "We look at your home page the way a search engine and a security scanner would, and tell you in plain words what's out of date, what's missing and what it would take to fix. The check is free, and anything urgent shows up right here.",
       "label": "your website address",
       "placeholder": "example.com",
       "button": "Check my site",
@@ -423,6 +423,49 @@
           "good": "{n} good"
         },
         "empty": "Nothing to report, which is rare and good."
+      },
+      "report": {
+        "helpHeading": "Need help with this?",
+        "moreLine": "The full report lists every finding, in order, with what each one takes to fix.",
+        "nothingUrgent": "Nothing urgent came up, which is rarer than you'd think.",
+        "download": "Get the full report"
+      },
+      "email": {
+        "heading": "Get the full report",
+        "intro": "Everything we found, in order, with what each item takes to fix. It downloads as soon as you send this.",
+        "label": "email",
+        "consent": "I'd like Angelique to follow up about these findings.",
+        "consentHint": "Leave it unticked and you'll hear nothing from us. You'll still get the report.",
+        "purpose": "We keep your address to send you this report, and to follow up only if you ticked the box. No newsletter, no sharing.",
+        "button": "Get the report",
+        "sending": "Sending…",
+        "back": "Back to the findings",
+        "errors": {
+          "email": "Enter an email address so we know where to send it.",
+          "tooFast": "That was quick. Give it a couple of seconds and send again.",
+          "network": "We couldn't send that. Try again, or email {email} and we'll send the report by hand.",
+          "notConfigured": "This isn't connected yet. Email {email} with your address and we'll send the report by hand."
+        }
+      },
+      "sent": {
+        "heading": "On its way.",
+        "text": "The report is downloading now. It's yours to keep, or to hand to whoever looks after your site.",
+        "followUp": "Angelique will read these findings and get back to you within one business day.",
+        "_todo_replyTime": "TODO(angelique): confirm the reply-time promise (brief §5.8)",
+        "noFollowUp": "We won't contact you about this. If you change your mind, the address in the footer always works.",
+        "downloadAgain": "Download it again",
+        "bookHeading": "Want it walked through?",
+        "bookText": "Twenty minutes with Angelique, no pitch: what to fix first, what it costs, and what you can do yourself.",
+        "book": "Book a call",
+        "quote": "Or get a quote to fix these"
+      },
+      "file": {
+        "title": "Site check — {host}",
+        "generated": "Checked on {date} by createawebsite.ca, a Monkeys at Work site.",
+        "intro": "This is what one page of {host} looks like from the outside: to a search engine, to a browser, and to anyone scanning for out-of-date software. Nothing here required a login.",
+        "recHeading": "What we'd suggest",
+        "footer": "createawebsite.ca is run by Monkeys at Work, a web studio in Quebec. Questions about this report: {email}",
+        "print": "Print or save as PDF"
       },
       "recommendation": {
         "healthy": {

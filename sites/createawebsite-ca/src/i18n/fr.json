@@ -412,7 +412,7 @@
     "audit": {
       "_review": true,
       "h2": "Vous avez déjà un site? Analysez-le.",
-      "intro": "On regarde votre page d'accueil comme le feraient un moteur de recherche et un outil de sécurité, et on vous dit en mots simples ce qui est périmé, ce qui manque et ce qu'il faudrait pour corriger. Rien n'est conservé, et vous n'avez pas à laisser de courriel.",
+      "intro": "On regarde votre page d'accueil comme le feraient un moteur de recherche et un outil de sécurité, et on vous dit en mots simples ce qui est périmé, ce qui manque et ce qu'il faudrait pour corriger. L'analyse est gratuite, et tout ce qui est urgent s'affiche ici même.",
       "label": "l'adresse de votre site web",
       "placeholder": "exemple.com",
       "button": "Analyser mon site",
@@ -441,6 +441,49 @@
           "good": "{n} correct"
         },
         "empty": "Rien à signaler, ce qui est rare et bon signe."
+      },
+      "report": {
+        "helpHeading": "Besoin d'aide avec ça?",
+        "moreLine": "Le rapport complet liste chaque constat, dans l'ordre, avec ce qu'il faut pour le corriger.",
+        "nothingUrgent": "Rien d'urgent n'est ressorti, ce qui est plus rare qu'on pense.",
+        "download": "Obtenir le rapport complet"
+      },
+      "email": {
+        "heading": "Obtenir le rapport complet",
+        "intro": "Tout ce qu'on a trouvé, dans l'ordre, avec ce qu'il faut pour corriger chaque point. Il se télécharge dès l'envoi.",
+        "label": "courriel",
+        "consent": "J'aimerais qu'Angelique fasse un suivi sur ces constats.",
+        "consentHint": "Laissez la case vide et vous n'aurez aucune nouvelle de nous. Vous aurez quand même le rapport.",
+        "purpose": "On conserve votre adresse pour vous envoyer ce rapport, et pour faire un suivi seulement si vous avez coché la case. Pas d'infolettre, pas de partage.",
+        "button": "Obtenir le rapport",
+        "sending": "Envoi…",
+        "back": "Retour aux constats",
+        "errors": {
+          "email": "Entrez une adresse courriel pour qu'on sache où l'envoyer.",
+          "tooFast": "C'était rapide. Attendez quelques secondes et renvoyez.",
+          "network": "L'envoi n'a pas fonctionné. Réessayez, ou écrivez à {email} et on vous enverra le rapport à la main.",
+          "notConfigured": "Ce n'est pas encore branché. Écrivez à {email} avec votre adresse et on vous enverra le rapport à la main."
+        }
+      },
+      "sent": {
+        "heading": "C'est parti.",
+        "text": "Le rapport se télécharge. Il est à vous, ou à remettre à la personne qui s'occupe de votre site.",
+        "followUp": "Angelique va lire ces constats et vous revenir dans un délai d'un jour ouvrable.",
+        "_todo_replyTime": "TODO(angelique): confirmer la promesse de délai de réponse (brief §5.8)",
+        "noFollowUp": "On ne vous contactera pas à ce sujet. Si vous changez d'idée, l'adresse dans le pied de page fonctionne toujours.",
+        "downloadAgain": "Le télécharger de nouveau",
+        "bookHeading": "Vous voulez qu'on vous l'explique?",
+        "bookText": "Vingt minutes avec Angelique, sans discours de vente : quoi corriger en premier, ce que ça coûte, et ce que vous pouvez faire vous-même.",
+        "book": "Réserver un appel",
+        "quote": "Ou obtenir une soumission pour ces correctifs"
+      },
+      "file": {
+        "title": "Analyse de site — {host}",
+        "generated": "Analysé le {date} par createawebsite.ca, un site de Monkeys at Work.",
+        "intro": "Voici à quoi ressemble une page de {host} vue de l'extérieur : pour un moteur de recherche, pour un navigateur, et pour quiconque cherche des logiciels périmés. Rien ici n'a exigé de connexion.",
+        "recHeading": "Ce qu'on suggère",
+        "footer": "createawebsite.ca est un site de Monkeys at Work, un studio web au Québec. Questions sur ce rapport : {email}",
+        "print": "Imprimer ou enregistrer en PDF"
       },
       "recommendation": {
         "healthy": {

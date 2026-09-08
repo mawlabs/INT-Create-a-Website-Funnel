@@ -125,6 +125,18 @@ export interface AuditCopy extends Reviewable {
     counts: Record<'critical' | 'warning' | 'info' | 'good', string>;
     empty: string;
   } & Reviewable;
+  report: { helpHeading: string; moreLine: string; nothingUrgent: string; download: string } & Reviewable;
+  email: {
+    heading: string; intro: string; label: string; consent: string; consentHint: string; purpose: string;
+    button: string; sending: string; back: string;
+    errors: { email: string; tooFast: string; network: string; notConfigured: string } & Reviewable;
+  } & Reviewable;
+  sent: {
+    heading: string; text: string; followUp: string; noFollowUp: string; downloadAgain: string;
+    bookHeading: string; bookText: string; book: string; quote: string;
+  } & Reviewable;
+  /** The downloadable report is a standalone document, so it carries its own strings. */
+  file: { title: string; generated: string; intro: string; recHeading: string; footer: string; print: string } & Reviewable;
   recommendation: Record<string, { title: string; text: string; cta: string }>;
   errors: Record<string, string>;
   findings: Record<string, AuditFindingCopy>;

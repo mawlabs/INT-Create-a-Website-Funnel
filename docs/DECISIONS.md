@@ -93,6 +93,21 @@ touches; the brief itself is unchanged and still governs anything not listed her
   builder or a CRM is, with a one-line description under any option that uses a term. The audit findings are written
   the same way: what it is, why it matters, what it takes to fix. Someone who knows the words still sees WordPress,
   Shopify and "custom-coded" as the labels.
+- **The site check ends in a decision, not a wall.** The page shows the score, what it detected and every urgent
+  finding, then a "Need help with this?" block carrying the recommendation and two ways forward: get a quote, or get
+  the full report. Warnings and small notes are not on the page at all — they are in the downloadable report, so the
+  visitor reads a short list and decides rather than scrolling twenty findings.
+- **The full report is a file, gated by an email, and following up is opt-in.** The report is generated in the
+  browser as one self-contained HTML file (no fonts, no scripts, prints cleanly) and downloads immediately on
+  submit — the visitor gets what they were promised whatever happens next. The address is kept, and a single
+  unticked checkbox, "I'd like Angelique to follow up about these findings", decides whether anyone contacts them;
+  the hint under it says so plainly. Both the purpose and the follow-up choice are recorded as the consent text, and
+  the follow-up choice is written into the lead itself, so nobody has to guess later. Affects: §11, Law 25.
+- **Site-check leads go to HubSpot, not to `process-lead`.** A site check is a contact with a report attached, not a
+  quoted project. Sending it through the chat's pipeline would have forced an invented `estimated_quote` onto the
+  record, and the MAW admin sorts leads by that figure — a report request would have outranked real quotes. It uses
+  the HubSpot form already wired for the question form, with the findings in the message field.
+  `TODO(angelique)`: this needs the same portal and form ids as the question form before it does anything.
 - **The header has fixed rows.** French labels are longer than English ones, so at phone width the header wrapped
   onto an extra line with the fallback font and lost it when Satoshi and Plex swapped in — moving the whole page up
   41 px and costing every French page about eight Lighthouse performance points. The bar is now a grid with set row

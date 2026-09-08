@@ -13,9 +13,12 @@ interface Props {
   versions: VersionData;
   endpoint: string;
   supportEmail: string;
+  bookUrl: string;
+  pageName: string;
+  hubspot: { portalId: string; formGuid: string };
   id?: string;
 }
-const { copy, locale, versions, endpoint, supportEmail, id = 'audit' } = Astro.props;
+const { copy, locale, versions, endpoint, supportEmail, bookUrl, pageName, hubspot, id = 'audit' } = Astro.props;
 
 // Bilingual by law, and a finding with no wording is a blank line in front of a client: fail the build instead.
 const missingFindings = FINDING_IDS.filter((f) => !copy.findings[f]);
@@ -27,7 +30,7 @@ if (missingFindings.length || missingErrors.length) {
 const strip = <T,>(v: T): T => (v && typeof v === 'object' && !Array.isArray(v)
   ? Object.fromEntries(Object.entries(v as Record<string, unknown>).filter(([k]) => !k.startsWith('_')).map(([k, x]) => [k, strip(x)])) as T
   : v);
-const config = { locale, copy: strip(copy), versions, endpoint, supportEmail };
+const config = { locale, copy: strip(copy), versions, endpoint, supportEmail, bookUrl, pageName, hubspot };
 ---
 <section class="section audit" id={id} aria-labelledby={`${id}-h`} data-audit-panel data-config={JSON.stringify(config)}>
   <div class="wrap wrap-narrow">
@@ -90,10 +93,27 @@ const config = { locale, copy: strip(copy), versions, endpoint, supportEmail };
   [data-audit-panel] .finding[data-severity="good"] .sev { background: var(--color-confirm); }
   [data-audit-panel] .f-title { font-weight: 600; color: var(--color-heading); }
   [data-audit-panel] .f-detail { margin-top: 0.2rem; font-size: var(--step--1); }
+  [data-audit-panel] .counts { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); list-style: none; padding: 0; margin-top: var(--space-2); font-family: var(--font-mono); font-size: var(--step-mono); letter-spacing: 0.04em; color: var(--color-meta); }
+  [data-audit-panel] .counts li { display: flex; align-items: center; gap: 0.4rem; max-width: none; }
+  [data-audit-panel] .counts li::before { content: ""; width: 0.6rem; height: 0.6rem; flex: none; background: var(--color-rule); }
+  [data-audit-panel] .counts li[data-severity="critical"]::before { background: var(--color-accent); }
+  [data-audit-panel] .counts li[data-severity="warning"]::before { background: var(--color-leader); }
+  [data-audit-panel] .counts li[data-severity="good"]::before { background: var(--color-confirm); }
+  [data-audit-panel] .nothing-urgent { margin-top: var(--space-3); font-weight: 600; }
+  [data-audit-panel] .more-line { margin-top: var(--space-3); font-size: var(--step--1); color: var(--color-meta); }
   [data-audit-panel] .rec { margin-top: var(--space-4); padding: var(--space-3); background: var(--color-bg); border: var(--border); box-shadow: var(--shadow-4); }
+  [data-audit-panel] .rec-label { margin-bottom: var(--space-1); letter-spacing: 0.08em; text-transform: uppercase; }
   [data-audit-panel] .rec h4 { font-size: var(--step-2); }
   [data-audit-panel] .rec p { margin-top: var(--space-1); }
-  [data-audit-panel] .rec .actions { margin-top: var(--space-3); }
+  [data-audit-panel] .rec .actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-3); }
+  [data-audit-panel] .gate-form { margin-top: var(--space-3); max-width: 30rem; }
+  [data-audit-panel] .gate-form .actions { margin-top: var(--space-3); }
+  [data-audit-panel] .gate .intro { margin-top: var(--space-2); }
+  [data-audit-panel] .hint { font-size: var(--step--1); color: var(--color-meta); margin-top: 0.35rem; }
+  [data-audit-panel] .purpose { margin-top: var(--space-2); letter-spacing: 0.02em; }
+  [data-audit-panel] .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  [data-audit-panel] .sent .report-h::after { content: "."; color: var(--color-accent); }
+  [data-audit-panel] .sent .actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
   [data-audit-panel] .again { margin-top: var(--space-3); }
   [data-audit-panel] .linkish { background: none; border: 0; padding: 0.25em 0; color: var(--color-heading); text-decoration: underline; text-underline-offset: 0.15em; font-size: var(--step--1); font-weight: 600; cursor: pointer; }
 </style>
