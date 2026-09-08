@@ -47,17 +47,17 @@ try {
 
   // Business flow, with multi-select and back
   await pick(page, 'A website for my business');
-  check('step 2 asks platform', (await question(page)).includes('platform'));
+  check('step 2 asks platform', (await question(page)).includes('built on'));
   check('progress updated', (await page.textContent('[data-quote-stage] .progress')).includes('Question 2 of 8'));
   await pick(page, 'WordPress');
   check('step 3 asks build approach for WordPress', (await question(page)).includes('build'));
   await page.click('[data-quote-stage] button.linkish', { timeout: 2000 }); // Previous question
   await page.waitForTimeout(220);
-  check('back returns to platform', (await question(page)).includes('platform'));
-  await pick(page, 'Fully custom');
+  check('back returns to platform', (await question(page)).includes('built on'));
+  await pick(page, 'Fully custom code');
   check('fully custom skips build approach', (await question(page)).includes('design'));
   check('total steps back to 8 without build approach', (await page.textContent('[data-quote-stage] .progress')).includes('of 8'));
-  await pick(page, 'inspiration');
+  await pick(page, 'examples');
   await pick(page, 'English and French');
   check('integrations is multi-select', (await page.locator('[data-quote-stage] input[type=checkbox]').count()) === 7);
   await page.check('[data-quote-stage] input[value="crm"]');
@@ -71,7 +71,7 @@ try {
   check('after integrations asks pages', (await question(page)).includes('pages'));
   await pick(page, '6 to 10');
   await pick(page, 'Maybe later');
-  check('timeline is last', (await question(page)).includes('timeline'));
+  check('timeline is last', (await question(page)).includes('How soon'));
   // keyboard: Enter on a focused option
   await page.focus('[data-quote-stage] button.opt >> nth=1');
   await page.keyboard.press('Enter');
@@ -126,7 +126,7 @@ try {
   check('start over returns to question 1', (await page.textContent('[data-quote-stage] .progress')).includes('Question 1'));
 
   // Every project type reaches a result with first options
-  for (const type of ['A blog', 'A landing page', 'An online store', 'A redesign', 'Changes to my current site', 'A custom app']) {
+  for (const type of ['A blog', 'One page to promote', 'An online store', 'A new look for my current site', 'Changes or fixes', 'Something custom']) {
     await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
     await page.evaluate(() => sessionStorage.clear());
     await page.reload({ waitUntil: 'networkidle' });
@@ -134,13 +134,13 @@ try {
     let guard = 0;
     while (guard++ < 12) {
       const q = await question(page);
-      if (q.includes('ballpark') || q.includes('discovery')) break;
+      if (q.includes('ballpark') || q.includes('planning')) break;
       const multi = await page.locator('[data-quote-stage] input[type=checkbox]').count();
       if (multi) { await page.locator('[data-quote-stage] input[type=checkbox]').first().check(); await page.locator('[data-quote-stage] button.btn').first().click(); await page.waitForTimeout(220); }
       else await page.locator('[data-quote-stage] button.opt').first().click().then(() => page.waitForTimeout(220));
     }
     const q = await question(page);
-    check(`flow "${type}" reaches a result`, q.includes('ballpark') || q.includes('discovery'), q);
+    check(`flow "${type}" reaches a result`, q.includes('ballpark') || q.includes('planning'), q);
   }
   check('custom flow shows discovery, no build price', (await page.textContent('[data-quote-stage]')).includes('$375') && !(await page.textContent('[data-quote-stage]')).includes('Price range'));
 
@@ -159,7 +159,7 @@ try {
   check('fr first question in French', (await question(page)).includes('bâtir'));
   await page.locator('[data-quote-stage] button.opt', { hasText: 'Une boutique en ligne' }).click();
   await page.waitForTimeout(220);
-  check('fr step 2 in French', (await question(page)).includes('plateforme'));
+  check('fr step 2 in French', (await question(page)).includes('bâti'));
   check('fr switch to EN links /', (await page.getAttribute('header a[data-lang-switch="en"]', 'href')) === '/');
 
   // guide hreflang + CTA to quote

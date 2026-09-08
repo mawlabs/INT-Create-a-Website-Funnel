@@ -98,112 +98,135 @@
         "_review": true,
         "projectType": {
           "q": "Qu'est-ce que vous voulez bâtir?",
-          "hint": "Choisissez une option. Quelques questions de plus et on vous donne un prix.",
+          "hint": "Choisissez ce qui s'en rapproche le plus. Quelques questions de plus et on vous donne un prix.",
           "options": {
             "business": "Un site web pour mon entreprise",
             "blog": "Un blogue ou un site de nouvelles",
-            "landing": "Une page d'atterrissage",
+            "landing": "Une seule page pour promouvoir une chose",
             "ecommerce": "Une boutique en ligne",
-            "redesign": "Une refonte de mon site actuel",
-            "changes": "Des modifications à mon site actuel",
-            "custom": "Une application, un outil ou une intégration IA sur mesure"
+            "redesign": "Un nouveau look pour mon site actuel",
+            "changes": "Des modifications ou des corrections à mon site actuel",
+            "custom": "Quelque chose de sur mesure : une application, un outil ou une fonction IA"
           }
         },
         "platform": {
-          "q": "Quelle plateforme voulez-vous utiliser?",
+          "q": "Sur quoi devrait-il être bâti?",
           "options": {
             "wordpress": "WordPress",
             "shopify": "Shopify",
             "woocommerce": "WooCommerce",
             "fullyCustom": "Code entièrement sur mesure",
-            "other": "Autre, ou je ne sais pas"
+            "other": "Pas sûr, ou autre chose"
+          },
+          "hint": "Pas sûr? Choisissez cette option et on vous fera une recommandation.",
+          "desc": {
+            "wordpress": "Le choix le plus courant pour un site d'entreprise. Vous pouvez le modifier vous-même.",
+            "shopify": "La façon la plus simple de tenir une boutique.",
+            "woocommerce": "Une boutique bâtie sur WordPress. Plus de contrôle, plus d'entretien.",
+            "fullyCustom": "Bâti de zéro, sans gabarit. Pour les sites qui ont besoin de quelque chose qu'aucune plateforme n'offre.",
+            "other": "On vous recommandera celle qui convient."
           }
         },
         "currentPlatform": {
-          "q": "Sur quelle plateforme est votre site actuel?",
+          "q": "Sur quoi votre site actuel est-il bâti?",
           "options": {
             "wordpress": "WordPress",
             "shopify": "Shopify",
             "woocommerce": "WooCommerce",
-            "other": "Autre, ou je ne sais pas"
-          }
+            "other": "Pas sûr, ou autre chose"
+          },
+          "hint": "C'est correct si vous ne le savez pas."
         },
         "approach": {
-          "q": "Quel type de développement convient le mieux?",
+          "q": "À quel point la construction doit-elle être sur mesure?",
           "options": {
-            "builder": "Avec un constructeur (Elementor, composants ACF)",
-            "customTheme": "Thème codé sur mesure",
-            "themeStore": "Boutique sur un thème",
+            "builder": "Bâti avec un constructeur de pages",
+            "customTheme": "Design codé sur mesure",
+            "themeStore": "Boutique sur un thème prêt à l'emploi",
             "customizedStore": "Boutique personnalisée",
             "customCodedStore": "Boutique codée sur mesure",
-            "refresh": "Rafraîchissement visuel, même structure",
-            "fullRedesign": "Refonte complète, nouvelle structure",
-            "migration": "Refonte et changement de plateforme"
+            "refresh": "Nouveau look, mêmes pages",
+            "fullRedesign": "Nouveau look et nouvelle structure",
+            "migration": "Nouveau look sur une nouvelle plateforme"
+          },
+          "desc": {
+            "builder": "Des blocs standards, mis à vos couleurs. Le plus rapide et le moins cher.",
+            "customTheme": "Chaque page conçue et codée pour vous.",
+            "themeStore": "Un thème acheté, mis à vos couleurs.",
+            "customizedStore": "Un thème, plus des gabarits et des fonctions sur mesure.",
+            "customCodedStore": "Bâtie de zéro, pour un passage à la caisse complexe ou des fonctions particulières.",
+            "refresh": "On garde les pages et le contenu, on refait l'apparence.",
+            "fullRedesign": "On repense les pages et le contenu, pas seulement le look.",
+            "migration": "On déplace le site sur une autre plateforme et on le rebâtit là."
           }
         },
         "design": {
-          "q": "Avez-vous un design ou des inspirations à partager?",
+          "q": "Avez-vous déjà un design?",
           "options": {
-            "ready": "Oui, j'ai un design prêt",
-            "inspiration": "J'ai des inspirations et des exemples",
-            "scratch": "Non, il me faut le design de A à Z"
+            "ready": "Oui, un design terminé",
+            "inspiration": "Des exemples que j'aime",
+            "scratch": "Non, on part de zéro"
           }
         },
         "multilingual": {
-          "q": "Le site doit-il être en plus d'une langue?",
+          "q": "Quelles langues?",
           "options": {
-            "bilingual": "Oui, français et anglais",
-            "multi": "Oui, plusieurs langues",
-            "single": "Non, une seule langue"
+            "bilingual": "Français et anglais",
+            "multi": "Trois langues ou plus",
+            "single": "Une seule langue"
           }
         },
         "integrations": {
-          "q": "À quoi le site doit-il se connecter?",
+          "q": "À quoi doit-il se connecter?",
           "options": {
-            "analytics": "Statistiques",
-            "crm": "CRM",
-            "newsletter": "Infolettre",
+            "analytics": "Statistiques de visites (Google Analytics)",
+            "crm": "Une liste de clients ou un CRM (HubSpot et compagnie)",
+            "newsletter": "Un outil d'infolettre (Mailchimp et compagnie)",
             "liveChat": "Clavardage en direct",
-            "booking": "Réservations",
+            "booking": "Réservations en ligne",
             "other": "Autre chose",
             "none": "Rien pour l'instant"
-          }
+          },
+          "hint": "Cochez tout ce qui s'applique, ou rien pour l'instant."
         },
         "shopIntegrations": {
           "q": "À quoi la boutique doit-elle se connecter?",
           "options": {
-            "payments": "Passerelle de paiement",
-            "shipping": "Livraison et expédition",
-            "subscriptions": "Abonnements",
-            "reviews": "Avis clients",
-            "marketing": "Marketing par courriel ou texto",
+            "payments": "Paiements (Stripe, PayPal et compagnie)",
+            "shipping": "Tarifs de livraison et expédition",
+            "subscriptions": "Abonnements ou commandes récurrentes",
+            "reviews": "Avis de clients",
+            "marketing": "Marketing par courriel ou par texto",
             "other": "Autre chose",
             "none": "Rien pour l'instant"
-          }
+          },
+          "hint": "Cochez tout ce qui s'applique, ou rien pour l'instant."
         },
         "newIntegrations": {
-          "q": "Ajouterez-vous de nouvelles intégrations?",
+          "q": "Quelque chose de nouveau à connecter?",
           "options": {
-            "analytics": "Statistiques",
-            "crm": "CRM",
-            "newsletter": "Infolettre",
+            "analytics": "Statistiques de visites (Google Analytics)",
+            "crm": "Une liste de clients ou un CRM (HubSpot et compagnie)",
+            "newsletter": "Un outil d'infolettre (Mailchimp et compagnie)",
             "liveChat": "Clavardage en direct",
-            "booking": "Réservations",
+            "booking": "Réservations en ligne",
             "other": "Autre chose",
-            "none": "Pas de nouvelle intégration"
-          }
+            "none": "Non, rien de nouveau"
+          },
+          "hint": "Cochez tout ce qui s'applique."
         },
         "pages": {
-          "q": "Combien de pages vous faut-il?",
+          "q": "Environ combien de pages?",
           "options": {
             "p1_5": "1 à 5 pages",
             "p6_10": "6 à 10 pages",
             "p11_20": "11 à 20 pages",
             "p20plus": "Plus de 20 pages"
-          }
+          },
+          "hint": "Accueil, à propos, services, contact : chacune compte."
         },
         "blog": {
-          "q": "Avez-vous besoin d'un blogue?",
+          "q": "Publierez-vous des articles ou des nouvelles?",
           "options": {
             "yes": "Oui",
             "no": "Non",
@@ -211,7 +234,7 @@
           }
         },
         "categories": {
-          "q": "Combien de catégories ou de sections vous faut-il?",
+          "q": "Combien de sections ou de sujets?",
           "options": {
             "c1_3": "1 à 3",
             "c4_8": "4 à 8",
@@ -219,15 +242,15 @@
           }
         },
         "templates": {
-          "q": "Vous faut-il des gabarits différents selon le type d'article?",
+          "q": "Des types d'articles différents auront-ils besoin de mises en page différentes?",
           "options": {
-            "multi": "Oui, plusieurs gabarits",
-            "one": "Non, un seul suffit",
+            "multi": "Oui, quelques mises en page",
+            "one": "Non, une seule suffit",
             "unsure": "Pas encore sûr"
           }
         },
         "affiliate": {
-          "q": "Le blogue servira-t-il au marketing d'affiliation?",
+          "q": "Gagnerez-vous de l'argent avec des liens vers des produits (liens d'affiliation)?",
           "options": {
             "yes": "Oui",
             "no": "Non",
@@ -235,7 +258,7 @@
           }
         },
         "products": {
-          "q": "Environ combien de produits aurez-vous?",
+          "q": "Environ combien de produits?",
           "options": {
             "under50": "Moins de 50",
             "p50_200": "50 à 200",
@@ -244,23 +267,23 @@
           }
         },
         "productHelp": {
-          "q": "Aurez-vous besoin d'aide pour ajouter les produits?",
+          "q": "Qui ajoute les produits à la boutique?",
           "options": {
-            "full": "Oui, tous les produits",
-            "few": "Juste quelques produits",
-            "none": "Non, je m'en occupe"
+            "full": "Vous, tous les produits",
+            "few": "J'en ajoute quelques-uns, vous faites le reste",
+            "none": "Je m'en occupe moi-même"
           }
         },
         "international": {
-          "q": "Vendrez-vous à l'international?",
+          "q": "Où livrerez-vous?",
           "options": {
-            "multi": "Oui, plusieurs pays",
-            "caUs": "Canada et États-Unis",
-            "local": "Non, local seulement"
+            "multi": "Dans plusieurs pays",
+            "caUs": "Au Canada et aux États-Unis",
+            "local": "Au Canada seulement"
           }
         },
         "morePages": {
-          "q": "Ajouterez-vous des pages?",
+          "q": "Le nouveau site aura-t-il plus de pages?",
           "options": {
             "few": "Oui, quelques-unes",
             "many": "Oui, beaucoup",
@@ -268,15 +291,16 @@
           }
         },
         "changeTypes": {
-          "q": "Quel genre de modifications vous faut-il?",
+          "q": "Qu'est-ce qui doit changer?",
           "options": {
             "features": "Ajouter des fonctionnalités",
-            "design": "Mettre à jour le design ou la mise en page",
-            "fixes": "Corriger des problèmes ou des bogues",
-            "content": "Mises à jour de contenu",
-            "performance": "Vitesse et performance",
+            "design": "Le look ou la mise en page",
+            "fixes": "Des choses qui ne fonctionnent pas",
+            "content": "Textes, images ou prix",
+            "performance": "La vitesse",
             "other": "Autre chose"
-          }
+          },
+          "hint": "Cochez tout ce qui s'applique."
         },
         "users": {
           "q": "Qui va l'utiliser?",
@@ -288,12 +312,12 @@
           }
         },
         "timeline": {
-          "q": "Et votre échéancier?",
-          "hint": "Un travail urgent, c'est du vrai travail : ça coûte de 20 à 30 pour cent de plus.",
+          "q": "Pour quand vous le faut-il?",
+          "hint": "Un travail urgent coûte de 20 à 30 pour cent de plus.",
           "options": {
             "standard": "L'échéancier habituel me convient",
-            "rush": "J'en ai besoin rapidement",
-            "flexible": "Ça peut prendre plus de temps au besoin"
+            "rush": "Le plus vite possible (ça coûte plus cher)",
+            "flexible": "Pas pressé"
           }
         }
       },
@@ -324,10 +348,10 @@
         },
         "guarantee": "C'est une approximation. Angelique confirme le montant exact avec vous, et la soumission finale ne dépassera pas cette fourchette.",
         "_todo_promise": "TODO(angelique): confirmer la promesse « la soumission finale ne dépassera pas la fourchette » sur une page publique (brief §13 #6)",
-        "taxes": "Dollars canadiens. Taxes en sus.",
+        "taxes": "En dollars canadiens, avant taxes.",
         "discovery": {
-          "heading": "Le sur mesure commence par une phase de découverte",
-          "text": "Les applications, outils et intégrations IA sur mesure sont cadrés dans une phase de découverte payante : {price} ({hours} heures) pour un plan complet et une feuille de route. La soumission pour le développement vient ensuite, à partir de ce plan.",
+          "heading": "Le sur mesure commence par une phase de planification",
+          "text": "Les applications, outils et fonctions IA sur mesure commencent par une phase de planification payante (on l'appelle la découverte) : {price} pour {hours} heures de travail qui se terminent par un plan complet et une feuille de route. La soumission pour le développement vient ensuite, à partir de ce plan.",
           "cta": "Réserver un appel découverte",
           "or": "ou",
           "send": "Envoyez-moi les détails"
@@ -385,43 +409,41 @@
     },
     "board": {
       "_review": true,
-      "label": "Le menu",
       "h2": "Ce que ça coûte.",
       "intro": "Les fourchettes derrière l'outil de soumission, en dollars canadiens à {rate} l'heure. La plupart des agences ne les publient pas. On pense que vous devriez les voir avant de parler à qui que ce soit.",
       "_todo_rate": "TODO(angelique): confirmer la publication du taux horaire (brief §5.4)",
-      "stamp": "taxes en sus — évidemment",
       "groups": {
         "_review": true,
         "websites": {
           "title": "Sites web — WordPress",
           "tiers": {
-            "basic": "De base, 5 à 10 pages, design à partir de composants",
-            "intermediate": "Intermédiaire, fonctions personnalisées et CMS",
-            "custom": "Entièrement sur mesure, découverte et intégrations complexes"
+            "basic": "De base : 5 à 10 pages, conçues à partir de blocs standards",
+            "intermediate": "Intermédiaire : fonctions sur mesure et contenu modifiable",
+            "custom": "Entièrement sur mesure : phase de planification, connexions complexes, fonctions avancées"
           }
         },
         "landing": {
           "title": "Pages d'atterrissage",
           "tiers": {
-            "builder": "Avec un constructeur",
-            "customTheme": "Codée sur mesure",
+            "builder": "Bâtie avec un constructeur de pages",
+            "customTheme": "Design codé sur mesure",
             "custom": "Code entièrement sur mesure"
           }
         },
         "shopify": {
           "title": "Boutiques en ligne — Shopify",
           "tiers": {
-            "basic": "De base, thème acheté, jusqu'à 50 produits",
-            "intermediate": "Intermédiaire, gabarits personnalisés",
-            "custom": "Thème et passage à la caisse entièrement sur mesure"
+            "basic": "De base : thème prêt à l'emploi, jusqu'à 50 produits",
+            "intermediate": "Intermédiaire : gabarits et fonctions sur mesure",
+            "custom": "Entièrement sur mesure : votre propre thème et passage à la caisse"
           }
         },
         "woocommerce": {
           "title": "Boutiques en ligne — WooCommerce",
           "tiers": {
-            "basic": "De base, WooCommerce standard, jusqu'à 50 produits",
-            "intermediate": "Intermédiaire, types de produits et caisse personnalisés",
-            "custom": "Entièrement sur mesure, B2B, abonnements, ERP"
+            "basic": "De base : boutique standard, jusqu'à 50 produits",
+            "intermediate": "Intermédiaire : types de produits et caisse sur mesure",
+            "custom": "Entièrement sur mesure : vente en gros, abonnements, systèmes d'entreprise"
           }
         },
         "redesign": {
@@ -439,10 +461,10 @@
           }
         },
         "custom": {
-          "title": "Applications, outils, IA sur mesure",
+          "title": "Applications, outils et fonctions IA sur mesure",
           "tiers": {
-            "discovery": "Phase de découverte, plan et feuille de route",
-            "build": "Le développement"
+            "discovery": "Phase de planification : un plan complet et une feuille de route",
+            "build": "Le développement lui-même"
           }
         },
         "maintenance": {
@@ -455,7 +477,7 @@
           }
         }
       },
-      "quotedLater": "soumission après la découverte",
+      "quotedLater": "soumission après la phase de planification",
       "line": "Si votre projet sort de ces fourchettes, la soumission le dira, avec le pourquoi.",
       "cta": "Obtenir ma soumission"
     },
@@ -491,7 +513,7 @@
       "items": [
         {
           "q": "Comment la soumission est-elle calculée?",
-          "a": "Avec le même cadre que notre studio utilise : un niveau de base pour votre type de site, puis des heures ajoutées pour les pages, les langues, les produits et les intégrations, à {rate} l'heure. Le clavardage sur monkeysat.work fonctionne avec les mêmes chiffres : vous y obtiendrez la même réponse."
+          "a": "Avec la même méthode que notre studio utilise pour chaque client : un prix de base pour votre type de site, puis des heures ajoutées pour les pages, les langues, les produits et tout ce qui doit se connecter, à {rate} l'heure. Le clavardage sur monkeysat.work utilise les mêmes chiffres : vous y obtiendriez la même réponse."
         },
         {
           "q": "La soumission est-elle ferme?",
@@ -517,7 +539,7 @@
         },
         {
           "q": "Qu'est-ce qui n'est pas dans la fourchette?",
-          "a": "La photographie, la rédaction de A à Z, les extensions et applications payantes, l'hébergement, le nom de domaine et les taxes. Votre soumission liste ce qui est inclus, pour que rien n'apparaisse plus tard."
+          "a": "La photographie, la rédaction de vos textes de zéro, les extensions et applications payantes, l'hébergement, votre nom de domaine et les taxes. Votre soumission liste ce qui est inclus, pour que rien n'apparaisse plus tard."
         },
         {
           "q": "Que se passe-t-il après le lancement?",
@@ -533,7 +555,6 @@
     "form": {
       "_review": true,
       "h2": "Une question avant de commencer?",
-      "badge": "pas de robots ici",
       "intro": "Posez-la ici et une personne vous répond par courriel dans un délai d'un jour ouvrable, en français ou en anglais. Pas d'appel, sauf si vous en demandez un.",
       "_todo_replyTime": "TODO(angelique): confirmer la promesse de délai de réponse (brief §5.8)",
       "name": "votre nom",

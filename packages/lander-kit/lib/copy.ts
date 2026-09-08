@@ -50,6 +50,8 @@ export interface StepCopy extends Reviewable {
   q: string;
   hint?: string;
   options: Record<string, string>;
+  /** Optional plain-language line under an option, for terms a shop owner may not know. */
+  desc?: Record<string, string>;
 }
 
 export interface QuoteCopy extends Reviewable {
@@ -105,10 +107,8 @@ export interface BoardGroupCopy extends Reviewable {
 }
 
 export interface BoardCopy extends Reviewable {
-  label: string;
   h2: string;
   intro: string;
-  stamp: string;
   groups: Record<string, BoardGroupCopy>;
   quotedLater: string;
   line: string;
@@ -130,7 +130,6 @@ export interface FaqCopy extends Reviewable { h2: string; items: FaqItemCopy[]; 
 
 export interface FormCopy extends Reviewable {
   h2: string;
-  badge: string;
   intro: string;
   name: string;
   email: string;

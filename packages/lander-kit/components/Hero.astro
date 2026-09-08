@@ -118,6 +118,8 @@ if (missing.length) throw new Error(`quote copy (${locale}) is missing option la
   [data-quote-panel] .opt:focus-visible, [data-quote-panel] .opt:has(input:focus-visible) { outline: 2px solid var(--color-focus-on-dark); outline-offset: 2px; }
   [data-quote-panel] .opt[aria-pressed="true"] { border-color: var(--color-accent); background: rgba(231, 111, 81, 0.18); }
   [data-quote-panel] .opt[aria-pressed="true"] .opt-dot { background: var(--color-accent); border-color: var(--color-accent); }
+  [data-quote-panel] .opt-text { display: grid; gap: 0.15rem; }
+  [data-quote-panel] .opt-desc { font-weight: 400; font-size: var(--step--1); color: var(--color-meta-on-dark); line-height: 1.35; }
   [data-quote-panel] .opt-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; border: 1.5px solid var(--color-rule-on-dark); }
   [data-quote-panel] label.opt { justify-content: flex-start; }
   [data-quote-panel] label.opt input { width: 1.1rem; height: 1.1rem; margin: 0; flex: none; accent-color: var(--maw-deep-warmth); }

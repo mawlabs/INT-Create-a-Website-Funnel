@@ -127,7 +127,7 @@ export function mountQuotePanel(root: HTMLElement): void {
           if (opt === 'none' && input.checked) group.querySelectorAll<HTMLInputElement>('input:not([value="none"])').forEach((i) => { i.checked = false; });
           if (opt !== 'none' && input.checked) { const none = group.querySelector<HTMLInputElement>('input[value="none"]'); if (none) none.checked = false; }
         });
-        const lab = h('label', { class: 'opt', for: id }, input, h('span', { text: copyStep.options[opt] }));
+        const lab = h('label', { class: 'opt', for: id }, input, optText(copyStep, opt));
         group.append(lab);
       }
       nodes.push(group);
@@ -141,7 +141,7 @@ export function mountQuotePanel(root: HTMLElement): void {
     } else {
       for (const opt of step.options) {
         const btn = h('button', { type: 'button', class: 'opt', 'aria-pressed': current === opt ? 'true' : 'false' });
-        btn.append(h('span', { text: copyStep.options[opt] }), h('span', { class: 'opt-dot', 'aria-hidden': 'true' }));
+        btn.append(optText(copyStep, opt), h('span', { class: 'opt-dot', 'aria-hidden': 'true' }));
         btn.addEventListener('click', () => { btn.setAttribute('aria-pressed', 'true'); answer(step, opt); });
         group.append(btn);
       }
@@ -149,6 +149,13 @@ export function mountQuotePanel(root: HTMLElement): void {
       if (index > 0) nodes.push(h('div', { class: 'actions' }, backButton(index)));
     }
     return nodes;
+  };
+
+  const optText = (copyStep: QuoteCopy['steps'][string], opt: string) => {
+    const wrap = h('span', { class: 'opt-text' }, h('span', { class: 'opt-label', text: copyStep.options[opt] }));
+    const desc = copyStep.desc?.[opt];
+    if (desc) wrap.append(h('span', { class: 'opt-desc', text: desc }));
+    return wrap;
   };
 
   const backButton = (index: number) => {

@@ -87,112 +87,135 @@
       "steps": {
         "projectType": {
           "q": "What are you building?",
-          "hint": "Pick one. A few more questions and we'll price it.",
+          "hint": "Pick the closest one. A few more questions and we'll price it.",
           "options": {
             "business": "A website for my business",
             "blog": "A blog or news site",
-            "landing": "A landing page",
+            "landing": "One page to promote one thing",
             "ecommerce": "An online store",
-            "redesign": "A redesign of my current site",
-            "changes": "Changes to my current site",
-            "custom": "A custom app, tool or AI integration"
+            "redesign": "A new look for my current site",
+            "changes": "Changes or fixes to my current site",
+            "custom": "Something custom: an app, a tool or an AI feature"
           }
         },
         "platform": {
-          "q": "What platform would you like to use?",
+          "q": "What should it be built on?",
           "options": {
             "wordpress": "WordPress",
             "shopify": "Shopify",
             "woocommerce": "WooCommerce",
             "fullyCustom": "Fully custom code",
-            "other": "Other, or not sure"
+            "other": "Not sure, or something else"
+          },
+          "hint": "Not sure? Pick that and we'll recommend one.",
+          "desc": {
+            "wordpress": "The most common choice for business sites. You can edit it yourself.",
+            "shopify": "The simplest way to run a store.",
+            "woocommerce": "A store built on WordPress. More control, more to look after.",
+            "fullyCustom": "Built from scratch, no template. For sites that need something no platform does.",
+            "other": "We'll recommend the one that fits."
           }
         },
         "currentPlatform": {
-          "q": "What platform is your current site on?",
+          "q": "What is your current site built on?",
           "options": {
             "wordpress": "WordPress",
             "shopify": "Shopify",
             "woocommerce": "WooCommerce",
-            "other": "Other, or I don't know"
-          }
+            "other": "Not sure, or something else"
+          },
+          "hint": "It's fine if you don't know."
         },
         "approach": {
-          "q": "What kind of build fits best?",
+          "q": "How custom should the build be?",
           "options": {
-            "builder": "Builder-based (Elementor, ACF components)",
-            "customTheme": "Custom-coded theme",
-            "themeStore": "Theme-based store",
+            "builder": "Built with a page builder",
+            "customTheme": "Custom-coded design",
+            "themeStore": "Store on a ready-made theme",
             "customizedStore": "Customized store",
             "customCodedStore": "Custom-coded store",
-            "refresh": "Visual refresh, same structure",
-            "fullRedesign": "Full redesign, new structure",
-            "migration": "Redesign and move to a new platform"
+            "refresh": "New look, same pages",
+            "fullRedesign": "New look and new structure",
+            "migration": "New look on a new platform"
+          },
+          "desc": {
+            "builder": "Standard building blocks, styled to your brand. Fastest and cheapest.",
+            "customTheme": "Every page designed and coded for you.",
+            "themeStore": "A purchased theme, styled to your brand.",
+            "customizedStore": "A theme, plus custom templates and features.",
+            "customCodedStore": "Built from scratch, for complex checkouts or special features.",
+            "refresh": "Keep the pages and content, redesign how it looks.",
+            "fullRedesign": "Rethink the pages and the content, not only the look.",
+            "migration": "Move the site to a different platform and rebuild it there."
           }
         },
         "design": {
-          "q": "Do you have a design or inspiration to share?",
+          "q": "Do you already have a design?",
           "options": {
-            "ready": "Yes, I have a design ready",
-            "inspiration": "I have some inspiration and examples",
-            "scratch": "No, I need the design from scratch"
+            "ready": "Yes, a finished design",
+            "inspiration": "Some examples I like",
+            "scratch": "No, start from scratch"
           }
         },
         "multilingual": {
-          "q": "Will the site need to be in more than one language?",
+          "q": "Which languages?",
           "options": {
-            "bilingual": "Yes, English and French",
-            "multi": "Yes, several languages",
-            "single": "No, one language"
+            "bilingual": "English and French",
+            "multi": "Three or more languages",
+            "single": "One language"
           }
         },
         "integrations": {
-          "q": "What will it need to connect to?",
+          "q": "What does it need to connect to?",
           "options": {
-            "analytics": "Analytics",
-            "crm": "CRM",
-            "newsletter": "Email newsletter",
+            "analytics": "Visitor statistics (Google Analytics)",
+            "crm": "A customer list or CRM (HubSpot and the like)",
+            "newsletter": "An email newsletter tool (Mailchimp and the like)",
             "liveChat": "Live chat",
-            "booking": "Booking or reservations",
+            "booking": "Online booking or reservations",
             "other": "Something else",
             "none": "Nothing for now"
-          }
+          },
+          "hint": "Pick everything that applies, or nothing for now."
         },
         "shopIntegrations": {
-          "q": "What will the store need to connect to?",
+          "q": "What does the store need to connect to?",
           "options": {
-            "payments": "Payment gateway",
-            "shipping": "Shipping and fulfillment",
-            "subscriptions": "Subscriptions",
-            "reviews": "Reviews",
-            "marketing": "Email or SMS marketing",
+            "payments": "Payments (Stripe, PayPal and the like)",
+            "shipping": "Shipping rates and fulfillment",
+            "subscriptions": "Subscriptions or recurring orders",
+            "reviews": "Customer reviews",
+            "marketing": "Email or text-message marketing",
             "other": "Something else",
             "none": "Nothing for now"
-          }
+          },
+          "hint": "Pick everything that applies, or nothing for now."
         },
         "newIntegrations": {
-          "q": "Will you be adding new integrations?",
+          "q": "Anything new it should connect to?",
           "options": {
-            "analytics": "Analytics",
-            "crm": "CRM",
-            "newsletter": "Email newsletter",
+            "analytics": "Visitor statistics (Google Analytics)",
+            "crm": "A customer list or CRM (HubSpot and the like)",
+            "newsletter": "An email newsletter tool (Mailchimp and the like)",
             "liveChat": "Live chat",
-            "booking": "Booking or reservations",
+            "booking": "Online booking or reservations",
             "other": "Something else",
-            "none": "No new integrations"
-          }
+            "none": "No, nothing new"
+          },
+          "hint": "Pick everything that applies."
         },
         "pages": {
-          "q": "How many pages do you need?",
+          "q": "About how many pages?",
           "options": {
             "p1_5": "1 to 5 pages",
             "p6_10": "6 to 10 pages",
             "p11_20": "11 to 20 pages",
             "p20plus": "More than 20 pages"
-          }
+          },
+          "hint": "Home, about, services, contact: each one counts."
         },
         "blog": {
-          "q": "Do you need a blog?",
+          "q": "Will you publish articles or news?",
           "options": {
             "yes": "Yes",
             "no": "No",
@@ -200,7 +223,7 @@
           }
         },
         "categories": {
-          "q": "How many categories or sections will you need?",
+          "q": "How many sections or topics?",
           "options": {
             "c1_3": "1 to 3",
             "c4_8": "4 to 8",
@@ -208,15 +231,15 @@
           }
         },
         "templates": {
-          "q": "Will you need different templates for different article types?",
+          "q": "Will different kinds of articles need different layouts?",
           "options": {
-            "multi": "Yes, several templates",
-            "one": "No, one template is fine",
+            "multi": "Yes, a few layouts",
+            "one": "No, one layout works",
             "unsure": "Not sure yet"
           }
         },
         "affiliate": {
-          "q": "Will the blog be used for affiliate marketing?",
+          "q": "Will you earn money from product links (affiliate links)?",
           "options": {
             "yes": "Yes",
             "no": "No",
@@ -224,7 +247,7 @@
           }
         },
         "products": {
-          "q": "Roughly how many products will you have?",
+          "q": "About how many products?",
           "options": {
             "under50": "Under 50",
             "p50_200": "50 to 200",
@@ -233,23 +256,23 @@
           }
         },
         "productHelp": {
-          "q": "Will you need help adding the products?",
+          "q": "Who adds the products to the store?",
           "options": {
-            "full": "Yes, full product setup",
-            "few": "Just a few products",
-            "none": "No, I'll handle it"
+            "full": "You do, all of them",
+            "few": "I add a few, you do the rest",
+            "none": "I'll do it myself"
           }
         },
         "international": {
-          "q": "Will you be selling internationally?",
+          "q": "Where will you ship?",
           "options": {
-            "multi": "Yes, several countries",
+            "multi": "Several countries",
             "caUs": "Canada and the US",
-            "local": "No, local only"
+            "local": "Canada only"
           }
         },
         "morePages": {
-          "q": "Will you be adding more pages?",
+          "q": "Will the new site have more pages?",
           "options": {
             "few": "Yes, a few more",
             "many": "Yes, a lot more",
@@ -257,18 +280,19 @@
           }
         },
         "changeTypes": {
-          "q": "What kind of changes do you need?",
+          "q": "What needs to change?",
           "options": {
             "features": "Add new features",
-            "design": "Update the design or layout",
-            "fixes": "Fix issues or bugs",
-            "content": "Content updates",
-            "performance": "Speed and performance",
+            "design": "The look or layout",
+            "fixes": "Things that are broken",
+            "content": "Text, images or prices",
+            "performance": "Speed",
             "other": "Something else"
-          }
+          },
+          "hint": "Pick everything that applies."
         },
         "users": {
-          "q": "Who will be using it?",
+          "q": "Who will use it?",
           "options": {
             "internal": "My team, internally",
             "customers": "My customers",
@@ -277,12 +301,12 @@
           }
         },
         "timeline": {
-          "q": "How's your timeline?",
-          "hint": "Rush work is real work, so it costs 20 to 30 percent more.",
+          "q": "How soon do you need it?",
+          "hint": "Rush work costs 20 to 30 percent more.",
           "options": {
-            "standard": "The usual timeline works",
-            "rush": "I need it on a rush",
-            "flexible": "It can take longer if needed"
+            "standard": "The usual timeline is fine",
+            "rush": "As soon as possible (costs more)",
+            "flexible": "No rush"
           }
         }
       },
@@ -312,10 +336,10 @@
         },
         "guarantee": "This is a ballpark. Angelique confirms the exact amount with you, and the final quote will not exceed this range.",
         "_todo_promise": "TODO(angelique): confirm the 'final quote won't exceed the range' promise on a public page (brief §13 #6)",
-        "taxes": "Canadian dollars. Taxes extra.",
+        "taxes": "In Canadian dollars, before tax.",
         "discovery": {
-          "heading": "Custom work starts with a discovery phase",
-          "text": "Custom apps, tools and AI integrations are scoped in a paid discovery phase: {price} ({hours} hours) for a full plan and roadmap. The build quote comes after, and it's based on that plan.",
+          "heading": "Custom work starts with a planning phase",
+          "text": "Custom apps, tools and AI features start with a paid planning phase (we call it discovery): {price} for {hours} hours of work that ends in a full plan and roadmap. The quote for the build itself comes after, based on that plan.",
           "cta": "Book a discovery call",
           "or": "or",
           "send": "Send me the details"
@@ -367,42 +391,40 @@
       }
     },
     "board": {
-      "label": "Le menu",
       "h2": "What things cost.",
       "intro": "The ranges behind the quote tool, in Canadian dollars at {rate} an hour. Most agencies won't publish these. We think you should see them before you talk to anyone.",
       "_todo_rate": "TODO(angelique): confirm publishing the hourly rate (brief §5.4)",
-      "stamp": "taxes extra — obviously",
       "groups": {
         "websites": {
           "title": "Websites — WordPress",
           "tiers": {
-            "basic": "Basic, 5–10 pages, design from components",
-            "intermediate": "Intermediate, custom functions and CMS",
-            "custom": "Fully custom, discovery and complex integrations"
+            "basic": "Basic: 5 to 10 pages, designed from standard building blocks",
+            "intermediate": "Intermediate: custom features and an editable content system",
+            "custom": "Fully custom: planning phase, complex connections, advanced features"
           }
         },
         "landing": {
           "title": "Landing pages",
           "tiers": {
-            "builder": "Builder-based",
-            "customTheme": "Custom-coded",
+            "builder": "Built with a page builder",
+            "customTheme": "Custom-coded design",
             "custom": "Fully custom code"
           }
         },
         "shopify": {
           "title": "Online stores — Shopify",
           "tiers": {
-            "basic": "Basic, purchased theme, up to 50 products",
-            "intermediate": "Intermediate, custom templates",
-            "custom": "Fully custom theme and checkout"
+            "basic": "Basic: ready-made theme, up to 50 products",
+            "intermediate": "Intermediate: custom templates and features",
+            "custom": "Fully custom: your own theme and checkout"
           }
         },
         "woocommerce": {
           "title": "Online stores — WooCommerce",
           "tiers": {
-            "basic": "Basic, standard WooCommerce, up to 50 products",
-            "intermediate": "Intermediate, custom product types and checkout",
-            "custom": "Fully custom, B2B, subscriptions, ERP"
+            "basic": "Basic: standard store, up to 50 products",
+            "intermediate": "Intermediate: custom product types and checkout",
+            "custom": "Fully custom: wholesale, subscriptions, business systems"
           }
         },
         "redesign": {
@@ -420,10 +442,10 @@
           }
         },
         "custom": {
-          "title": "Custom apps, tools, AI",
+          "title": "Custom apps, tools and AI features",
           "tiers": {
-            "discovery": "Discovery phase, plan and roadmap",
-            "build": "The build"
+            "discovery": "Planning phase: a full plan and roadmap",
+            "build": "The build itself"
           }
         },
         "maintenance": {
@@ -436,7 +458,7 @@
           }
         }
       },
-      "quotedLater": "quoted after discovery",
+      "quotedLater": "quoted after the planning phase",
       "line": "If your project lands outside these ranges, the quote will say so, with the why.",
       "cta": "Get my quote"
     },
@@ -469,7 +491,7 @@
       "items": [
         {
           "q": "How is the quote calculated?",
-          "a": "From the same framework our studio uses: a base tier for your type of site, then hours added for pages, languages, products and integrations, at {rate} an hour. The chat on monkeysat.work runs on the same numbers, so you'll get the same answer there."
+          "a": "With the same method our studio uses for every client: a base price for your type of site, then hours added for pages, languages, products and anything it connects to, at {rate} an hour. The chat on monkeysat.work uses the same numbers, so you'd get the same answer there."
         },
         {
           "q": "Is the quote binding?",
@@ -495,7 +517,7 @@
         },
         {
           "q": "What isn't in the range?",
-          "a": "Photography, copywriting from scratch, paid plugins and apps, hosting, domains and taxes. Your quote lists what's included, so nothing shows up later."
+          "a": "Photography, writing your text from scratch, paid plugins and apps, hosting, your domain name, and taxes. Your quote lists what's included, so nothing shows up later."
         },
         {
           "q": "What happens after launch?",
@@ -510,7 +532,6 @@
     },
     "form": {
       "h2": "Still have a question?",
-      "badge": "no robots here",
       "intro": "Ask it here and a person answers by email within one business day, in English or French. No call unless you ask for one.",
       "_todo_replyTime": "TODO(angelique): confirm the reply-time promise (brief §5.8)",
       "name": "your name",

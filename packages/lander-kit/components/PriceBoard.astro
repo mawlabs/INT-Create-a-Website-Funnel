@@ -28,8 +28,6 @@ const groups = pricing.groups.map((g) => {
 <section class="board on-dark" id={id} aria-labelledby={`${id}-h`}>
   <div class="awning" aria-hidden="true"></div>
   <div class="wrap wrap-narrow inner">
-    <span class="stamp" aria-hidden="true">{copy.stamp}</span>
-    <p class="meta signage on-dark">{copy.label}</p>
     <h2 id={`${id}-h`} class="dot">{copy.h2.replace(/\.$/, '')}</h2>
     <p class="intro">{renderPricing(copy.intro, pricing, locale)}</p>
     <div class="groups">
@@ -49,15 +47,6 @@ const groups = pricing.groups.map((g) => {
 <style>
   .board { position: relative; }
   .inner { position: relative; padding-block: var(--section-pad); text-align: start; }
-  .stamp {
-    position: absolute; top: var(--space-3); right: var(--gutter);
-    width: clamp(5rem, 12vw, 7.5rem); aspect-ratio: 1; border-radius: 50%;
-    border: 2px dashed var(--color-leader); color: var(--color-leader);
-    display: grid; place-items: center; text-align: center; padding: 0.6rem;
-    font-family: var(--font-mono); font-weight: 500; font-size: clamp(0.55rem, 1.2vw, 0.72rem); letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.25;
-    transform: rotate(9deg);
-  }
-  .signage { margin-bottom: var(--space-2); }
   .intro { margin-top: var(--space-2); color: var(--color-meta-on-dark); max-width: var(--measure); }
   .groups { display: grid; gap: var(--space-4); margin-top: var(--space-4); }
   .group { display: grid; gap: 0.8rem; }
