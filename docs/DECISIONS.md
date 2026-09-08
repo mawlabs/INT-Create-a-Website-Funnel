@@ -93,6 +93,14 @@ touches; the brief itself is unchanged and still governs anything not listed her
   builder or a CRM is, with a one-line description under any option that uses a term. The audit findings are written
   the same way: what it is, why it matters, what it takes to fix. Someone who knows the words still sees WordPress,
   Shopify and "custom-coded" as the labels.
+- **The header has fixed rows.** French labels are longer than English ones, so at phone width the header wrapped
+  onto an extra line with the fallback font and lost it when Satoshi and Plex swapped in — moving the whole page up
+  41 px and costing every French page about eight Lighthouse performance points. The bar is now a grid with set row
+  heights (brand and actions on one row, section links on a scrollable row below, one row from 48 em), so its height
+  never depends on text metrics. The language bar is decided by a small inline script in `<head>` for the same
+  reason: added after first paint, it pushed the page down. Affects: `Header.astro`, `Layout.astro`, `LangBar.astro`.
+- **The audit score is a curve, not a subtraction.** `100 / (1 + penalty / 45)`, floored at 1. A neglected site ranks
+  low without bottoming out at zero, which reads as an insult rather than a measurement. Affects: `audit.ts`.
 - **No dashed or dotted boxes.** The dashed frame around the quote result and the dotted rules in the FAQ, the footer
   and the stacked tables are now hairlines or nothing. The dot leader on a price line stays: it is the sub-brand's
   device, and it is a leader, not a border. The "taxes extra" stamp and the "no robots here" badge were also cut; the
