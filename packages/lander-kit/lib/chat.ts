@@ -7,7 +7,7 @@ import type { Locale } from './i18n';
 export const CHAT_ORIGIN = 'https://monkeysat.work/';
 export const PROJECTS = ['business', 'ecommerce', 'redesign', 'changes', 'custom'] as const;
 export type Project = (typeof PROJECTS)[number];
-export type CtaSection = 'hero' | 'pricing' | 'guide';
+export type CtaSection = 'hero' | 'audit' | 'guide';
 
 export interface ChatLinkOptions {
   project?: Project | null;

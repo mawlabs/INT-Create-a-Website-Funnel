@@ -30,6 +30,7 @@ const port = 4321 + Math.floor(Math.random() * 1000);
 const server = spawn('python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1', '--directory', dist], { stdio: 'ignore' });
 await new Promise((r) => setTimeout(r, 800));
 
+// Use the browser this environment ships with when there is one; otherwise let playwright find its own.
 const executablePath = process.env.CHROMIUM_PATH || [
   '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
   '/opt/pw-browsers/chromium',

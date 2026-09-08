@@ -1,0 +1,104 @@
+---
+/**
+ * "Already have a site? Check it." — the second tool. Reads the visitor's home page through the site's own
+ * fetch endpoint, analyses it in the browser, and hands the result to the quote flow.
+ */
+import type { AuditCopy } from '../lib/copy';
+import { AUDIT_ERROR_CODES, FINDING_IDS, type VersionData } from '../lib/audit';
+import { interpolate, type Locale } from '../lib/i18n';
+
+interface Props {
+  copy: AuditCopy;
+  locale: Locale;
+  versions: VersionData;
+  endpoint: string;
+  supportEmail: string;
+  id?: string;
+}
+const { copy, locale, versions, endpoint, supportEmail, id = 'audit' } = Astro.props;
+
+// Bilingual by law, and a finding with no wording is a blank line in front of a client: fail the build instead.
+const missingFindings = FINDING_IDS.filter((f) => !copy.findings[f]);
+const missingErrors = AUDIT_ERROR_CODES.filter((e) => !copy.errors[e]);
+if (missingFindings.length || missingErrors.length) {
+  throw new Error(`audit copy (${locale}) is missing findings [${missingFindings.join(', ')}] and errors [${missingErrors.join(', ')}]`);
+}
+
+const strip = <T,>(v: T): T => (v && typeof v === 'object' && !Array.isArray(v)
+  ? Object.fromEntries(Object.entries(v as Record<string, unknown>).filter(([k]) => !k.startsWith('_')).map(([k, x]) => [k, strip(x)])) as T
+  : v);
+const config = { locale, copy: strip(copy), versions, endpoint, supportEmail };
+---
+<section class="section audit" id={id} aria-labelledby={`${id}-h`} data-audit-panel data-config={JSON.stringify(config)}>
+  <div class="wrap wrap-narrow">
+    <h2 id={`${id}-h`} class="dot">{copy.h2.replace(/[.?]$/, '')}{copy.h2.endsWith('?') ? '?' : ''}</h2>
+    <p class="intro">{copy.intro}</p>
+
+    <form class="audit-form" data-audit-form novalidate hidden>
+      <div class="field">
+        <label for={`${id}-url`}>{copy.label}</label>
+        <div class="row">
+          <input id={`${id}-url`} name="url" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder={copy.placeholder} data-audit-url />
+          <button type="submit" class="btn">{copy.button}</button>
+        </div>
+      </div>
+      <p class="meta disclaimer">{copy.disclaimer}</p>
+    </form>
+
+    <p class="form-status" role="status" data-audit-status hidden></p>
+    <div data-audit-output></div>
+
+    <noscript><p>{interpolate(copy.nojs, { email: supportEmail })}</p></noscript>
+  </div>
+</section>
+
+<style>
+  .audit { background: var(--color-surface); border-top: 1px solid var(--color-rule); }
+  .audit-form { margin-top: var(--space-3); max-width: 34rem; }
+  .audit-form .row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .audit-form input { flex: 1 1 14rem; }
+  /* Charcoal on Sunset passes AA for large text only, so this button keeps the standard button size. */
+  .audit-form .btn { flex: none; }
+  .disclaimer { margin-top: var(--space-2); letter-spacing: 0.02em; max-width: var(--measure); }
+  .form-status[data-kind="error"] { color: var(--color-heading); }
+</style>
+
+<style is:global>
+  /* The report is built at runtime by the island, so its styles are global. */
+  [data-audit-panel] .report { margin-top: var(--space-4); }
+  [data-audit-panel] .report-h { font-size: var(--step-2); outline: none; }
+  [data-audit-panel] .report-h:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
+  [data-audit-panel] .report-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-4); margin-top: var(--space-3); padding: var(--space-3); background: var(--color-bg); border: var(--border); }
+  [data-audit-panel] .score { display: flex; align-items: baseline; gap: 0.5rem; padding-inline-end: var(--space-3); border-inline-end: 1px solid var(--color-rule); }
+  [data-audit-panel] .score-num { font-family: var(--font-display); font-weight: 900; font-size: clamp(2.75rem, 7vw, 4rem); line-height: 1; font-variant-numeric: tabular-nums; }
+  [data-audit-panel] .score-of { font-family: var(--font-mono); font-size: var(--step-mono); color: var(--color-meta); }
+  [data-audit-panel] .score[data-grade="good"] .score-num { color: var(--color-confirm); }
+  [data-audit-panel] .facts { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem var(--space-2); margin: 0; align-content: center; }
+  [data-audit-panel] .facts dt { font-family: var(--font-mono); font-size: var(--step-mono); color: var(--color-meta); letter-spacing: 0.04em; }
+  [data-audit-panel] .facts dd { margin: 0; font-weight: 600; }
+  [data-audit-panel] .note { margin-top: var(--space-2); font-size: var(--step--1); color: var(--color-meta); }
+  [data-audit-panel] .group { font-size: var(--step-1); margin-top: var(--space-4); display: flex; align-items: center; gap: 0.6rem; }
+  [data-audit-panel] .group::before { content: ""; width: 1.1rem; height: 0.35rem; flex: none; background: var(--color-rule); }
+  [data-audit-panel] .group[data-severity="critical"]::before { background: var(--color-accent); }
+  [data-audit-panel] .group[data-severity="warning"]::before { background: var(--color-leader); }
+  [data-audit-panel] .group[data-severity="good"]::before { background: var(--color-confirm); }
+  [data-audit-panel] .findings { list-style: none; padding: 0; margin-top: var(--space-2); display: grid; gap: 0; }
+  [data-audit-panel] .finding { display: grid; grid-template-columns: auto 1fr; gap: var(--space-2); padding-block: var(--space-2); border-bottom: 1px solid var(--color-rule); max-width: none; }
+  [data-audit-panel] .finding .sev { width: 0.35rem; background: var(--color-rule); }
+  [data-audit-panel] .finding[data-severity="critical"] .sev { background: var(--color-accent); }
+  [data-audit-panel] .finding[data-severity="warning"] .sev { background: var(--color-leader); }
+  [data-audit-panel] .finding[data-severity="good"] .sev { background: var(--color-confirm); }
+  [data-audit-panel] .f-title { font-weight: 600; color: var(--color-heading); }
+  [data-audit-panel] .f-detail { margin-top: 0.2rem; font-size: var(--step--1); }
+  [data-audit-panel] .rec { margin-top: var(--space-4); padding: var(--space-3); background: var(--color-bg); border: var(--border); box-shadow: var(--shadow-4); }
+  [data-audit-panel] .rec h4 { font-size: var(--step-2); }
+  [data-audit-panel] .rec p { margin-top: var(--space-1); }
+  [data-audit-panel] .rec .actions { margin-top: var(--space-3); }
+  [data-audit-panel] .again { margin-top: var(--space-3); }
+  [data-audit-panel] .linkish { background: none; border: 0; padding: 0.25em 0; color: var(--color-heading); text-decoration: underline; text-underline-offset: 0.15em; font-size: var(--step--1); font-weight: 600; cursor: pointer; }
+</style>
+
+<script>
+  import { mountAuditPanel } from '../lib/audit-panel';
+  for (const el of document.querySelectorAll<HTMLElement>('[data-audit-panel]')) mountAuditPanel(el);
+</script>

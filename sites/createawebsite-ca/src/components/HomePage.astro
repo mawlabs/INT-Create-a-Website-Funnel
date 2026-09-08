@@ -1,16 +1,17 @@
 ---
-/** Home page, quote-first: hero with the instant-quote panel, price board, how it works, work, FAQ, question form. */
+/** Home page, quote-first: the instant quote, the site audit, how it works, work, FAQ, question form. */
 import CaseStudies from '@maw/lander-kit/components/CaseStudies.astro';
 import Faq from '@maw/lander-kit/components/Faq.astro';
 import Hero from '@maw/lander-kit/components/Hero.astro';
 import Layout from '@maw/lander-kit/components/Layout.astro';
 import LeadForm from '@maw/lander-kit/components/LeadForm.astro';
-import PriceBoard from '@maw/lander-kit/components/PriceBoard.astro';
+import SiteAudit from '@maw/lander-kit/components/SiteAudit.astro';
 import Steps from '@maw/lander-kit/components/Steps.astro';
 import type { Locale } from '@maw/lander-kit/lib/i18n';
 import { renderPricing } from '@maw/lander-kit/lib/pricing';
 import * as schema from '@maw/lander-kit/lib/schema';
 import { pricing } from '../data/pricing';
+import { versions } from '../data/versions';
 import { caseStudies, testimonials } from '../data/work';
 import { copy } from '../i18n';
 import { baseNodes, layoutProps, pageMeta } from '../lib/page';
@@ -39,7 +40,7 @@ const jsonLd = schema.graph([...baseNodes(locale), schema.faqPage(faqItems)]);
       domain: site.domain,
     }}
   />
-  <PriceBoard copy={c.home.board} locale={locale} pricing={pricing} ctaHref="#quote" />
+  <SiteAudit copy={c.home.audit} locale={locale} versions={versions} endpoint={site.auditEndpoint} supportEmail={site.supportEmail} />
   <Steps copy={c.home.steps} />
   <CaseStudies copy={c.home.work} items={caseStudies[locale]} quotes={testimonials[locale]} />
   <Faq h2={c.home.faq.h2} items={faqItems} />

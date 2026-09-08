@@ -23,11 +23,13 @@ const tag = (l: Locale) => (l === 'fr' ? 'fr-CA' : 'en-CA');
       <Mark size="38px" class="brand-mark" />
       <span class="domain" aria-hidden="true">{siteName}</span>
     </a>
-    <nav class="nav" aria-label={copy.switchLabel}>
-      <a href={`${homePath}#prices`}>{copy.nav.prices}</a>
-      <a href={`${homePath}#how`}>{copy.nav.how}</a>
+    <nav class="sections" aria-label={copy.nav.label}>
+      <a href={`${homePath}#quote`}>{copy.nav.quote}</a>
+      <a href={`${homePath}#audit`}>{copy.nav.audit}</a>
       <a href={guidePath}>{copy.nav.guide}</a>
-      <span class="lang">
+    </nav>
+    <div class="end">
+      <nav class="lang" aria-label={copy.switchLabel}>
         {locales.map((l, i) => (
           <>
             {i > 0 && <span class="sep" aria-hidden="true">|</span>}
@@ -36,25 +38,53 @@ const tag = (l: Locale) => (l === 'fr' ? 'fr-CA' : 'en-CA');
               : <a href={alternates[l]} lang={tag(l)} hreflang={tag(l)} data-lang-switch={l}>{copy[l]}</a>}
           </>
         ))}
-      </span>
+      </nav>
       <a class="btn btn-dark btn-small book" href={bookUrl} data-cta="book" data-book-call rel="noopener">{copy.book}</a>
-    </nav>
+    </div>
   </div>
 </header>
 
 <style>
   .site-header { background: var(--color-bg); border-bottom: 1px solid var(--color-rule); }
   @media (min-width: 60em) { .site-header { position: sticky; top: 0; z-index: 20; } }
-  .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); padding-block: 0.875rem; }
+  /*
+   * Fixed rows, not wrapping: French labels are longer than English ones, so a header that reflows when the
+   * webfonts swap moves the whole page down. Row heights are set here and never depend on text metrics.
+   */
+  .bar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "brand end" "sections sections";
+    align-items: center;
+    gap: 0.5rem var(--space-3);
+    padding-block: 0.75rem;
+  }
+  .brand { grid-area: brand; min-height: 2.75rem; }
+  .end { grid-area: end; display: flex; align-items: center; gap: var(--space-2); min-height: 2.75rem; }
+  .sections {
+    grid-area: sections;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .sections::-webkit-scrollbar { display: none; }
+  .sections a { white-space: nowrap; }
+  @media (min-width: 48em) {
+    .bar { grid-template-columns: auto 1fr auto; grid-template-areas: "brand sections end"; gap: var(--space-4); }
+    .sections { justify-content: flex-end; overflow: visible; min-height: 0; }
+  }
   .brand { display: inline-flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--color-heading); }
   .brand :global(.brand-mark .square) { box-shadow: 3px 3px 0 var(--color-leader); }
   .domain { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
-  .nav { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) 1.375rem; font-family: var(--font-body); font-weight: 600; font-size: 0.95rem; }
-  .nav > a:not(.book) { text-decoration: none; padding: 0.35em 0; }
-  .nav > a:not(.book):hover { text-decoration: underline; }
+  .sections { font-family: var(--font-body); font-weight: 600; font-size: 0.95rem; }
+  .sections a { text-decoration: none; padding: 0.35em 0; }
+  .sections a:hover { text-decoration: underline; }
   .lang { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-display); font-weight: 700; }
   .lang .current { text-decoration: none; }
   .lang .sep { opacity: 0.5; }
-  .book { margin-inline-start: 0.25rem; }
-  @media (max-width: 30em) { .domain { display: none; } .nav { font-size: 0.9rem; gap: var(--space-1) 1rem; } }
+  .book { flex: none; }
+  @media (max-width: 30em) { .domain { display: none; } .sections { font-size: 0.9rem; gap: var(--space-2); } }
 </style>

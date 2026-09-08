@@ -13,6 +13,7 @@ const dist = new URL('../sites/createawebsite-ca/dist', import.meta.url).pathnam
 const port = 4700;
 const server = spawn('python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1', '--directory', dist], { stdio: 'ignore' });
 await new Promise((r) => setTimeout(r, 800));
+// Use the browser this environment ships with when there is one; otherwise let playwright find its own.
 const executablePath = ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome', '/opt/pw-browsers/chromium'].find((p) => existsSync(p));
 const browser = await chromium.launch({ executablePath, args: ['--no-sandbox'] });
 const results = [];
@@ -152,6 +153,57 @@ try {
   // Question form (HubSpot) still works: not configured message
   check('question form visible', await page.isVisible('[data-lead-form]'));
 
+
+  // ---- Site audit: mocked endpoint, so the checks are about the island and the engine, not the network ----
+  const wpFixture = {
+    ok: true,
+    url: 'https://vieuxsite.ca', finalUrl: 'https://vieuxsite.ca/', status: 200, elapsedMs: 3100, bytes: 240000,
+    headers: { 'x-powered-by': 'PHP/7.4.33', server: 'Apache/2.4.29' },
+    html: `<!doctype html><html lang="en"><head><title>Vieux site</title>
+      <meta name="generator" content="WordPress 5.9.3" /></head>
+      <body><h1>Bonjour</h1><img src="/a.jpg"></body></html>`,
+    probes: { robots: { status: 404, ok: false }, sitemap: { status: 404, ok: false }, readme: { status: 200, ok: true, body: 'Version 5.9.3' } },
+  };
+  await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
+  await page.evaluate(() => sessionStorage.clear());
+  await page.reload({ waitUntil: 'networkidle' });
+  check('audit form visible with JS', await page.isVisible('[data-audit-form]'));
+
+  await page.route('**/api/audit.php', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(wpFixture) }));
+  await page.click('[data-audit-panel] button[type="submit"]');
+  check('audit needs an address', (await page.textContent('[data-audit-status]')).includes('website address'));
+
+  await page.fill('[data-audit-url]', 'vieuxsite.ca');
+  await page.click('[data-audit-panel] button[type="submit"]');
+  await page.waitForSelector('[data-audit-output] .report', { timeout: 5000 });
+  const reportText = await page.textContent('[data-audit-output]');
+  check('audit shows the platform and PHP version', reportText.includes('WordPress 5.9.3') && reportText.includes('PHP 7.4.33'), reportText.slice(0, 120));
+  check('audit flags the outdated CMS', reportText.includes('no longer supported'));
+  check('audit flags PHP end of life', reportText.includes('no longer gets security fixes'));
+  check('audit flags the missing French version', reportText.includes('no French version'));
+  check('audit groups findings by severity', (await page.locator('[data-audit-output] .finding[data-severity="critical"]').count()) >= 3);
+  const score = Number(await page.textContent('[data-audit-output] .score-num'));
+  check('audit score is a low number for this fixture', score >= 0 && score < 40, String(score));
+  check('audit focus moves to the report heading', await page.evaluate(() => document.activeElement?.classList.contains('report-h')));
+  check('audit summary kept for the lead', (await page.evaluate(() => sessionStorage.getItem('caw-audit') ?? '')).includes('vieuxsite.ca'));
+
+  // The recommendation hands over to the quote flow
+  await page.click('[data-audit-output] .rec button.btn');
+  await page.waitForTimeout(600);
+  const afterHandoff = await question(page);
+  check('audit prefills the quote and skips the answered questions', !afterHandoff.includes('What are you building'), afterHandoff);
+  const answers = await page.evaluate(() => JSON.parse(sessionStorage.getItem('caw-quote') ?? '{}').answers ?? {});
+  check('prefilled answers carry the project type and platform', answers.projectType === 'redesign' && answers.currentPlatform === 'wordpress', JSON.stringify(answers));
+
+  // Endpoint refusals are worded, not raw codes
+  await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
+  await page.route('**/api/audit.php', (route) => route.fulfill({ status: 429, contentType: 'application/json', body: JSON.stringify({ ok: false, error: 'rate_limited' }) }));
+  await page.fill('[data-audit-url]', 'example.ca');
+  await page.click('[data-audit-panel] button[type="submit"]');
+  await page.waitForTimeout(400);
+  check('audit rate-limit message is in plain words', (await page.textContent('[data-audit-status]')).includes('Wait a couple of minutes'));
+  await page.unroute('**/api/audit.php');
+
   // FR page (clear the shared sessionStorage state first: answers persist across the EN/FR pages of one origin by design)
   await page.evaluate(() => sessionStorage.clear());
   await page.goto(`${origin}/fr/`, { waitUntil: 'networkidle' });
@@ -178,6 +230,7 @@ try {
   const hrefs = await p2.$$eval('[data-nojs-option]', (as) => as.map((a) => a.getAttribute('href')));
   check('no-JS: options link to the MAW chat with project param', hrefs.length === 7 && hrefs.every((h) => h.includes('monkeysat.work') && h.includes('project=')), hrefs[3]);
   const noscripts = await p2.$$eval('noscript', (ns) => ns.map((n) => n.textContent));
+  check('no-JS: audit form hidden', await p2.isHidden('[data-audit-form]'));
   check('no-JS: question form hidden, noscript fallback with email', await p2.isHidden('[data-lead-form]') && noscripts.some((t) => t.includes('support@monkeysat.work')), noscripts.join(' | ').slice(0, 120));
   await ctx2.close();
   await ctx.close();

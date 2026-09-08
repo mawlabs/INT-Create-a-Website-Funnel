@@ -7,7 +7,7 @@ Monorepo for Monkeys at Work (MAW) funnel landing sites: static Astro sites shar
 ## Layout
 
 - `packages/lander-kit/` — tokens, fonts, base styles, Astro components, helpers (seo, schema, hubspot, analytics, i18n). No copy lives here.
-- `sites/<name>/` — one Astro site per domain: pages, `src/i18n/{en,fr}.json`, `src/data/pricing.ts`, `src/content/guides/`.
+- `sites/<name>/` — one Astro site per domain: pages, `src/i18n/{en,fr}.json`, `src/data/{pricing,versions,work}.ts`, `src/content/guides/`, and `public/api/audit.php` (the one server-side file).
 - `sites.json` — name, domain, docroot, `deploy` flag; drives CI and deploy matrices.
 - `docs/` — briefs, `DECISIONS.md`, `screens/`.
 
@@ -15,8 +15,9 @@ Monorepo for Monkeys at Work (MAW) funnel landing sites: static Astro sites shar
 
 - `pnpm install` — workspace install (current Node LTS, pnpm).
 - `pnpm --filter createawebsite-ca dev | build | preview`
-- `pnpm check` — `astro check` + lint + FR-review count across sites.
+- `pnpm check` — `astro check` + FR-review and TODO counts across sites.
 - `pnpm lhci` — Lighthouse CI against built output with the budgets in the brief §10.5.
+- `pnpm test` — quote engine (every answer path) and audit engine (fixtures); `pnpm e2e` — browser checks of the quote flow, the audit tool, consent gating and the no-JS fallbacks against the built site.
 - `pnpm test:quote` — walks every answer path of the quote engine; `pnpm e2e` — browser checks of the quote flow, consent gating and no-JS fallbacks against the built site.
 
 ## Non-negotiables

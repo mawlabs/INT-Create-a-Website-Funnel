@@ -9,8 +9,9 @@
     "en": "EN",
     "fr": "FR",
     "nav": {
-      "prices": "Prix",
-      "how": "Comment ça marche",
+      "label": "Sections",
+      "quote": "Soumission instantanée",
+      "audit": "Analyser mon site",
       "guide": "Le guide"
     },
     "book": "Réserver un appel"
@@ -337,6 +338,7 @@
         "timelineLabel": "Échéancier",
         "weeks": "{low} à {high} semaines",
         "rushNote": "Échéancier accéléré inclus.",
+        "designNote": "Vous fournissez le design : la phase de design ne couvre que la prise en main des fichiers.",
         "provideHeading": "Ce que vous devrez fournir",
         "provide": {
           "designFiles": "Vos fichiers de design",
@@ -407,79 +409,278 @@
         "edit": "Modifier"
       }
     },
-    "board": {
+    "audit": {
       "_review": true,
-      "h2": "Ce que ça coûte.",
-      "intro": "Les fourchettes derrière l'outil de soumission, en dollars canadiens à {rate} l'heure. La plupart des agences ne les publient pas. On pense que vous devriez les voir avant de parler à qui que ce soit.",
-      "_todo_rate": "TODO(angelique): confirmer la publication du taux horaire (brief §5.4)",
-      "groups": {
-        "_review": true,
-        "websites": {
-          "title": "Sites web — WordPress",
-          "tiers": {
-            "basic": "De base : 5 à 10 pages, conçues à partir de blocs standards",
-            "intermediate": "Intermédiaire : fonctions sur mesure et contenu modifiable",
-            "custom": "Entièrement sur mesure : phase de planification, connexions complexes, fonctions avancées"
-          }
+      "h2": "Vous avez déjà un site? Analysez-le.",
+      "intro": "On regarde votre page d'accueil comme le feraient un moteur de recherche et un outil de sécurité, et on vous dit en mots simples ce qui est périmé, ce qui manque et ce qu'il faudrait pour corriger. Rien n'est conservé, et vous n'avez pas à laisser de courriel.",
+      "label": "l'adresse de votre site web",
+      "placeholder": "exemple.com",
+      "button": "Analyser mon site",
+      "checking": "On regarde votre site…",
+      "again": "Analyser un autre site",
+      "disclaimer": "Ceci lit une page de l'extérieur, comme n'importe quel visiteur peut le faire. Aucune connexion, aucune modification, aucune recherche de fichiers privés.",
+      "truncated": "Votre page d'accueil est volumineuse : nous en avons lu la première partie. Certains décomptes ci-dessous peuvent être sous-évalués.",
+      "nojs": "L'analyse de site a besoin de JavaScript. Envoyez votre adresse à {email} et on la fera à la main.",
+      "result": {
+        "heading": "Ce qu'on a trouvé sur {host}",
+        "scoreLabel": "Note globale",
+        "scoreOutOf": "sur 100",
+        "platformLabel": "Bâti avec",
+        "phpLabel": "Fonctionne sur",
+        "unknownPlatform": "Rien que nous ayons reconnu",
+        "groups": {
+          "critical": "À régler en premier",
+          "warning": "À corriger",
+          "info": "Petites choses",
+          "good": "Déjà correct"
         },
-        "landing": {
-          "title": "Pages d'atterrissage",
-          "tiers": {
-            "builder": "Bâtie avec un constructeur de pages",
-            "customTheme": "Design codé sur mesure",
-            "custom": "Code entièrement sur mesure"
-          }
+        "counts": {
+          "critical": "{n} urgent",
+          "warning": "{n} à corriger",
+          "info": "{n} petites",
+          "good": "{n} correct"
         },
-        "shopify": {
-          "title": "Boutiques en ligne — Shopify",
-          "tiers": {
-            "basic": "De base : thème prêt à l'emploi, jusqu'à 50 produits",
-            "intermediate": "Intermédiaire : gabarits et fonctions sur mesure",
-            "custom": "Entièrement sur mesure : votre propre thème et passage à la caisse"
-          }
+        "empty": "Rien à signaler, ce qui est rare et bon signe."
+      },
+      "recommendation": {
+        "healthy": {
+          "title": "Votre site est en bon état",
+          "text": "Rien ici n'exige une refonte. Si vous voulez quelqu'un pour le garder à jour et sauvegardé, un forfait d'entretien couvre ça.",
+          "cta": "Obtenir une soumission pour les petites corrections"
         },
-        "woocommerce": {
-          "title": "Boutiques en ligne — WooCommerce",
-          "tiers": {
-            "basic": "De base : boutique standard, jusqu'à 50 produits",
-            "intermediate": "Intermédiaire : types de produits et caisse sur mesure",
-            "custom": "Entièrement sur mesure : vente en gros, abonnements, systèmes d'entreprise"
-          }
-        },
-        "redesign": {
-          "title": "Refontes",
-          "tiers": {
-            "refresh": "Rafraîchissement visuel sur la structure existante",
-            "full": "Refonte complète, nouvelle structure et référencement",
-            "migration": "Refonte et changement de plateforme"
-          }
+        "french": {
+          "title": "Ajoutez le français avant tout le reste",
+          "text": "Le reste du site est correct, mais une entreprise québécoise a besoin d'une version française, et c'est le seul point ici qui vient avec une échéance légale.",
+          "cta": "Obtenir une soumission pour ajouter le français"
         },
         "fixes": {
-          "title": "Corrections et modifications",
-          "tiers": {
-            "fixes": "Corrections rapides et mises à jour, 1 à 8 heures"
-          }
+          "title": "C'est une liste de corrections, pas une refonte",
+          "text": "Tout ce qui précède peut être réglé sur le site que vous avez déjà. La plupart, c'est quelques heures de travail.",
+          "cta": "Obtenir une soumission pour ces corrections"
         },
-        "custom": {
-          "title": "Applications, outils et fonctions IA sur mesure",
-          "tiers": {
-            "discovery": "Phase de planification : un plan complet et une feuille de route",
-            "build": "Le développement lui-même"
-          }
+        "redesign": {
+          "title": "Une refonte coûtera moins cher que les réparations",
+          "text": "Il y a assez de choses ici pour que les corriger une à une revienne cher. Repartir à neuf coûte généralement moins cher et dure plus longtemps.",
+          "cta": "Obtenir une soumission pour une refonte"
         },
-        "maintenance": {
-          "title": "Après le lancement — entretien à {maintenanceRate} l'heure",
-          "suffix": "par mois",
-          "tiers": {
-            "light": "Léger, 10 à 18 heures",
-            "standard": "Standard, 18 à 30 heures",
-            "premium": "Premium, 30 à 50 heures"
-          }
+        "migration": {
+          "title": "Le temps de quitter l'outil de création",
+          "text": "Votre site est sur un outil de création en ligne et il en montre les limites. Le déplacer vers une plateforme que vous contrôlez règle la majeure partie de cette liste d'un coup.",
+          "cta": "Obtenir une soumission pour le déplacer et le rebâtir"
         }
       },
-      "quotedLater": "soumission après la phase de planification",
-      "line": "Si votre projet sort de ces fourchettes, la soumission le dira, avec le pourquoi.",
-      "cta": "Obtenir ma soumission"
+      "errors": {
+        "url_required": "Entrez l'adresse de votre site web pour qu'on puisse le regarder.",
+        "url_invalid": "Ceci ne ressemble pas à une adresse de site web. Essayez quelque chose comme exemple.com.",
+        "url_scheme": "Nous pouvons seulement analyser des adresses qui commencent par http ou https.",
+        "url_port": "Nous pouvons seulement analyser des sites sur les ports web standards.",
+        "url_private": "Cette adresse pointe vers un réseau privé : nous ne pouvons pas l'atteindre d'ici.",
+        "url_too_long": "Cette adresse est trop longue.",
+        "dns_failed": "Nous n'avons pas trouvé cette adresse. Vérifiez l'orthographe et réessayez.",
+        "fetch_failed": "Nous n'avons pas pu joindre ce site. Il est peut-être hors service, ou il nous bloque.",
+        "site_error": "Le site a répondu par une erreur ({status}). Essayez l'adresse exacte que vous utilisez dans votre navigateur.",
+        "too_many_redirects": "Cette adresse redirige en boucle : nous avons arrêté.",
+        "rate_limited": "Ça fait plusieurs analyses en peu de temps. Attendez quelques minutes et réessayez.",
+        "method_not_allowed": "Quelque chose s'est mal passé de notre côté. Réessayez.",
+        "network": "L'analyse n'a pas pu se terminer. Réessayez, ou écrivez à {email} avec votre adresse.",
+        "not_configured": "L'analyse de site n'est pas encore activée. Écrivez à {email} avec votre adresse et on la fera à la main."
+      },
+      "findings": {
+        "https.missing": {
+          "title": "Votre site n'utilise pas de connexion sécurisée",
+          "detail": "Les visiteurs voient un avertissement « non sécurisé » dans la barre d'adresse, et les moteurs de recherche vous classent plus bas. Le certificat est gratuit et s'installe en quelques minutes."
+        },
+        "https.ok": {
+          "title": "Connexion sécurisée en place",
+          "detail": "Votre site est servi en HTTPS."
+        },
+        "https.noRedirect": {
+          "title": "L'ancienne adresse non sécurisée fonctionne encore",
+          "detail": "Quelqu'un qui tape votre adresse sans « https » reste sur la version non sécurisée. Elle devrait le rediriger automatiquement vers la version sécurisée."
+        },
+        "https.noHsts": {
+          "title": "Le navigateur n'est pas informé d'utiliser toujours l'adresse sécurisée",
+          "detail": "Un seul en-tête (HSTS) dit aux navigateurs de ne plus jamais essayer la version non sécurisée. Petite mesure de renforcement."
+        },
+        "mixedContent": {
+          "title": "{count} éléments de la page se chargent encore sans sécurité",
+          "detail": "Des images ou des scripts chargés par l'ancienne adresse non sécurisée peuvent être bloqués par le navigateur, ce qui brise l'apparence ou le fonctionnement de la page.",
+          "titleOne": "Un élément de la page se charge encore sans sécurité"
+        },
+        "wordpress.outdated": {
+          "title": "WordPress {version} n'est plus pris en charge",
+          "detail": "La version actuelle est {latest}. Les vieilles versions ne reçoivent plus de correctifs de sécurité, et la plupart des sites piratés sont simplement des sites non à jour. C'est la première chose à régler."
+        },
+        "wordpress.behind": {
+          "title": "WordPress {version} est en retard sur la version actuelle",
+          "detail": "La version actuelle est {latest}. La mise à jour est habituellement rapide, mais testez-la d'abord sur une copie si le site contient du code sur mesure."
+        },
+        "wordpress.current": {
+          "title": "WordPress {version} est à jour",
+          "detail": "Rien à faire ici."
+        },
+        "wordpress.versionExposed": {
+          "title": "Votre version de WordPress est visible par tout le monde",
+          "detail": "La page annonce la version {version} dans son code source. Ça indique à un attaquant exactement quelles failles essayer. La cacher est une modification d'une ligne."
+        },
+        "wordpress.versionUnknown": {
+          "title": "Nous n'avons pas pu lire votre version de WordPress",
+          "detail": "C'est souvent bon signe : ça veut dire que la version n'est pas publiée. À confirmer depuis votre tableau de bord."
+        },
+        "wordpress.readmeExposed": {
+          "title": "Le fichier readme de WordPress est public",
+          "detail": "Le fichier /readme.html indique votre version exacte. Il ne sert à rien sur un site en ligne et devrait être supprimé."
+        },
+        "php.eol": {
+          "title": "PHP {version} ne reçoit plus de correctifs de sécurité",
+          "detail": "PHP est le langage sur lequel votre site fonctionne. La version {version} a atteint sa fin de vie; la version {current} est actuelle. Votre hébergeur peut habituellement changer ça en quelques clics, mais il faut d'abord tester les extensions."
+        },
+        "php.securityOnly": {
+          "title": "PHP {version} ne reçoit plus que des correctifs de sécurité",
+          "detail": "Elle reçoit encore des correctifs de sécurité, mais plus d'améliorations. La version {current} est plus rapide. Planifiez le changement avant la fin du soutien."
+        },
+        "php.current": {
+          "title": "PHP {version} est une version prise en charge",
+          "detail": "Rien à faire ici."
+        },
+        "php.exposed": {
+          "title": "Votre serveur annonce sa version de PHP",
+          "detail": "La version {version} apparaît dans les en-têtes de réponse. La cacher est un petit changement de réglage et donne un indice de moins aux attaquants."
+        },
+        "jquery.outdated": {
+          "title": "Une vieille version de jQuery est chargée",
+          "detail": "La version {version} est sur la page; la version {latest} est actuelle. Les vieilles versions ont des failles connues que les robots recherchent."
+        },
+        "seo.noindex": {
+          "title": "Votre site demande à Google de ne pas l'afficher",
+          "detail": "La page porte une instruction « noindex ». C'est souvent un reste de la construction du site, et ça vous exclut complètement des résultats de recherche."
+        },
+        "seo.title.missing": {
+          "title": "La page n'a pas de titre",
+          "detail": "Le titre, c'est la ligne bleue dans les résultats Google et l'étiquette de l'onglet du navigateur. Sans lui, les moteurs de recherche en inventent un."
+        },
+        "seo.title.long": {
+          "title": "Le titre de la page est long ({length} caractères)",
+          "detail": "Google coupe les titres autour de 60 caractères. Un titre plus court garde les mots importants visibles."
+        },
+        "seo.title.short": {
+          "title": "Le titre de la page est très court ({length} caractères)",
+          "detail": "Il reste de la place pour dire ce que vous faites et où, ce que les gens cherchent justement."
+        },
+        "seo.description.missing": {
+          "title": "Il n'y a pas de description pour les résultats de recherche",
+          "detail": "La description, c'est le texte gris sous votre lien dans Google. L'écrire vous-même ne coûte rien et ça décide si les gens cliquent."
+        },
+        "seo.description.long": {
+          "title": "La description de recherche est longue ({length} caractères)",
+          "detail": "Google la coupe autour de 155 caractères : la fin risque de ne jamais être vue."
+        },
+        "seo.h1.missing": {
+          "title": "La page n'a pas de titre principal",
+          "detail": "Un titre clair dit aux lecteurs comme aux moteurs de recherche de quoi parle la page."
+        },
+        "seo.h1.multiple": {
+          "title": "La page a {count} titres principaux",
+          "detail": "Un seul suffit habituellement. Plusieurs titres qui se disputent la vedette brouillent le sujet de la page."
+        },
+        "seo.canonical.missing": {
+          "title": "Aucune adresse canonique n'est définie",
+          "detail": "Elle indique aux moteurs de recherche quelle adresse est la bonne quand une page est accessible de plusieurs façons. Ça évite que vos pages se fassent concurrence."
+        },
+        "seo.og.missing": {
+          "title": "Les liens vers votre site se partagent mal",
+          "detail": "Aucune image ni titre d'aperçu n'est défini : publier votre lien sur Facebook ou LinkedIn n'affiche qu'une adresse nue."
+        },
+        "seo.schema.present": {
+          "title": "Les moteurs de recherche obtiennent des données structurées",
+          "detail": "Vos pages se décrivent dans un format que Google lit."
+        },
+        "seo.schema.missing": {
+          "title": "Aucune donnée structurée pour les moteurs de recherche",
+          "detail": "Un petit bloc de données invisibles peut placer votre adresse, vos heures, vos prix ou vos avis directement dans les résultats de recherche."
+        },
+        "seo.robots.missing": {
+          "title": "Aucun fichier robots.txt",
+          "detail": "Ce petit fichier dit aux moteurs de recherche ce qu'ils peuvent consulter et où se trouve votre plan de site. La plupart des sites devraient en avoir un."
+        },
+        "seo.sitemap.present": {
+          "title": "Un plan de site est publié",
+          "detail": "Les moteurs de recherche trouvent chaque page sans deviner."
+        },
+        "seo.sitemap.missing": {
+          "title": "Aucun plan de site trouvé",
+          "detail": "Un plan de site liste vos pages pour les moteurs de recherche. Sans lui, les nouvelles pages peuvent mettre bien plus de temps à apparaître."
+        },
+        "lang.missing": {
+          "title": "La page ne déclare pas sa langue",
+          "detail": "Un seul attribut indique aux navigateurs et aux lecteurs d'écran dans quelle langue est la page. Ça aide aussi les moteurs de recherche à la montrer aux bonnes personnes."
+        },
+        "lang.frenchMissing": {
+          "title": "Nous n'avons trouvé aucune version française",
+          "detail": "Si vous faites affaire au Québec, votre site doit être offert en français, au moins aussi visiblement que dans toute autre langue. C'est la Charte de la langue française, mise à jour par la loi 96, pas une préférence."
+        },
+        "lang.hreflangMissing": {
+          "title": "Vos versions linguistiques ne sont pas liées pour les moteurs de recherche",
+          "detail": "Il semble y avoir deux langues, mais rien n'indique à Google qu'il s'agit du même site. Chaque version finit par faire concurrence à l'autre."
+        },
+        "lang.bilingual": {
+          "title": "Plus d'une langue est en place",
+          "detail": "Votre site déclare une version française."
+        },
+        "mobile.viewport.missing": {
+          "title": "Le site n'est pas configuré pour les téléphones",
+          "detail": "Sans cette seule ligne, les téléphones réduisent toute la page pour l'afficher, et le texte devient illisible. La plupart de vos visiteurs sont sur un téléphone."
+        },
+        "mobile.viewport.ok": {
+          "title": "Configuré pour les téléphones",
+          "detail": "La page indique aux téléphones comment l'afficher."
+        },
+        "speed.htmlWeight": {
+          "title": "La page elle-même est lourde ({kb} Ko)",
+          "detail": "C'est seulement le code de la page, avant les images. Sur une connexion mobile, ça retarde tout le reste."
+        },
+        "speed.htmlWeight.info": {
+          "title": "Le code de la page est un peu volumineux ({kb} Ko)",
+          "detail": "Pas encore un problème, mais à surveiller à mesure que le site grossit."
+        },
+        "speed.slowResponse": {
+          "title": "Le serveur a mis {ms} ms à répondre",
+          "detail": "C'est avant même que quoi que ce soit s'affiche. Une réponse lente vient souvent d'un hébergement bon marché, d'une absence de cache, ou d'une extension qui en fait trop."
+        },
+        "speed.fastResponse": {
+          "title": "Le serveur a répondu rapidement ({ms} ms)",
+          "detail": "Bonne base sur laquelle bâtir."
+        },
+        "speed.blockingScripts": {
+          "title": "{count} scripts retardent le premier affichage",
+          "detail": "Ils se chargent avant que quoi que ce soit apparaisse. Les marquer pour un chargement différé est habituellement un gain rapide."
+        },
+        "speed.imagesNoDimensions": {
+          "title": "{count} images n'ont pas de dimensions",
+          "detail": "La page saute pendant le chargement des images, et c'est ce qui fait rater les boutons aux visiteurs."
+        },
+        "speed.noLazyLoading": {
+          "title": "Les {count} images se chargent toutes en même temps",
+          "detail": "Les images plus bas dans la page peuvent attendre qu'on y arrive. Sur un téléphone, ça économise du temps et des données."
+        },
+        "a11y.imagesNoAlt": {
+          "title": "{count} images sur {total} n'ont pas de description textuelle",
+          "detail": "Les lecteurs d'écran n'annoncent rien pour celles-là, et les moteurs de recherche ne peuvent pas savoir ce qu'elles montrent. La description s'affiche aussi quand une image ne charge pas.",
+          "titleOne": "1 image sur {total} n'a pas de description textuelle"
+        },
+        "privacy.analyticsNoConsent": {
+          "title": "Le suivi semble démarrer avant l'accord des visiteurs",
+          "detail": "Nous avons trouvé des scripts de statistiques ou de publicité et aucune bannière de consentement. Au Québec, la loi 25 exige le consentement avant tout suivi, avec une vraie façon de refuser."
+        },
+        "security.headers": {
+          "title": "{count} en-têtes de protection standards sont absents",
+          "detail": "Ce sont de petits réglages du serveur qui bloquent des attaques courantes. Ils ne coûtent rien et ne changent rien de visible."
+        },
+        "security.serverExposed": {
+          "title": "Votre serveur annonce sa version exacte",
+          "detail": "La réponse indique {server}. Cacher le numéro de version donne une prise de moins aux attaquants."
+        }
+      }
     },
     "steps": {
       "_review": true,
@@ -543,7 +744,7 @@
         },
         {
           "q": "Que se passe-t-il après le lancement?",
-          "a": "Gérez-le vous-même — on fait la passation avec une formation — ou prenez un forfait d'entretien (Léger, Standard ou Premium; fourchettes plus haut)."
+          "a": "Gérez-le vous-même — on fait la passation avec une formation — ou prenez un forfait d'entretien (Léger, Standard ou Premium)."
         },
         {
           "q": "Travaillez-vous avec des entreprises hors Québec?",
@@ -596,7 +797,7 @@
     "_todo_replyTime": "TODO(angelique): confirmer la promesse de délai de réponse (brief §5.8)",
     "received": "Votre demande",
     "receivedValue": "reçue",
-    "back": "Retour au menu",
+    "back": "Retour à l'outil de soumission",
     "guide": "Lire le guide en attendant"
   },
   "notFound": {

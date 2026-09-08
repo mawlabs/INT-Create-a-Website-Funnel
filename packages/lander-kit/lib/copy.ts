@@ -14,7 +14,7 @@ export interface HeaderCopy extends Reviewable {
   switchLabel: string;
   en: string;
   fr: string;
-  nav: { prices: string; how: string; guide: string };
+  nav: { label: string; quote: string; audit: string; guide: string };
   book: string;
 }
 
@@ -72,6 +72,7 @@ export interface QuoteCopy extends Reviewable {
     timelineLabel: string;
     weeks: string;             // "{low}–{high} weeks"
     rushNote: string;
+    designNote: string;
     provideHeading: string;
     provide: Record<string, string>;
     guarantee: string;
@@ -100,19 +101,33 @@ export interface QuoteCopy extends Reviewable {
   summary: { heading: string; edit: string } & Reviewable;
 }
 
-export interface BoardGroupCopy extends Reviewable {
-  title: string;
-  tiers: Record<string, string>;
-  suffix?: string;            // e.g. "a month"
-}
+export interface AuditFindingCopy { title: string; detail: string; /** Used when the count is 1. */ titleOne?: string }
 
-export interface BoardCopy extends Reviewable {
+export interface AuditCopy extends Reviewable {
   h2: string;
   intro: string;
-  groups: Record<string, BoardGroupCopy>;
-  quotedLater: string;
-  line: string;
-  cta: string;
+  label: string;
+  placeholder: string;
+  button: string;
+  checking: string;
+  again: string;
+  disclaimer: string;
+  truncated: string;
+  nojs: string;                       // contains {email}
+  result: {
+    heading: string;                  // contains {host}
+    scoreLabel: string;
+    scoreOutOf: string;
+    platformLabel: string;
+    phpLabel: string;
+    unknownPlatform: string;
+    groups: Record<'critical' | 'warning' | 'info' | 'good', string>;
+    counts: Record<'critical' | 'warning' | 'info' | 'good', string>;
+    empty: string;
+  } & Reviewable;
+  recommendation: Record<string, { title: string; text: string; cta: string }>;
+  errors: Record<string, string>;
+  findings: Record<string, AuditFindingCopy>;
 }
 
 export interface StepsCopy extends Reviewable {

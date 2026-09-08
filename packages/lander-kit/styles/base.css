@@ -167,7 +167,7 @@ code, kbd { font-family: var(--font-mono); font-size: 0.92em; }
 .data-table tbody th[scope="row"] { font-weight: 600; background: var(--color-bg); }
 .only-narrow { display: none; }
 @media (max-width: 44.99em) { .only-wide { display: none; } .only-narrow { display: block; } }
-.stack section { padding-block: var(--space-3); border-bottom: 2px dotted var(--color-rule); }
+.stack section { padding-block: var(--space-3); border-bottom: 1px solid var(--color-rule); }
 .stack h4 { margin-bottom: var(--space-2); }
 .stack dt { font-weight: 600; }
 .stack dd { margin: 0 0 var(--space-1); }

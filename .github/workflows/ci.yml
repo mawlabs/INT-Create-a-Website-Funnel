@@ -39,10 +39,22 @@ jobs:
             node scripts/check-copy.mjs --list
           fi
 
+      - name: Lint the audit endpoint (PHP)
+        run: php -l sites/createawebsite-ca/public/api/audit.php
+
+      - name: Engine tests (quote paths, audit fixtures)
+        run: node scripts/run-tests.mjs
+
       - name: Build every site
         run: pnpm -r --filter './sites/*' build
         env:
           PUBLIC_SITE_URL: https://createawebsite.ca
+
+      - name: Install Chromium for the browser checks
+        run: npx --yes playwright@1.63.0 install --with-deps chromium
+
+      - name: Browser checks (quote flow, audit tool, consent gating, no-JS)
+        run: node scripts/e2e.mjs
 
       - name: Lighthouse CI (brief §10.5 budgets)
         run: node scripts/lhci.mjs

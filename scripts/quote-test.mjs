@@ -57,6 +57,27 @@ ok(qm.price.low > qb.price.low, 'bilingual pricier');
 ok(qb.price.low === 2500 && qb.price.high === 3500, `basic business base is the published tier: ${qb.price.low}-${qb.price.high}`);
 console.log('basic business:', qb.price, qb.hours, qb.weeks, qb.breakdown);
 
+// the breakdown always adds up to the quoted hours
+for (const type of PROJECT_TYPES) {
+  const a = fill({ projectType: type }, (s) => s.options[0]);
+  const q = computeQuote(a, pricing);
+  if (q?.kind !== 'quote') continue;
+  const b = q.breakdown;
+  const low = b.design.low + b.development.low + b.content.low + b.testing.low;
+  const high = b.design.high + b.development.high + b.content.high + b.testing.high;
+  ok(low === q.hours.low && high === q.hours.high, `${type}: breakdown sums to the total (${low}-${high} vs ${q.hours.low}-${q.hours.high})`);
+}
+
+// providing a finished design removes the design phase from the quote
+const ready = { ...base, design: 'ready' };
+const scratch = { ...base, design: 'scratch' };
+const qReady = computeQuote(ready, pricing), qScratch = computeQuote(scratch, pricing);
+ok(qReady.designProvided && !qScratch.designProvided, 'designProvided flag');
+ok(qReady.breakdown.design.high < qScratch.breakdown.design.high / 3, `design phase shrinks: ${qReady.breakdown.design.high} vs ${qScratch.breakdown.design.high}`);
+ok(qReady.price.high < qScratch.price.high, `price drops when the design is provided: ${qReady.price.high} vs ${qScratch.price.high}`);
+ok(qReady.breakdown.development.high === qScratch.breakdown.development.high, 'other phases are unchanged');
+console.log('design provided:', qReady.price, qReady.hours, qReady.breakdown.design, 'vs from scratch:', qScratch.price, qScratch.hours, qScratch.breakdown.design);
+
 // changing a branch prunes stale answers
 const s1 = stepsFor({ projectType: 'business', platform: 'wordpress' }).map((s) => s.id);
 const s2 = stepsFor({ projectType: 'business', platform: 'fullyCustom' }).map((s) => s.id);

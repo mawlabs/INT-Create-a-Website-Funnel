@@ -16,7 +16,9 @@
     "lhci": "node scripts/lhci.mjs",
     "screens": "node scripts/screens.mjs",
     "e2e": "node scripts/e2e.mjs",
-    "test:quote": "node -e \"require('child_process').execFileSync(require('path').join(require.resolve('esbuild/package.json'),'..','bin','esbuild'),['scripts/quote-test.mjs','--bundle','--platform=node','--format=esm','--outfile=.cache/quote-test.bundle.mjs','--log-level=warning'],{stdio:'inherit'})\" && node .cache/quote-test.bundle.mjs"
+    "test:quote": "node scripts/run-tests.mjs quote",
+    "test": "node scripts/run-tests.mjs",
+    "test:audit": "node scripts/run-tests.mjs audit"
   },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",

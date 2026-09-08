@@ -17,6 +17,8 @@ export const site = {
    * project host documented for the ClickUp webhook (MAW360 documentation §17.4).
    */
   leadEndpoint: (import.meta.env.PUBLIC_MAW_LEAD_ENDPOINT as string | undefined) || 'https://jkuhsxbylrrtdcbkmtec.supabase.co/functions/v1/process-lead',
+  /** The site's own fetch endpoint for the audit tool (public/api/audit.php, deployed with the static files). */
+  auditEndpoint: (import.meta.env.PUBLIC_AUDIT_ENDPOINT as string | undefined) || '/api/audit.php',
   termsUrl: 'https://monkeysat.work/terms', // TODO(angelique): confirm the public URL of the MAW terms & conditions
   bookUrl: 'https://meetings.hubspot.com/ange1',
   org: {

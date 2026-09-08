@@ -215,6 +215,7 @@ export function mountQuotePanel(root: HTMLElement): void {
       leader(c.result.timelineLabel, interpolate(c.result.weeks, { low: r.weeks.low, high: r.weeks.high }), 'faint'),
     );
     if (r.timeline === 'rush') box.append(h('p', { class: 'hint', text: c.result.rushNote }));
+    if (r.designProvided) box.append(h('p', { class: 'hint', text: c.result.designNote }));
     nodes.push(box);
     nodes.push(h('h3', { class: 'sub-h', text: c.result.provideHeading }));
     nodes.push(h('ul', { class: 'provide' }, ...r.provide.map((k) => h('li', { text: c.result.provide[k] ?? k }))));
@@ -316,9 +317,14 @@ export function mountQuotePanel(root: HTMLElement): void {
       if (!result) { go('steps'); return; }
       submit.disabled = true;
       say(i.sending);
+      let auditLines: string[] = [];
+      try {
+        const saved = sessionStorage.getItem('caw-audit');
+        if (saved) auditLines = (JSON.parse(saved) as { summary?: string[] }).summary ?? [];
+      } catch { /* ignore */ }
       const payload = buildLeadPayload({
         name: v('firstname'), email: v('email'), phone: v('phone'), company: v('company'), notes: v('notes'),
-        locale: cfg.locale, answers: state.answers, result, summaryLines: summaryLines(), sessionId,
+        locale: cfg.locale, answers: state.answers, result, summaryLines: [...summaryLines(), ...auditLines], sessionId,
         source: { domain: cfg.domain, page: window.location.href, lang: cfg.locale, utm_source: cfg.domain, utm_medium: 'funnel', utm_campaign: `lander-${cfg.locale}`, utm_content: 'quote' },
         followUp, feedback: followUp ? 'out_of_budget' : undefined,
       });
@@ -377,6 +383,18 @@ export function mountQuotePanel(root: HTMLElement): void {
     if (state.view === 'intake') { swap(() => renderIntake(false)); return; }
     if (state.view === 'followup') { swap(() => renderIntake(true)); return; }
   }
+
+  // The audit hands over a project type and platform; jump the flow forward rather than making them retype it.
+  window.addEventListener('maw:quote-prefill', (ev) => {
+    const detail = (ev as CustomEvent<{ answers: Record<string, string> }>).detail;
+    if (!detail?.answers) return;
+    state = { answers: pruneAnswers(detail.answers as Answers), view: 'steps' };
+    started = true;
+    save();
+    render();
+    root.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' });
+    window.setTimeout(focusHeading, reduced.matches ? 0 : 400);
+  });
 
   root.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && state.view === 'steps' && Object.keys(state.answers).length > 0) { e.preventDefault(); back(); }

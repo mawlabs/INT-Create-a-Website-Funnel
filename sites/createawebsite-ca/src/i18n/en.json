@@ -8,8 +8,9 @@
     "en": "EN",
     "fr": "FR",
     "nav": {
-      "prices": "Prices",
-      "how": "How it works",
+      "label": "Sections",
+      "quote": "Instant quote",
+      "audit": "Check my site",
       "guide": "The guide"
     },
     "book": "Book a call"
@@ -325,6 +326,7 @@
         "timelineLabel": "Timeline",
         "weeks": "{low}–{high} weeks",
         "rushNote": "Rush timeline included.",
+        "designNote": "You're providing the design, so the design phase is a handoff allowance only.",
         "provideHeading": "What you'll need to provide",
         "provide": {
           "designFiles": "Your design files",
@@ -390,77 +392,277 @@
         "edit": "Change"
       }
     },
-    "board": {
-      "h2": "What things cost.",
-      "intro": "The ranges behind the quote tool, in Canadian dollars at {rate} an hour. Most agencies won't publish these. We think you should see them before you talk to anyone.",
-      "_todo_rate": "TODO(angelique): confirm publishing the hourly rate (brief §5.4)",
-      "groups": {
-        "websites": {
-          "title": "Websites — WordPress",
-          "tiers": {
-            "basic": "Basic: 5 to 10 pages, designed from standard building blocks",
-            "intermediate": "Intermediate: custom features and an editable content system",
-            "custom": "Fully custom: planning phase, complex connections, advanced features"
-          }
+    "audit": {
+      "h2": "Already have a site? Check it.",
+      "intro": "We look at your home page the way a search engine and a security scanner would, and tell you in plain words what's out of date, what's missing and what it would take to fix. Nothing is stored, and you don't need to leave an email.",
+      "label": "your website address",
+      "placeholder": "example.com",
+      "button": "Check my site",
+      "checking": "Looking at your site…",
+      "again": "Check another site",
+      "disclaimer": "This reads one page from the outside, the way any visitor can. It doesn't log in, change anything, or scan for private files.",
+      "truncated": "Your home page is large, so we read the first part of it. A few counts below may be low.",
+      "nojs": "The site check needs JavaScript. Email your address to {email} and we'll run it by hand.",
+      "result": {
+        "heading": "What we found on {host}",
+        "scoreLabel": "Overall",
+        "scoreOutOf": "out of 100",
+        "platformLabel": "Built with",
+        "phpLabel": "Running on",
+        "unknownPlatform": "Not something we recognized",
+        "groups": {
+          "critical": "Deal with these first",
+          "warning": "Worth fixing",
+          "info": "Small things",
+          "good": "Already right"
         },
-        "landing": {
-          "title": "Landing pages",
-          "tiers": {
-            "builder": "Built with a page builder",
-            "customTheme": "Custom-coded design",
-            "custom": "Fully custom code"
-          }
+        "counts": {
+          "critical": "{n} urgent",
+          "warning": "{n} to fix",
+          "info": "{n} small",
+          "good": "{n} good"
         },
-        "shopify": {
-          "title": "Online stores — Shopify",
-          "tiers": {
-            "basic": "Basic: ready-made theme, up to 50 products",
-            "intermediate": "Intermediate: custom templates and features",
-            "custom": "Fully custom: your own theme and checkout"
-          }
+        "empty": "Nothing to report, which is rare and good."
+      },
+      "recommendation": {
+        "healthy": {
+          "title": "Your site is in good shape",
+          "text": "Nothing here needs a rebuild. If you'd like someone keeping it updated and backed up, a maintenance plan covers it.",
+          "cta": "Get a quote for the small fixes"
         },
-        "woocommerce": {
-          "title": "Online stores — WooCommerce",
-          "tiers": {
-            "basic": "Basic: standard store, up to 50 products",
-            "intermediate": "Intermediate: custom product types and checkout",
-            "custom": "Fully custom: wholesale, subscriptions, business systems"
-          }
-        },
-        "redesign": {
-          "title": "Redesigns",
-          "tiers": {
-            "refresh": "Visual refresh on the existing structure",
-            "full": "Full redesign, new structure and SEO",
-            "migration": "Redesign and platform migration"
-          }
+        "french": {
+          "title": "Add French before anything else",
+          "text": "The rest of the site is reasonable, but a Quebec business needs a French version, and that's the one item here with a legal deadline attached.",
+          "cta": "Get a quote to add French"
         },
         "fixes": {
-          "title": "Fixes and changes",
-          "tiers": {
-            "fixes": "Quick fixes and updates, 1 to 8 hours"
-          }
+          "title": "This is a fix list, not a rebuild",
+          "text": "Everything above can be dealt with on the site you already have. Most of it is a few hours of work.",
+          "cta": "Get a quote to fix these"
         },
-        "custom": {
-          "title": "Custom apps, tools and AI features",
-          "tiers": {
-            "discovery": "Planning phase: a full plan and roadmap",
-            "build": "The build itself"
-          }
+        "redesign": {
+          "title": "A rebuild will cost less than the repairs",
+          "text": "There's enough here that fixing one thing at a time gets expensive. Starting fresh is usually cheaper and lasts longer.",
+          "cta": "Get a quote for a redesign"
         },
-        "maintenance": {
-          "title": "After launch — maintenance at {maintenanceRate} an hour",
-          "suffix": "a month",
-          "tiers": {
-            "light": "Light, 10 to 18 hours",
-            "standard": "Standard, 18 to 30 hours",
-            "premium": "Premium, 30 to 50 hours"
-          }
+        "migration": {
+          "title": "Time to move off the builder",
+          "text": "Your site is on a website builder and is showing its limits. Moving it to a platform you control fixes most of this list at once.",
+          "cta": "Get a quote to move and rebuild"
         }
       },
-      "quotedLater": "quoted after the planning phase",
-      "line": "If your project lands outside these ranges, the quote will say so, with the why.",
-      "cta": "Get my quote"
+      "errors": {
+        "url_required": "Enter your website address so we can look at it.",
+        "url_invalid": "That doesn't look like a website address. Try something like example.com.",
+        "url_scheme": "We can only check addresses that start with http or https.",
+        "url_port": "We can only check sites on the standard web ports.",
+        "url_private": "That address points to a private network, so we can't reach it from here.",
+        "url_too_long": "That address is too long.",
+        "dns_failed": "We couldn't find that address. Check the spelling and try again.",
+        "fetch_failed": "We couldn't reach that site. It may be down, or blocking us.",
+        "site_error": "The site answered with an error ({status}). Try the exact address you use in your browser.",
+        "too_many_redirects": "That address redirects in circles, so we stopped.",
+        "rate_limited": "That's a few checks in a short time. Wait a couple of minutes and try again.",
+        "method_not_allowed": "Something went wrong on our end. Try again.",
+        "network": "We couldn't complete the check. Try again, or email {email} with your address.",
+        "not_configured": "The site check isn't switched on yet. Email {email} with your address and we'll run it by hand."
+      },
+      "findings": {
+        "https.missing": {
+          "title": "Your site doesn't use a secure connection",
+          "detail": "Visitors see a “not secure” warning in the address bar, and search engines rank the site lower. A certificate is free and takes minutes to install."
+        },
+        "https.ok": {
+          "title": "Secure connection in place",
+          "detail": "Your site is served over HTTPS."
+        },
+        "https.noRedirect": {
+          "title": "The old insecure address still works",
+          "detail": "Someone typing your address without “https” stays on the insecure version. It should send them to the secure one automatically."
+        },
+        "https.noHsts": {
+          "title": "The browser isn't told to always use the secure address",
+          "detail": "A single header (HSTS) tells browsers to never try the insecure version again. Small hardening step."
+        },
+        "mixedContent": {
+          "title": "{count} things on the page still load insecurely",
+          "detail": "Images or scripts loaded over the old insecure address can be blocked by the browser, which breaks how the page looks or works.",
+          "titleOne": "One thing on the page still loads insecurely"
+        },
+        "wordpress.outdated": {
+          "title": "WordPress {version} is no longer supported",
+          "detail": "The current release is {latest}. Old versions stop getting security fixes, and most hacked sites are simply out-of-date ones. This is the first thing to deal with."
+        },
+        "wordpress.behind": {
+          "title": "WordPress {version} is behind the current release",
+          "detail": "The current release is {latest}. Updating is usually quick, but test it on a copy first if the site has custom code."
+        },
+        "wordpress.current": {
+          "title": "WordPress {version} is up to date",
+          "detail": "Nothing to do here."
+        },
+        "wordpress.versionExposed": {
+          "title": "Your WordPress version is visible to anyone",
+          "detail": "The page announces version {version} in its source. It tells an attacker exactly which weaknesses to try. Hiding it is a one-line change."
+        },
+        "wordpress.versionUnknown": {
+          "title": "We couldn't read your WordPress version",
+          "detail": "That's often a good sign: it means the version isn't published. Worth confirming it's current from your dashboard."
+        },
+        "wordpress.readmeExposed": {
+          "title": "The WordPress readme file is public",
+          "detail": "The file at /readme.html states your exact version. It serves no purpose on a live site and should be deleted."
+        },
+        "php.eol": {
+          "title": "PHP {version} no longer gets security fixes",
+          "detail": "PHP is the language your site runs on. Version {version} is past its end of life; {current} is current. Your host can usually switch it in a few clicks, but plugins should be tested first."
+        },
+        "php.securityOnly": {
+          "title": "PHP {version} only gets security fixes now",
+          "detail": "It still receives security patches, but no more improvements. Version {current} is faster. Plan the move before support ends."
+        },
+        "php.current": {
+          "title": "PHP {version} is a supported version",
+          "detail": "Nothing to do here."
+        },
+        "php.exposed": {
+          "title": "Your server announces its PHP version",
+          "detail": "Version {version} appears in the response headers. Hiding it is a small setting change and gives attackers one less clue."
+        },
+        "jquery.outdated": {
+          "title": "An old version of jQuery is loaded",
+          "detail": "Version {version} is on the page; {latest} is current. Old versions have known weaknesses that scanners look for."
+        },
+        "seo.noindex": {
+          "title": "Your site is telling Google not to list it",
+          "detail": "The page carries a “noindex” instruction. It's usually left over from building the site, and it keeps you out of search results entirely."
+        },
+        "seo.title.missing": {
+          "title": "The page has no title",
+          "detail": "The title is the blue line in Google results and the label on the browser tab. Without it, search engines invent one."
+        },
+        "seo.title.long": {
+          "title": "The page title is long ({length} characters)",
+          "detail": "Google cuts titles off around 60 characters. Shorter titles keep the important words visible."
+        },
+        "seo.title.short": {
+          "title": "The page title is very short ({length} characters)",
+          "detail": "There's room to say what you do and where, which is what people search for."
+        },
+        "seo.description.missing": {
+          "title": "There's no description for search results",
+          "detail": "The description is the grey text under your link in Google. Writing it yourself is free and it decides whether people click."
+        },
+        "seo.description.long": {
+          "title": "The search description is long ({length} characters)",
+          "detail": "Google cuts it off around 155 characters, so the end may never be seen."
+        },
+        "seo.h1.missing": {
+          "title": "The page has no main heading",
+          "detail": "One clear heading tells both readers and search engines what the page is about."
+        },
+        "seo.h1.multiple": {
+          "title": "The page has {count} main headings",
+          "detail": "Usually one is enough. Several competing headings muddy what the page is about."
+        },
+        "seo.canonical.missing": {
+          "title": "No canonical address is set",
+          "detail": "This tells search engines which address is the real one when a page is reachable several ways. It prevents your pages competing with each other."
+        },
+        "seo.og.missing": {
+          "title": "Links to your site share badly",
+          "detail": "There's no preview image or title set, so posting your link on Facebook or LinkedIn shows a bare address."
+        },
+        "seo.schema.present": {
+          "title": "Search engines get structured details",
+          "detail": "Your pages describe themselves in a format Google reads."
+        },
+        "seo.schema.missing": {
+          "title": "No structured details for search engines",
+          "detail": "A small block of hidden data can put your address, hours, prices or reviews directly in search results."
+        },
+        "seo.robots.missing": {
+          "title": "No robots.txt file",
+          "detail": "This small file tells search engines what they may look at and where your sitemap is. Most sites should have one."
+        },
+        "seo.sitemap.present": {
+          "title": "A sitemap is published",
+          "detail": "Search engines can find every page without guessing."
+        },
+        "seo.sitemap.missing": {
+          "title": "No sitemap found",
+          "detail": "A sitemap lists your pages for search engines. Without it, newer pages can take much longer to appear."
+        },
+        "lang.missing": {
+          "title": "The page doesn't declare its language",
+          "detail": "One attribute tells browsers and screen readers which language the page is in. It also helps search engines show it to the right people."
+        },
+        "lang.frenchMissing": {
+          "title": "We found no French version",
+          "detail": "If you do business in Quebec, your site has to be available in French, at least as prominently as any other language. That's the Charter of the French Language, updated by Bill 96, not a preference."
+        },
+        "lang.hreflangMissing": {
+          "title": "Your language versions aren't linked for search engines",
+          "detail": "There seem to be two languages, but nothing tells Google they're the same site. Each version ends up competing with the other."
+        },
+        "lang.bilingual": {
+          "title": "More than one language is in place",
+          "detail": "Your site declares a French version."
+        },
+        "mobile.viewport.missing": {
+          "title": "The site isn't set up for phones",
+          "detail": "Without this one line, phones shrink the whole desktop page to fit, so the text is unreadable. Most of your visitors are on a phone."
+        },
+        "mobile.viewport.ok": {
+          "title": "Set up for phones",
+          "detail": "The page tells phones how to display it."
+        },
+        "speed.htmlWeight": {
+          "title": "The page itself is heavy ({kb} KB)",
+          "detail": "That's just the page's own code, before images. On a phone connection it delays everything that follows."
+        },
+        "speed.htmlWeight.info": {
+          "title": "The page's own code is on the large side ({kb} KB)",
+          "detail": "Not a problem yet, but worth watching as you add to the site."
+        },
+        "speed.slowResponse": {
+          "title": "The server took {ms} ms to answer",
+          "detail": "That's before anything is drawn on screen. Slow answers usually mean cheap hosting, no caching, or a plugin doing too much work."
+        },
+        "speed.fastResponse": {
+          "title": "The server answered quickly ({ms} ms)",
+          "detail": "Good foundation to build on."
+        },
+        "speed.blockingScripts": {
+          "title": "{count} scripts hold up the first paint",
+          "detail": "They load before anything appears. Marking them to load later is usually a quick win."
+        },
+        "speed.imagesNoDimensions": {
+          "title": "{count} images have no size set",
+          "detail": "The page jumps around as images load, which is the thing that makes people mis-tap buttons."
+        },
+        "speed.noLazyLoading": {
+          "title": "All {count} images load at once",
+          "detail": "Images further down the page can wait until someone scrolls to them. On a phone that saves real time and data."
+        },
+        "a11y.imagesNoAlt": {
+          "title": "{count} of {total} images have no text description",
+          "detail": "Screen readers announce nothing for these, and search engines can't tell what they show. Descriptions also appear when an image fails to load.",
+          "titleOne": "1 of {total} images has no text description"
+        },
+        "privacy.analyticsNoConsent": {
+          "title": "Tracking appears to run before visitors agree",
+          "detail": "We found analytics or advertising scripts and no consent banner. In Quebec, Law 25 requires consent before tracking, with a real way to say no."
+        },
+        "security.headers": {
+          "title": "{count} standard protection headers are missing",
+          "detail": "These are small server settings that block common attacks. They cost nothing and change nothing visible."
+        },
+        "security.serverExposed": {
+          "title": "Your server announces its exact version",
+          "detail": "The response says {server}. Hiding the version number gives attackers one less thing to work with."
+        }
+      }
     },
     "steps": {
       "h2": "How it works",
@@ -521,7 +723,7 @@
         },
         {
           "q": "What happens after launch?",
-          "a": "Run it yourself — we hand over with training — or put it on a maintenance plan (Light, Standard or Premium; ranges above)."
+          "a": "Run it yourself — we hand over with training — or put it on a maintenance plan (Light, Standard or Premium)."
         },
         {
           "q": "Do you work with businesses outside Quebec?",
@@ -570,7 +772,7 @@
     "_todo_replyTime": "TODO(angelique): confirm the reply-time promise (brief §5.8)",
     "received": "Your request",
     "receivedValue": "received",
-    "back": "Back to the board",
+    "back": "Back to the quote tool",
     "guide": "Read the guide meanwhile"
   },
   "notFound": {

@@ -8,7 +8,7 @@ const { copy, locale, otherPath } = Astro.props;
 const other: Locale = locale === 'en' ? 'fr' : 'en';
 const otherTag = other === 'fr' ? 'fr-CA' : 'en-CA';
 ---
-<div class="langbar" data-langbar data-current={locale} data-other={other} hidden lang={otherTag}>
+<div class="langbar" data-langbar data-current={locale} data-other={other} lang={otherTag}>
   <div class="wrap inner">
     <p>{copy.text} <a href={otherPath} hreflang={otherTag} data-lang-switch={other}>{copy.link}</a></p>
     <button type="button" data-langbar-dismiss>{copy.dismiss}</button>
@@ -23,17 +23,15 @@ const otherTag = other === 'fr' ? 'fr-CA' : 'en-CA';
 </style>
 
 <script>
+  /* Whether to show the bar is decided in <head> before first paint; this only handles dismissal. */
   const KEY = 'maw-langbar-dismissed';
   const bar = document.querySelector<HTMLElement>('[data-langbar]');
   if (bar) {
-    let dismissed = false;
-    try { dismissed = localStorage.getItem(KEY) === '1'; } catch { /* ignore */ }
-    const other = bar.dataset.other ?? '';
-    const langs = navigator.languages?.length ? navigator.languages : [navigator.language];
-    const preferred = (langs[0] || '').toLowerCase().slice(0, 2);
-    if (!dismissed && preferred === other) bar.hidden = false;
     const remember = () => { try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ } };
-    bar.querySelector('[data-langbar-dismiss]')?.addEventListener('click', () => { bar.hidden = true; remember(); });
+    bar.querySelector('[data-langbar-dismiss]')?.addEventListener('click', () => {
+      document.documentElement.removeAttribute('data-langbar');
+      remember();
+    });
     bar.querySelector('a[data-lang-switch]')?.addEventListener('click', remember);
   }
 </script>

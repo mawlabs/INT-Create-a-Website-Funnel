@@ -132,6 +132,8 @@ export interface Quote {
   breakdown: { design: HourRange; development: HourRange; content: HourRange; testing: HourRange };
   weeks: HourRange;
   complexity: Complexity;
+  /** True when the client brings a finished design, so the design phase is a handoff allowance only. */
+  designProvided: boolean;
   /** Keys into i18n quote.provide.* */
   provide: string[];
   timeline: 'standard' | 'rush' | 'flexible';
@@ -166,11 +168,19 @@ const ADD: Record<string, Record<string, [number, number]>> = {
 ADD.newIntegrations = ADD.integrations;
 
 /* multipliers */
+/* multipliers on the whole project. Design is not here: providing a design removes design hours from the
+   breakdown rather than discounting everything (see DESIGN_HANDOFF below). */
 const MULT: Record<string, Record<string, [number, number]>> = {
-  design: { ready: [0.9, 0.9], inspiration: [1, 1], scratch: [1, 1] },
   multilingual: { bilingual: [1.2, 1.3], multi: [1.3, 1.4], single: [1, 1] },   // framework: +20–40%
   timeline: { standard: [1, 1], rush: [1.2, 1.3], flexible: [1, 1] },           // prompt: add 20–30% for rush
 };
+
+/**
+ * What is left of the design phase when the client brings a finished design: reviewing the files, filling the
+ * gaps they don't cover (states, breakpoints, error screens) and preparing them for build. The rest is removed
+ * from the quote, and the total and the price follow from the sum of the phases.
+ */
+const DESIGN_HANDOFF = 0.15;
 
 const SPLIT: Record<ProjectType, [number, number, number, number]> = {
   business: [0.3, 0.45, 0.12, 0.13],
@@ -216,6 +226,28 @@ function baseTier(a: Answers, data: PricingData): { ref: string; price: Range | 
 
 function round(n: number, step: number, dir: 'floor' | 'ceil'): number {
   return (dir === 'floor' ? Math.floor(n / step) : Math.ceil(n / step)) * step;
+}
+
+/**
+ * Split `total` hours across phases in whole hours, using the largest-remainder method so the parts add up to
+ * the total exactly. When the fractions sum to less than 1 (a phase has been removed from the quote) the target
+ * shrinks by the same proportion, so removing a phase removes its hours rather than redistributing them.
+ */
+function allocate(total: number, fractions: number[]): number[] {
+  const share = fractions.reduce((a, b) => a + b, 0);
+  const target = Math.max(fractions.length, Math.round(total * share));
+  const raw = fractions.map((f) => (target * f) / share);
+  const out = raw.map((x) => Math.max(1, Math.floor(x)));
+  const order = raw.map((x, i) => ({ i, rem: x - Math.floor(x) })).sort((a, b) => b.rem - a.rem);
+  let diff = target - out.reduce((a, b) => a + b, 0);
+  for (let k = 0; diff > 0; k++, diff--) out[order[k % order.length].i] += 1;
+  while (diff < 0) {
+    const idx = out.indexOf(Math.max(...out));
+    if (out[idx] <= 1) break;
+    out[idx] -= 1;
+    diff++;
+  }
+  return out;
 }
 
 export function complexityFor(hoursMid: number): Complexity {
@@ -273,8 +305,20 @@ export function computeQuote(a: Answers, data: PricingData): QuoteResult | null 
     hLow *= m[0]; hHigh *= m[1]; pLow *= m[0]; pHigh *= m[1];
   }
 
-  hLow = Math.max(1, Math.round(hLow));
-  hHigh = Math.max(hLow + 1, Math.round(hHigh));
+  // Phases first, then the total: the quote must never bill hours it doesn't list.
+  const split = SPLIT[type];
+  const designProvided = a.design === 'ready';
+  const fractions = [designProvided ? split[0] * DESIGN_HANDOFF : split[0], split[1], split[2], split[3]];
+  const lows = allocate(hLow, fractions);
+  const highs = allocate(hHigh, fractions);
+  const phases: HourRange[] = lows.map((low, i) => ({ low, high: Math.max(low, highs[i]) }));
+  const sumLow = phases.reduce((t, x) => t + x.low, 0);
+  const sumHigh = phases.reduce((t, x) => t + x.high, 0);
+  // Price follows the hours, so the tier's implied rate is preserved when a phase is removed.
+  pLow *= hLow > 0 ? sumLow / hLow : 1;
+  pHigh *= hHigh > 0 ? sumHigh / hHigh : 1;
+  hLow = Math.max(1, sumLow);
+  hHigh = Math.max(hLow + 1, sumHigh);
   pLow = Math.max(data.hourlyRate, round(pLow, 50, 'floor'));
   pHigh = Math.max(pLow + 50, round(pHigh, 50, 'ceil'));
 
@@ -283,9 +327,6 @@ export function computeQuote(a: Answers, data: PricingData): QuoteResult | null 
   let wLow = Math.max(type === 'changes' ? 1 : 2, Math.round(hLow / 8));
   let wHigh = Math.max(wLow + 1, Math.round(hHigh / 6));
   if (timeline === 'rush') { wLow = Math.max(1, Math.round(wLow * 0.6)); wHigh = Math.max(wLow + 1, Math.round(wHigh * 0.6)); }
-
-  const split = SPLIT[type];
-  const part = (i: number): HourRange => ({ low: Math.max(1, Math.round(hLow * split[i])), high: Math.max(1, Math.round(hHigh * split[i])) });
 
   const provide = ['brand', 'content'];
   if (a.design === 'ready') provide.unshift('designFiles');
@@ -298,7 +339,8 @@ export function computeQuote(a: Answers, data: PricingData): QuoteResult | null 
     projectType: type,
     hours: { low: hLow, high: hHigh, plus },
     price: { low: pLow, high: pHigh, plus, currency: 'CAD' },
-    breakdown: { design: part(0), development: part(1), content: part(2), testing: part(3) },
+    breakdown: { design: phases[0], development: phases[1], content: phases[2], testing: phases[3] },
+    designProvided,
     weeks: { low: wLow, high: wHigh },
     complexity: complexityFor((hLow + hHigh) / 2),
     provide,

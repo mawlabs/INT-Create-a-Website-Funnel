@@ -3,7 +3,7 @@
  * FR nodes carry `_review: true` until Angelique's pass; `_todo*` keys hold facts only she can confirm.
  */
 import type {
-  BoardCopy, ChromeCopy, ConsentCopy, FaqCopy, FooterCopy, FormCopy, HeaderCopy, HeroCopy,
+  AuditCopy, ChromeCopy, ConsentCopy, FaqCopy, FooterCopy, FormCopy, HeaderCopy, HeroCopy,
   LangBarCopy, PageMetaCopy, QuoteCopy, Reviewable, StepsCopy, WorkCopy,
 } from '@maw/lander-kit/lib/copy';
 import type { Locale } from '@maw/lander-kit/lib/i18n';
@@ -26,7 +26,7 @@ export interface SiteCopy {
   home: {
     hero: HeroCopy;
     quote: QuoteCopy;
-    board: BoardCopy;
+    audit: AuditCopy;
     steps: StepsCopy;
     work: WorkCopy;
     faq: FaqCopy;
