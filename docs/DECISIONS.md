@@ -18,13 +18,49 @@ Run `pnpm check:copy -- --list` for the live list. As of 7 Sept 2026:
 | ● | Three case studies + two testimonials. `src/data/work.ts` is empty and the "Work we've shipped" section is not rendered until it has data — nothing fabricated. | `src/data/work.ts` | §13 #5 |
 | ● | The MAW `process-lead` endpoint: confirm the URL, that it accepts cross-origin POSTs from this domain, and that the extra quote fields are stored. Then send one test lead end to end. | `site.ts`, `PUBLIC_MAW_LEAD_ENDPOINT` | §7.1 |
 | ● | SiteGround: confirm PHP is enabled for the docroot, or the site audit cannot run. | `public/api/audit.php` | §12 |
-| | Audit reference versions (WordPress, PHP, jQuery) — re-check quarterly. | `src/data/versions.ts` | — |
+| ● | Audit reference versions (WordPress, PHP, jQuery) are **unverified** — see "Open question for the team" below. Verify or automate before launch, then re-check quarterly. | `src/data/versions.ts` | — |
+| | Decide how the site-check score is presented: our own rating, or counts only — see "Open question for the team" below. | `lib/audit.ts`, `home.audit` copy | — |
 | | Confirmations: publish the hourly rate; the "final quote won't exceed the range" promise on a public page; freelancer cost + timeline cells; MAW timeline cell; 4–8 weeks FAQ; ownership FAQ wording vs. T&C; outside-Quebec FAQ; reply-time promise on the thanks page. Each is a `_todo_*` key beside the string in `en.json` / `fr.json`. | `src/i18n/*.json` | §13 #6 |
 | | MAW app change (`chat=open`, `project`, `lang`, `utm_*` persistence, `maw_lead_source`) scheduled with Karim or Hamza. The links already carry the parameters. | monkeysat.work repo | §7.1, §13 #7 |
 | | Business address (enables `LocalBusiness`) and the privacy officer's name (Law 25). Privacy page text also needs a pass against monkeysat.work's policy. | `site.ts` (`org.address`), `privacy` in JSON | §13 #8, §11 |
 | | Search Console export from monkeysat.work to fold ranking queries into the guide. | — | §13 #9 |
 | ● | FR review pass on every `_review: true` node (37 nodes) and the FR guide (`review: true` in frontmatter). `main` cannot deploy until the count is zero. | `fr.json`, `fr/*.mdx` | §13 #10 |
 | | Canonical host: `.htaccess` redirects `www` → bare domain. Confirm. | `public/.htaccess` | §10.4 |
+
+## Open question for the team — where the site-check score comes from
+
+Raised 8 Sept 2026. Nothing is blocked by it except the last item, which is a launch blocker on its own.
+
+**The score is ours, not an industry measure.** Each finding carries a weight — urgent 18, worth fixing 7, small
+note 2 — and the total runs through `100 / (1 + penalty / 45)`, floored at 1 (`packages/lander-kit/lib/audit.ts`).
+Those numbers were chosen so the ranking behaved sensibly across the test fixtures, not derived from anything
+published. A visitor cannot reproduce the number elsewhere, and it is not comparable to a Lighthouse or GTmetrix
+score. Two ways to handle that, both cheap:
+
+- keep the number and label it as our own rating rather than a benchmark; or
+- drop the number and lead with the counts (`5 urgent · 9 to fix · 10 small · 1 good`), which are plain facts.
+
+**The findings themselves sit on firmer ground, and split three ways.**
+
+| Grounded in law or a published standard | Convention, not a published limit | Our judgement, no source |
+|---|---|---|
+| French version (Charter of the French Language, updated by Bill 96); tracking before consent (Law 25); alt text and `lang` (WCAG 2.1); PHP end-of-life (php.net support schedule); WordPress current release (wordpress.org) | Title ~65 characters, description ~165, one H1, canonical, sitemap, robots.txt, Open Graph — Google truncates by pixel width, not character count, so these approximate a rule nobody publishes | 500 KB of HTML is "heavy" and 200 KB "notable"; 2,500 ms is "slow" and 800 ms "fast"; more than three blocking scripts; more than four images without dimensions; 30% of images missing alt text turning a note into a warning; two or more missing security headers |
+
+Each finding can be defended item by item on the left, explained as convention in the middle, and is a house
+opinion on the right. Worth deciding whether the wording should say so where the right-hand column applies.
+
+**● The version data needs a real source before launch.** `src/data/versions.ts` currently says WordPress 6.9 is
+current (6.6 the oldest supported) and PHP 8.2 is the end-of-life boundary with 8.4 current. Those came from the
+model's training data, which predates the build, and `api.wordpress.org`, `php.net` and `endoflife.date` were all
+unreachable from the build sandbox, so **they are unverified**. If 6.9 is not actually the latest, the tool tells a
+client running the genuine latest release that they are behind — the one kind of error that discredits a tool like
+this outright. Two fixes:
+
+- verify by hand and update the file (fastest, but goes stale again); or
+- fetch at build time from `api.wordpress.org/core/version-check/1.7/` and `endoflife.date/api/php.json`, write the
+  file, and fail the build if either is unreachable. GitHub Actions has open network, so this works in the deploy
+  even though it did not here. The report already carries a checked-on date, which would then mean something.
+
 
 ## 2026-09-07 (evening) — direction change: quote-first, "Menu du jour" sub-brand
 
