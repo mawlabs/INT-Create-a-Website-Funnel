@@ -533,6 +533,7 @@
         "dns_failed": "Nous n'avons pas trouvé cette adresse. Vérifiez l'orthographe et réessayez.",
         "fetch_failed": "Nous n'avons pas pu joindre ce site. Il est peut-être hors service, ou il nous bloque.",
         "site_error": "Le site a répondu par une erreur ({status}). Essayez l'adresse exacte que vous utilisez dans votre navigateur.",
+        "site_blocked": "Ce site est protégé par un service de sécurité qui bloque les vérifications automatisées. Rien ne cloche de votre côté : nous ne pouvons simplement pas le lire de l'extérieur. Envoyez l'adresse à {email} et nous l'examinerons à la main.",
         "too_many_redirects": "Cette adresse redirige en boucle : nous avons arrêté.",
         "rate_limited": "Ça fait plusieurs analyses en peu de temps. Attendez quelques minutes et réessayez.",
         "method_not_allowed": "Quelque chose s'est mal passé de notre côté. Réessayez.",

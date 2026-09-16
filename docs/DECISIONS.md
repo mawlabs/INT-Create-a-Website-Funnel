@@ -99,6 +99,44 @@ this outright. Two fixes:
   even though it did not here. The report already carries a checked-on date, which would then mean something.
 
 
+## 2026-09-16 (later) — the site check has never seen a real website
+
+Angelique: "Can this work for real though by just entering a domain?" — then: "recheck your strategy to make
+this a real tool." Both are fair. What follows is what is established so far; a seven-dimension adversarial
+audit of the whole path is in flight and its conclusions will be logged separately.
+
+- **`audit.php` has never completed a single real fetch.** Its SSRF refusals were exercised directly and work;
+  its happy path has never run. The development sandbox has no outbound network to real sites (verified again
+  today against three domains), so this cannot be proven from here by any means. Everything below the endpoint
+  — 71 findings, both languages, the downloadable report — has only ever seen hand-written fixtures.
+- **`lang.frenchMissing` accuses compliant bilingual sites.** It is a `critical` whose copy cites the Charter of
+  the French Language and Bill 96, and it fires on 4 of 10 realistic bilingual markup shapes: a switcher whose
+  label sits in a `<span>` (WPML, Polylang, Elementor, Divi all do this), a flag image, French at `/fr-ca/`
+  rather than `/fr/`, and any server that answers 405 to the HEAD probe. Only a real `hreflang` pair is a safe
+  signal. This is the most damaging thing the tool can do: a wrong legal accusation, under MAW's name, with a
+  "book a call" button attached. **Not yet fixed** — the shape of the fix waits on the audit, because the same
+  defect is structural: a failed probe is currently indistinguishable from a negative result, everywhere.
+- **`seo.canonical.mismatch` was firing on correct canonicals** — the comparison included the scheme and the
+  `www.`, which are exactly what a canonical exists to declare. A site reached at `http://` or at `www.` whose
+  canonical names the https, non-www version was told its canonical "points somewhere else". Fixed: host and
+  path only, `www.` stripped, trailing slash ignored. Seven cases pinned in `scripts/audit-test.mjs`. The https
+  and duplicate-host stories are told by their own findings.
+- **A blocked fetch now says so.** 403, 406 and 429 on a home page are a bot wall in practice, and a great many
+  small-business sites sit behind Cloudflare, Sucuri or a firewall plugin; 503 counts only when a firewall
+  names itself in the headers or the body. New error `site_blocked` in both languages: "nothing is wrong on
+  your end — we just can't read it from outside", with the by-hand fallback. It replaces `site_error`, which
+  told the owner their own site had answered with an error.
+- **`scripts/audit-self.mjs` runs the checker against our own built pages**, served over real HTTP, presented
+  at their production address (an address is a property of the hosting, not of the markup). It is the cheapest
+  false-positive alarm there is: a site we built to pass these checks should pass them. It found the canonical
+  bug within a minute of existing. It runs as the `self` suite in `pnpm test` and is skipped without a build.
+  Our own pages score 87 / 85 / 95, with only hosting artifacts and two genuine notes about our FR title and
+  descriptions being slightly long.
+
+TODO(angelique): nothing here makes the check safe to put in front of the public yet. The blocking item is
+still "does PHP with outbound curl work on the SiteGround docroot", and it cannot be answered from this repo.
+
+
 ## 2026-09-16 — the site check, taken down to technical SEO
 
 Angelique: "For the website report generator, can we make it really intuitive like even down to technical SEO?"

@@ -188,7 +188,7 @@ export const POSITIVE_FINDING_IDS: readonly FindingId[] = [
 /** Error codes the fetch endpoint can return, so the sites can word them all. */
 export const AUDIT_ERROR_CODES = [
   'url_required', 'url_invalid', 'url_scheme', 'url_port', 'url_private', 'url_too_long',
-  'dns_failed', 'fetch_failed', 'site_error', 'too_many_redirects', 'rate_limited',
+  'dns_failed', 'fetch_failed', 'site_error', 'site_blocked', 'too_many_redirects', 'rate_limited',
   'method_not_allowed', 'network', 'not_configured',
 ] as const;
 
@@ -245,12 +245,18 @@ const visibleText = (html: string): string => html
   .replace(/\s+/g, ' ')
   .trim();
 
-/** Origin + path, no trailing slash, lowercased: enough to tell two addresses apart without false alarms. */
+/**
+ * Host and path only — no scheme, no `www.`, no trailing slash — because those three differences are what a
+ * canonical (or an hreflang self-link) exists to declare. We reach the page at whatever address the visitor
+ * typed; a canonical naming the https version, or the non-www one, is the tag doing its job, and reporting
+ * that as "points somewhere else" would be wrong on a correctly built site. A different path or a genuinely
+ * different domain still counts. The https and duplicate-host stories are told by their own findings.
+ */
 const sameAddress = (a: string, b: string): boolean => {
   const norm = (u: string): string => {
     try {
       const x = new URL(u, b);
-      return `${x.protocol}//${x.host}${x.pathname}`.replace(/\/+$/, '').toLowerCase();
+      return `${x.host.replace(/^www\./i, '')}${x.pathname.replace(/\/+$/, '')}`.toLowerCase();
     } catch {
       return u.replace(/\/+$/, '').toLowerCase();
     }

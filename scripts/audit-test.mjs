@@ -155,12 +155,21 @@ const mismatch = technical.findings.find((f) => f.id === 'seo.canonical.mismatch
 ok(mismatch?.evidence === 'https://autre-site.ca/', `canonical evidence quotes the address, got ${mismatch?.evidence}`);
 console.log('technical:', technical.score, technical.recommendation.id, ids(technical).length, 'findings');
 
-/* ---- a canonical that differs only by a trailing slash or a www is not a mismatch ---- */
-const canonical = analyze(snap({
-  finalUrl: 'https://example.ca/services/',
-  html: '<html lang="fr"><head><meta charset="utf-8"><title>Services de reparation</title><link rel="canonical" href="https://example.ca/services"></head><body><h1>x</h1></body></html>',
-}), versions);
-ok(!ids(canonical).includes('seo.canonical.mismatch'), 'trailing slash alone is not a canonical mismatch');
+/* ---- a canonical only counts as a mismatch when it names a different page ---- */
+const canonicalPage = (finalUrl, href) => ids(analyze(snap({
+  finalUrl,
+  html: `<html lang="fr"><head><meta charset="utf-8"><title>Services de reparation</title><link rel="canonical" href="${href}"></head><body><h1>x</h1></body></html>`,
+}), versions)).includes('seo.canonical.mismatch');
+// A canonical exists to declare the https, non-www, no-trailing-slash version of an address. Reporting it as
+// "points somewhere else" because the visitor typed the address a different way would be wrong on a correctly
+// built site — and every one of these was a false alarm until the self-check on our own pages caught it.
+ok(!canonicalPage('https://example.ca/services/', 'https://example.ca/services'), 'trailing slash alone is not a canonical mismatch');
+ok(!canonicalPage('http://example.ca/services/', 'https://example.ca/services/'), 'a canonical naming the https version is not a mismatch');
+ok(!canonicalPage('https://www.example.ca/services/', 'https://example.ca/services/'), 'a canonical naming the non-www version is not a mismatch');
+ok(!canonicalPage('https://example.ca/services/', 'https://www.example.ca/services/'), 'a canonical naming the www version is not a mismatch');
+ok(!canonicalPage('https://example.ca/services/', '/services/'), 'a relative canonical resolves against the page');
+ok(canonicalPage('https://example.ca/services/', 'https://example.ca/'), 'a canonical naming a different page is a mismatch');
+ok(canonicalPage('https://example.ca/services/', 'https://autre.ca/services/'), 'a canonical naming a different domain is a mismatch');
 
 /* ---- robots.txt: a later Allow: / cancels the site-wide Disallow ---- */
 const allowed = analyze(snap({

@@ -515,6 +515,7 @@
         "dns_failed": "We couldn't find that address. Check the spelling and try again.",
         "fetch_failed": "We couldn't reach that site. It may be down, or blocking us.",
         "site_error": "The site answered with an error ({status}). Try the exact address you use in your browser.",
+        "site_blocked": "That site is behind a security service that blocks automated checks. Nothing is wrong on your end — we just can't read it from outside. Send the address to {email} and we'll go through it by hand.",
         "too_many_redirects": "That address redirects in circles, so we stopped.",
         "rate_limited": "That's a few checks in a short time. Wait a couple of minutes and try again.",
         "method_not_allowed": "Something went wrong on our end. Try again.",

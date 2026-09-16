@@ -323,9 +323,32 @@ function probe(string $url, string $method = 'GET', int $keep = 4000): array {
 
 /* ------------------------------------------------------------------- run */
 
+/**
+ * Is a security service turning us away, rather than the site being broken? A great many small-business
+ * sites sit behind Cloudflare, Sucuri or a firewall plugin, and telling their owner "your site answered with
+ * an error" when it is really "we were refused at the door" is both wrong and alarming.
+ *
+ * 403, 406 and 429 on a home page are a bot wall in practice — a site that is genuinely broken returns 5xx.
+ * 503 is treated as real maintenance unless a firewall names itself.
+ */
+function is_blocked(array $page): bool {
+    $status = $page['status'];
+    $h = $page['headers'];
+    $named = ($h['server'] ?? '') . ' ' . ($h['via'] ?? '') . ' ' . ($h['x-powered-by'] ?? '');
+    $fingerprints = ($h['cf-ray'] ?? '') . ($h['cf-mitigated'] ?? '') . ($h['x-sucuri-id'] ?? '') . ($h['x-iinfo'] ?? '');
+    $firewall = $fingerprints !== ''
+        || preg_match('/cloudflare|sucuri|incapsula|imperva|akamai|ddos-guard|wordfence/i', $named) === 1
+        || preg_match('/attention required|just a moment|checking your browser|sucuri website firewall|enable javascript and cookies|ray id/i', $page['body'] ?? '') === 1;
+
+    if ($status === 403 || $status === 406 || $status === 429) {
+        return true;
+    }
+    return $status === 503 && $firewall;
+}
+
 $page = fetch_page($input);
 if ($page['status'] >= 400) {
-    fail('site_error', 502, ['status' => $page['status']]);
+    fail(is_blocked($page) ? 'site_blocked' : 'site_error', 502, ['status' => $page['status']]);
 }
 
 $parts = parse_url($page['finalUrl']);

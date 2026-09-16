@@ -12,6 +12,8 @@ const only = process.argv[2];
 const suites = [
   { name: 'quote', entry: 'scripts/quote-test.mjs' },
   { name: 'audit', entry: 'scripts/audit-test.mjs' },
+  // Runs the checker against this site's own built pages. Needs a build, so it is skipped without one.
+  { name: 'self', entry: 'scripts/audit-self.mjs', needs: 'sites/createawebsite-ca/dist' },
 ].filter((s) => !only || s.name === only);
 
 function findEsbuild() {
@@ -33,6 +35,10 @@ if (!esbuild) {
 mkdirSync(join(root, '.cache'), { recursive: true });
 let failed = false;
 for (const suite of suites) {
+  if (suite.needs && !existsSync(join(root, suite.needs))) {
+    console.log(`\n— ${suite.name} — skipped: no build at ${suite.needs}`);
+    continue;
+  }
   const out = join(root, '.cache', `${suite.name}.bundle.mjs`);
   const build = spawnSync(esbuild, [join(root, suite.entry), '--bundle', '--platform=node', '--format=esm', `--outfile=${out}`, '--log-level=warning'], { stdio: 'inherit' });
   if (build.status !== 0) { failed = true; continue; }
