@@ -250,12 +250,21 @@ export function mountAuditPanel(root: HTMLElement): void {
       const value = emailInput.value.trim();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) { setError(e.errors.email); emailInput.focus(); return; }
       setError(null);
-      if ((formEl.elements.namedItem('website') as HTMLInputElement).value) { show(viewSent(false)); return; }
+      // A filled honeypot is a bot. Show the same screen, hand over nothing, record nothing.
+      if ((formEl.elements.namedItem('website') as HTMLInputElement).value) { show(viewSent(false, 'unrecorded')); return; }
       if (Date.now() - loadedAt < 3000) { gateSay(e.errors.tooFast); return; }
 
       const followUp = consent.checked;
+
+      // Hand over the report first, and inside the click that asked for it. It is a blob this browser already
+      // holds — nothing about producing it can fail, and it does not belong to HubSpot. Downloading it after
+      // an awaited network call also puts it outside the user gesture, which Safari suppresses. Every branch
+      // below this line is about recording the lead; none of them is a reason to withhold what was promised.
+      downloadFile();
+
       if (!cfg.hubspot.portalId || !cfg.hubspot.formGuid) {
-        gateSay(interpolate(e.errors.notConfigured, { email: cfg.supportEmail }));
+        track('audit_gate_error', { code: 'not_configured' });
+        show(viewSent(followUp, 'unrecorded'));
         return;
       }
       submit.disabled = true;
@@ -272,7 +281,12 @@ export function mountAuditPanel(root: HTMLElement): void {
       });
       const res = await submitLead(hubspotEndpoint(cfg.hubspot), submission);
       submit.disabled = false;
-      if (!res.ok) { gateSay(interpolate(e.errors.network, { email: cfg.supportEmail })); return; }
+      if (!res.ok) {
+        // The only conversion event this tool has. Silence here is how MAW would never learn it was broken.
+        track('audit_gate_error', { code: 'network', status: res.status ?? 0 });
+        show(viewSent(followUp, 'unrecorded'));
+        return;
+      }
       track('audit_report_sent', { followUp: followUp ? 1 : 0, score: report!.score });
       show(viewSent(followUp));
     });
@@ -289,10 +303,9 @@ export function mountAuditPanel(root: HTMLElement): void {
     return [wrap];
   };
 
-  const viewSent = (followUp: boolean) => {
+  const viewSent = (followUp: boolean, recorded: 'recorded' | 'unrecorded' = 'recorded') => {
     const s = c.sent;
     const wrap = h('div', { class: 'report sent' });
-    downloadFile();
 
     const again = h('button', { type: 'button', class: 'btn btn-outline btn-small', text: s.downloadAgain });
     again.addEventListener('click', downloadFile);
@@ -312,7 +325,9 @@ export function mountAuditPanel(root: HTMLElement): void {
     wrap.append(
       h('h3', { class: 'report-h dot-end', tabindex: '-1', 'data-focus': true, text: s.heading.replace(/\.$/, '') }),
       h('p', { text: s.text }),
-      h('p', { class: 'hint', text: followUp ? s.followUp : s.noFollowUp }),
+      h('p', { class: 'hint', text: recorded === 'recorded'
+        ? (followUp ? s.followUp : s.noFollowUp)
+        : interpolate(s.unrecorded, { email: cfg.supportEmail }) }),
       h('div', { class: 'actions' }, again),
       h('div', { class: 'rec' },
         h('h4', { text: s.bookHeading }),

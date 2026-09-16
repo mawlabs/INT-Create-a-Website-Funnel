@@ -164,6 +164,21 @@ try {
       <body><h1>Bonjour</h1><img src="/a.jpg"></body></html>`,
     probes: { robots: { status: 404, ok: false }, sitemap: { status: 404, ok: false }, readme: { status: 200, ok: true, body: 'Version 5.9.3' } },
   };
+  // Downloads are recorded rather than performed, and the file's own contents are kept so we can read it.
+  await page.addInitScript(() => {
+    window.__downloads = [];
+    window.__downloadBodies = [];
+    const realCreate = URL.createObjectURL.bind(URL);
+    URL.createObjectURL = (blob) => {
+      blob.text().then((t) => window.__downloadBodies.push(t)).catch(() => {});
+      return realCreate(blob);
+    };
+    const realClick = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function () {
+      if (this.download) { window.__downloads.push(this.download); return; }
+      return realClick.call(this);
+    };
+  });
   await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
   await page.evaluate(() => sessionStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
@@ -210,9 +225,16 @@ try {
   await page.fill('#audit-email', 'owner@example.ca');
   await page.waitForTimeout(3200);   // clear the anti-bot timing guard, as a reader would
   await page.click('[data-audit-output] button[type="submit"]');
-  await page.waitForTimeout(200);
-  const gateStatus = await page.textContent('[data-audit-output] .form-status');
-  check('gate refuses to pretend it sent anything while HubSpot is unconfigured', gateStatus.includes('support@monkeysat.work'), gateStatus);
+  await page.waitForTimeout(300);
+  // The report is the thing that was promised, and it is a local blob. It is handed over whether or not the
+  // lead can be recorded — withholding it at the only conversion event the tool has was the old behaviour.
+  const unconfigured = await page.textContent('[data-audit-output]');
+  check('the report is delivered even when HubSpot is not configured',
+    (await page.evaluate(() => window.__downloads ?? [])).length === 1, JSON.stringify(await page.evaluate(() => window.__downloads ?? [])));
+  check('and the visitor is told plainly that nobody will follow up',
+    unconfigured.includes("couldn't save your address") && unconfigured.includes('support@monkeysat.work'), unconfigured.slice(0, 160));
+  await page.locator('[data-audit-output] .again button').click();
+  await page.waitForTimeout(150);
 
   // With HubSpot configured the gate sends, downloads the report and offers a call.
   // The ids are injected into the served HTML, because the site ships without them until Angelique supplies them.
@@ -223,21 +245,6 @@ try {
       .replace('&quot;portalId&quot;:&quot;&quot;', '&quot;portalId&quot;:&quot;1234&quot;')
       .replace('&quot;formGuid&quot;:&quot;&quot;', '&quot;formGuid&quot;:&quot;abcd&quot;');
     await route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body });
-  });
-  // Downloads are recorded rather than performed, and the file's own contents are kept so we can read it.
-  await page.addInitScript(() => {
-    window.__downloads = [];
-    window.__downloadBodies = [];
-    const realCreate = URL.createObjectURL.bind(URL);
-    URL.createObjectURL = (blob) => {
-      blob.text().then((t) => window.__downloadBodies.push(t)).catch(() => {});
-      return realCreate(blob);
-    };
-    const realClick = HTMLAnchorElement.prototype.click;
-    HTMLAnchorElement.prototype.click = function () {
-      if (this.download) { window.__downloads.push(this.download); return; }
-      return realClick.call(this);
-    };
   });
   await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
   check('hubspot ids reached the island', (await page.evaluate(() => JSON.parse(document.querySelector('[data-audit-panel]').dataset.config).hubspot.portalId)) === '1234');
@@ -253,7 +260,7 @@ try {
   await page.click('[data-audit-output] button[type="submit"]');
   await page.waitForSelector('[data-audit-output] .sent', { timeout: 5000 });
   const sent = await page.textContent('[data-audit-output]');
-  check('sent view confirms and promises follow-up when asked', sent.includes('On its way') && sent.includes('get back to you'));
+  check('sent view confirms and promises follow-up when asked', sent.includes("It's yours") && sent.includes('get back to you'), sent.slice(0, 120));
   check('sent view offers a call', sent.includes('Want it walked through'));
   check('booking link goes to the meeting page', (await page.getAttribute('[data-audit-output] a[data-cta="book"]', 'href')).includes('meetings.hubspot.com/ange1'));
   const downloads = await page.evaluate(() => window.__downloads ?? []);

@@ -147,6 +147,8 @@ export interface AuditCopy extends Reviewable {
   } & Reviewable;
   sent: {
     heading: string; text: string; followUp: string; noFollowUp: string; downloadAgain: string;
+    /** Shown when the report was handed over but the lead could not be recorded. Contains {email}. */
+    unrecorded: string;
     bookHeading: string; bookText: string; book: string; quote: string;
   } & Reviewable;
   /** The downloadable report is a standalone document, so it carries its own strings. */

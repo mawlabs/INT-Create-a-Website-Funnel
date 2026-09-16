@@ -418,7 +418,7 @@
       "button": "Analyser mon site",
       "checking": "On regarde votre site…",
       "again": "Analyser un autre site",
-      "disclaimer": "Ceci lit une page de l'extérieur, comme n'importe quel visiteur peut le faire. Aucune connexion, aucune modification, aucune recherche de fichiers privés.",
+      "disclaimer": "Nous lisons votre page d'accueil et quelques fichiers publics — robots.txt, votre plan de site, les adresses habituelles — comme le ferait n'importe quel visiteur ou moteur de recherche. Nous ne nous connectons pas, ne modifions rien et ne cherchons aucun fichier privé.",
       "truncated": "Votre page d'accueil est volumineuse : nous en avons lu la première partie. Certains décomptes ci-dessous peuvent être sous-évalués.",
       "nojs": "L'analyse de site a besoin de JavaScript. Envoyez votre adresse à {email} et on la fera à la main.",
       "result": {
@@ -462,7 +462,7 @@
         "label": "courriel",
         "consent": "J'aimerais qu'Angelique fasse un suivi sur ces constats.",
         "consentHint": "Laissez la case vide et vous n'aurez aucune nouvelle de nous. Vous aurez quand même le rapport.",
-        "purpose": "On conserve votre adresse pour vous envoyer ce rapport, et pour faire un suivi seulement si vous avez coché la case. Pas d'infolettre, pas de partage.",
+        "purpose": "Votre adresse est conservée avec ces constats pour que nous puissions faire un suivi — seulement si vous avez coché la case. Le rapport se télécharge directement sur cet appareil ; nous ne l'envoyons pas par courriel. Pas d'infolettre, aucun partage.",
         "button": "Obtenir le rapport",
         "sending": "Envoi…",
         "back": "Retour aux constats",
@@ -474,8 +474,8 @@
         }
       },
       "sent": {
-        "heading": "C'est parti.",
-        "text": "Le rapport se télécharge. Il est à vous, ou à remettre à la personne qui s'occupe de votre site.",
+        "heading": "Il est à vous.",
+        "text": "Le rapport se télécharge maintenant. Il est à vous, à garder ou à remettre à la personne qui s'occupe de votre site.",
         "followUp": "Angelique va lire ces constats et vous revenir dans un délai d'un jour ouvrable.",
         "_todo_replyTime": "TODO(angelique): confirmer la promesse de délai de réponse (brief §5.8)",
         "noFollowUp": "On ne vous contactera pas à ce sujet. Si vous changez d'idée, l'adresse dans le pied de page fonctionne toujours.",
@@ -483,7 +483,8 @@
         "bookHeading": "Vous voulez qu'on vous l'explique?",
         "bookText": "Vingt minutes avec Angelique, sans discours de vente : quoi corriger en premier, ce que ça coûte, et ce que vous pouvez faire vous-même.",
         "book": "Réserver un appel",
-        "quote": "Ou obtenir une soumission pour ces correctifs"
+        "quote": "Ou obtenir une soumission pour ces correctifs",
+        "unrecorded": "Le rapport s'est téléchargé, mais nous n'avons pas pu enregistrer votre adresse — personne ne fera donc de suivi. Si vous voulez qu'on passe ces constats en revue avec vous, écrivez à {email}."
       },
       "file": {
         "title": "Analyse de site — {host}",
@@ -535,10 +536,12 @@
         "site_error": "Le site a répondu par une erreur ({status}). Essayez l'adresse exacte que vous utilisez dans votre navigateur.",
         "site_blocked": "Ce site est protégé par un service de sécurité qui bloque les vérifications automatisées. Rien ne cloche de votre côté : nous ne pouvons simplement pas le lire de l'extérieur. Envoyez l'adresse à {email} et nous l'examinerons à la main.",
         "too_many_redirects": "Cette adresse redirige en boucle : nous avons arrêté.",
+        "redirect_unreachable": "Cette adresse envoie les visiteurs vers un endroit que nous ne pouvons pas suivre. Vérifiez où votre site redirige, ou écrivez à {email} et nous regarderons avec vous.",
         "rate_limited": "Ça fait plusieurs analyses en peu de temps. Attendez quelques minutes et réessayez.",
         "method_not_allowed": "Quelque chose s'est mal passé de notre côté. Réessayez.",
         "network": "L'analyse n'a pas pu se terminer. Réessayez, ou écrivez à {email} avec votre adresse.",
-        "not_configured": "L'analyse de site n'est pas encore activée. Écrivez à {email} avec votre adresse et on la fera à la main."
+        "not_configured": "L'analyse de site n'est pas encore activée. Écrivez à {email} avec votre adresse et on la fera à la main.",
+        "server_unavailable": "La vérification est en panne de notre côté, pas du vôtre. Écrivez à {email} avec votre adresse et nous la ferons à la main aujourd'hui."
       },
       "findings": {
         "https.missing": {
@@ -775,8 +778,18 @@
         },
         "lang.frenchMissing": {
           "title": "Nous n'avons trouvé aucune version française",
-          "detail": "Si vous faites affaire au Québec, votre site doit être disponible en français, au moins aussi en évidence que toute autre langue. C'est la Charte de la langue française, modifiée par la loi 96, pas une préférence.",
+          "detail": "La page est rédigée en anglais et l'adresse française habituelle a répondu par un « introuvable » net. Si vous faites affaire au Québec, votre site doit être disponible en français, au moins aussi en évidence que toute autre langue. C'est la Charte de la langue française, modifiée par la loi 96, pas une préférence.",
           "fix": "Faites traduire le site en français et publiez-le à ses propres adresses, puis reliez les deux versions entre elles."
+        },
+        "lang.frenchUnclear": {
+          "title": "Nous n'avons pas trouvé de version française",
+          "detail": "La page est rédigée en anglais et nous avons cherché une version française aux adresses habituelles sans la trouver. Elle existe peut-être ailleurs — si c'est le cas, dites-le-nous et ignorez ceci. Sinon : une entreprise qui fait affaire au Québec doit offrir le français, au moins aussi en évidence que toute autre langue.",
+          "fix": "Si vous avez une version française, assurez-vous qu'elle soit liée depuis chaque page et déclarée avec hreflang pour que les moteurs la trouvent aussi. Sinon, c'est la première chose à planifier."
+        },
+        "lang.declaredWrong": {
+          "title": "La page est en français mais se déclare en anglais",
+          "detail": "Les mots de la page sont français ; le code déclare une autre langue. Un lecteur d'écran lit alors le français avec une prononciation anglaise, ce qui est presque incompréhensible, et les moteurs peuvent montrer la page aux mauvaises personnes.",
+          "fix": "Changez l'attribut lang de la balise html pour fr-CA. Une ligne, et rien de visible ne change."
         },
         "lang.hreflangMissing": {
           "title": "Vos versions linguistiques ne sont pas reliées pour les moteurs",

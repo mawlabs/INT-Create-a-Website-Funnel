@@ -64,6 +64,10 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -p "${SG_PORT:-18765}" -H "${{ secrets.SG_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
+      # `--delete` plus an .htaccess in the repo means this deploy OWNS the docroot's Apache rules: anything
+      # Angelique changes in Site Tools (HTTPS Enforce, a redirect, a block) is silently reverted on the next
+      # push. TODO(angelique): decide which side owns it. If Site Tools should win, add
+      # --exclude='.htaccess' here and in staging.yml; if the repo should win, move the Site Tools rules in.
       - name: rsync to SiteGround
         run: |
           rsync -az --delete \

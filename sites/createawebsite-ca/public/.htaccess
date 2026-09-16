@@ -2,8 +2,14 @@
 
 RewriteEngine On
 
-# Force HTTPS
+# Force HTTPS.
+#
+# Both conditions have to hold. SiteGround terminates TLS in front of Apache, so on a genuinely secure request
+# Apache can still see HTTPS as off — and on `RewriteCond %{HTTPS} !=on` alone that redirects https to itself,
+# forever, which is ERR_TOO_MANY_REDIRECTS on every page of the site. Their own HTTPS Enforce writes the
+# X-Forwarded-Proto condition for exactly this reason.
 RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
 # Canonical host: non-www. TODO(angelique): confirm www or not (brief §10.4).

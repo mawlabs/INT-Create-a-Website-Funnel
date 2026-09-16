@@ -120,8 +120,8 @@ export const FINDING_IDS = [
   'seo.robots.missing', 'seo.robots.blocksAll', 'seo.robots.noSitemap',
   'seo.sitemap.present', 'seo.sitemap.missing', 'seo.sitemap.notXml',
   'seo.charset.missing', 'seo.thinContent', 'seo.internalLinks',
-  'lang.missing', 'lang.frenchMissing', 'lang.hreflangMissing', 'lang.bilingual',
-  'lang.hreflang.noSelf', 'lang.hreflang.noXDefault',
+  'lang.missing', 'lang.frenchMissing', 'lang.frenchUnclear', 'lang.declaredWrong',
+  'lang.hreflangMissing', 'lang.bilingual', 'lang.hreflang.noSelf', 'lang.hreflang.noXDefault',
   'mobile.viewport.missing', 'mobile.viewport.ok', 'mobile.viewport.noScale', 'mobile.viewport.fixedWidth',
   'speed.htmlWeight', 'speed.htmlWeight.info', 'speed.slowResponse', 'speed.fastResponse',
   'speed.blockingScripts', 'speed.stylesheets', 'speed.imagesNoDimensions', 'speed.noLazyLoading',
@@ -160,8 +160,9 @@ export const FINDING_AREAS: Record<FindingId, Area> = {
   'seo.sitemap.present': 'findability', 'seo.sitemap.missing': 'findability', 'seo.sitemap.notXml': 'findability',
   'seo.charset.missing': 'findability', 'seo.thinContent': 'findability', 'seo.internalLinks': 'findability',
 
-  'lang.missing': 'languages', 'lang.frenchMissing': 'languages', 'lang.hreflangMissing': 'languages',
-  'lang.bilingual': 'languages', 'lang.hreflang.noSelf': 'languages', 'lang.hreflang.noXDefault': 'languages',
+  'lang.missing': 'languages', 'lang.frenchMissing': 'languages', 'lang.frenchUnclear': 'languages',
+  'lang.declaredWrong': 'languages', 'lang.hreflangMissing': 'languages', 'lang.bilingual': 'languages',
+  'lang.hreflang.noSelf': 'languages', 'lang.hreflang.noXDefault': 'languages',
 
   'mobile.viewport.missing': 'phone', 'mobile.viewport.ok': 'phone',
   'mobile.viewport.noScale': 'phone', 'mobile.viewport.fixedWidth': 'phone',
@@ -188,7 +189,8 @@ export const POSITIVE_FINDING_IDS: readonly FindingId[] = [
 /** Error codes the fetch endpoint can return, so the sites can word them all. */
 export const AUDIT_ERROR_CODES = [
   'url_required', 'url_invalid', 'url_scheme', 'url_port', 'url_private', 'url_too_long',
-  'dns_failed', 'fetch_failed', 'site_error', 'site_blocked', 'too_many_redirects', 'rate_limited',
+  'dns_failed', 'fetch_failed', 'site_error', 'site_blocked', 'too_many_redirects', 'redirect_unreachable',
+  'rate_limited', 'server_unavailable',
   'method_not_allowed', 'network', 'not_configured',
 ] as const;
 
@@ -287,9 +289,45 @@ function robotsBlocksAll(body: string): string | undefined {
   return allowsRoot ? undefined : blocking;
 }
 
+/**
+ * Elements that actually load something, and the attribute that loads it.
+ *
+ * A hyperlink is not one of them. `<a href="http://facebook.com/…">` is an ordinary link to an ordinary site
+ * and the browser does nothing about it; matching any `href` made every page with an old footer link into a
+ * red critical reading "images or scripts get blocked, which breaks how the page looks". `rel` decides
+ * whether a `<link>` loads anything — `profile` and `pingback` do not.
+ */
+const SUBRESOURCE: Record<string, string[]> = {
+  img: ['src', 'srcset'], script: ['src'], iframe: ['src'], frame: ['src'],
+  video: ['src', 'poster'], audio: ['src'], source: ['src', 'srcset'],
+  embed: ['src'], track: ['src'], object: ['data'], input: ['src'],
+  link: ['href'], form: ['action'],
+};
+const LINK_LOADS = /(^|\s)(stylesheet|preload|prefetch|prerender|icon|apple-touch-icon|manifest)(\s|$)/i;
+
+function insecureSubresources(html: string): string[] {
+  const found = new Set<string>();
+  for (const [name, attrs] of Object.entries(SUBRESOURCE)) {
+    for (const tag of tags(html, name)) {
+      if (name === 'link' && !LINK_LOADS.test(attr(tag, 'rel') ?? '')) continue;
+      if (name === 'input' && (attr(tag, 'type') ?? '').toLowerCase() !== 'image') continue;
+      for (const a of attrs) {
+        const value = attr(tag, a);
+        if (!value) continue;
+        // srcset is a comma-separated list of "url descriptor" pairs; everything else is one url.
+        for (const candidate of value.split(',')) {
+          const url = candidate.trim().split(/\s+/)[0];
+          if (/^http:\/\//i.test(url)) found.add(url);
+        }
+      }
+    }
+  }
+  return [...found];
+}
+
 /* --------------------------------------------------------------- detection */
 
-export function detectPlatform(snap: Snapshot): { platform: Platform; version?: string } {
+export function detectPlatform(snap: Snapshot): { platform: Platform; version?: string; authoritative?: boolean } {
   const html = snap.html;
   const h = snap.headers;
   const generator = metaContent(html, 'generator') ?? '';
@@ -312,7 +350,8 @@ export function detectPlatform(snap: Snapshot): { platform: Platform; version?: 
   }
   if (/Joomla/i.test(generator)) return { platform: 'joomla' };
 
-  const wpVersion = detectWordPressVersion(snap);
+  const wp = detectWordPressVersion(snap);
+  const wpVersion = wp.version;
   const isWp = !!wpVersion
     || /WordPress/i.test(generator)
     || /\/wp-(content|includes)\//i.test(html)
@@ -320,24 +359,40 @@ export function detectPlatform(snap: Snapshot): { platform: Platform; version?: 
     || !!h['link']?.match(/wp-json/i);
   if (isWp) {
     const woo = /WooCommerce\s*([\d.]+)/i.exec(html) ?? /woocommerce[-_]/i.exec(html);
-    if (woo || /class="[^"]*woocommerce/i.test(html)) return { platform: 'woocommerce', version: wpVersion };
-    return { platform: 'wordpress', version: wpVersion };
+    if (woo || /class="[^"]*woocommerce/i.test(html)) return { platform: 'woocommerce', version: wpVersion, authoritative: wp.authoritative };
+    return { platform: 'wordpress', version: wpVersion, authoritative: wp.authoritative };
   }
   return { platform: 'unknown' };
 }
 
-function detectWordPressVersion(snap: Snapshot): string | undefined {
+/**
+ * Core assets whose `?ver=` really does track the WordPress release. Deliberately a short list: the old
+ * catch-all matched `/wp-includes/js/jquery/jquery.min.js?ver=3.7.1` — and since every caching plugin worth
+ * using excludes jQuery from concatenation, that is often the FIRST versioned asset in the document. A
+ * patched, hardened site was being told it was running WordPress 3.7.1 and was no longer supported.
+ */
+const CORE_ASSET = /\/wp-(?:includes|admin)\/(?:css\\?\/dist\\?\/block-library|css\\?\/classic-themes|css\\?\/dashicons|js\\?\/wp-emoji-release)[^"']*[?&]ver=(\d+\.\d+(?:\.\d+)?)/i;
+
+/**
+ * `authoritative` says whether the site told us its version or we guessed it from a file name. Only the
+ * site's own word is allowed to raise a critical: being wrong about this in front of someone's web guy costs
+ * more than the finding is worth.
+ */
+function detectWordPressVersion(snap: Snapshot): { version?: string; authoritative: boolean } {
   const generator = metaContent(snap.html, 'generator') ?? '';
   const fromMeta = generator.match(/WordPress\s+([\d.]+)/i);
-  if (fromMeta) return fromMeta[1];
-  const fromAsset = snap.html.match(/\/wp-(?:includes|admin)\/[^"']*[?&]ver=([\d]+\.[\d.]+)/i);
-  if (fromAsset) return fromAsset[1];
+  if (fromMeta) return { version: fromMeta[1], authoritative: true };
+
   const readme = snap.probes?.readme;
   if (readme?.ok && readme.body) {
     const m = readme.body.match(/Version\s+([\d.]+)/i);
-    if (m) return m[1];
+    if (m) return { version: m[1], authoritative: true };
   }
-  return undefined;
+
+  const fromAsset = snap.html.match(CORE_ASSET);
+  // Below 5.0 the block library did not exist, so a match that old is a misread, not an ancient site.
+  if (fromAsset && compareVersions(fromAsset[1], '5.0') >= 0) return { version: fromAsset[1], authoritative: false };
+  return { authoritative: false };
 }
 
 export function detectPhpVersion(snap: Snapshot): string | undefined {
@@ -357,6 +412,37 @@ function detectJQuery(html: string): string | undefined {
 const CMP_SIGNS = /cookiebot|onetrust|cookieconsent|cookie-law-info|complianz|axeptio|didomi|klaro|tarteaucitron|borlabs|termly|iubenda|usercentrics|osano|cookieyes/i;
 const ANALYTICS_SIGNS = /googletagmanager\.com\/gtag|google-analytics\.com\/(analytics|ga)\.js|gtag\s*\(|_gaq\.push|googletagmanager\.com\/gtm\.js|facebook\.net\/[^"']*fbevents/i;
 
+/** Did this probe come back at all? status 0 means no answer: a timeout, a refusal, or one we skipped. */
+const answered = (p?: Probe): boolean => !!p && p.status > 0;
+
+/**
+ * Is this probe positive evidence that the thing is NOT there? Only a clean 404 or 410 is. A 403, a 429, a
+ * 5xx or no answer at all means we could not tell — and "we could not tell" must never reach somebody as a
+ * statement of fact about their website.
+ */
+const missing = (p?: Probe): boolean => !!p && (p.status === 404 || p.status === 410);
+
+/**
+ * Which language a page is written in, judged from its own words rather than from what it declares.
+ *
+ * Deliberately crude and deliberately cautious: a short list of function words that belong to one language
+ * and not the other, over the first several hundred words, and it answers 'unknown' unless one side clearly
+ * wins. Its only job is to stop the tool telling an all-French business that it has no French.
+ */
+const FRENCH_WORDS = /\b(?:les|des|une|nous|vous|pour|avec|dans|est|sont|votre|notre|cette|qui|que|aux|du|et|sur|chez|leur|tous|toute|aussi|sans|mais|plus|ainsi|depuis|toujours|entre|selon|dont|alors|comme|fait|peut|ses|leurs|cela)\b/gi;
+const ENGLISH_WORDS = /\b(?:the|and|with|for|you|your|our|from|this|that|are|is|have|has|about|more|will|can|been|was|were|they|their|what|when|which|would|there|out|up|but|all|any|how|its|also|into|than|then|them|these|some)\b/gi;
+const LANGUAGE_SAMPLE = 400;
+
+function languageOfText(text: string): 'fr' | 'en' | 'unknown' {
+  const sample = text.split(' ').slice(0, LANGUAGE_SAMPLE).join(' ');
+  const fr = (sample.match(FRENCH_WORDS) ?? []).length;
+  const en = (sample.match(ENGLISH_WORDS) ?? []).length;
+  // Enough signal to be worth anything, and a clear enough margin that a few loan words cannot flip it.
+  if (fr >= 8 && fr > en * 1.5) return 'fr';
+  if (en >= 8 && en > fr * 1.5) return 'en';
+  return 'unknown';
+}
+
 /* ---------------------------------------------------------------- analysis */
 
 export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
@@ -375,7 +461,7 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   const h = snap.headers;
   const doc = head(html);
   const https = snap.finalUrl.startsWith('https://');
-  const { platform, version: platformVersion } = detectPlatform(snap);
+  const { platform, version: platformVersion, authoritative: versionIsStated } = detectPlatform(snap);
   const phpVersion = detectPhpVersion(snap);
   const isWordPress = platform === 'wordpress' || platform === 'woocommerce';
 
@@ -385,31 +471,30 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   } else {
     add('https.ok', 'good');
     const insecure = snap.probes?.insecure;
-    if (insecure && !(insecure.status >= 300 && insecure.status < 400 && (insecure.location ?? '').startsWith('https://'))) {
+    // No answer is not evidence that the insecure address works. Saying so would be inventing a finding.
+    if (answered(insecure) && !(insecure!.status >= 300 && insecure!.status < 400 && (insecure!.location ?? '').startsWith('https://'))) {
       add('https.noRedirect', 'warning');
     }
     if (!h['strict-transport-security']) add('https.noHsts', 'info');
   }
 
-  const mixedMatches = https
-    ? (html.match(/(?:src|href)\s*=\s*["']http:\/\/(?!(?:www\.)?(?:w3\.org|schema\.org|purl\.org|ogp\.me|gmpg\.org|xmlns))[^"']*/gi) ?? [])
-    : [];
-  if (mixedMatches.length > 0) {
-    const first = mixedMatches[0].replace(/^[^=]*=\s*["']/, '');
-    add('mixedContent', 'critical', { count: mixedMatches.length }, first);
-  }
+  const insecureLoads = https ? insecureSubresources(html) : [];
+  if (insecureLoads.length > 0) add('mixedContent', 'critical', { count: insecureLoads.length }, insecureLoads[0]);
 
   /* ---- platform and versions ---- */
   if (isWordPress) {
     if (platformVersion) {
-      if (compareVersions(platformVersion, versions.wordpress.minSupported) < 0) {
+      const unsupported = compareVersions(platformVersion, versions.wordpress.minSupported) < 0;
+      if (unsupported && versionIsStated) {
         add('wordpress.outdated', 'critical', { version: platformVersion, latest: versions.wordpress.latest });
-      } else if (compareVersions(platformVersion, versions.wordpress.latest) < 0) {
+      } else if (unsupported || compareVersions(platformVersion, versions.wordpress.latest) < 0) {
+        // A version pieced together from a file name is a warning at most, however old it looks.
         add('wordpress.behind', 'warning', { version: platformVersion, latest: versions.wordpress.latest });
       } else {
         add('wordpress.current', 'good', { version: platformVersion });
       }
-      add('wordpress.versionExposed', 'info', { version: platformVersion });
+      // Only a site that publishes its version is exposing it; one we inferred is not "visible to anyone".
+      if (versionIsStated) add('wordpress.versionExposed', 'info', { version: platformVersion });
     } else {
       add('wordpress.versionUnknown', 'info');
     }
@@ -496,15 +581,18 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   const robots = snap.probes?.robots;
   const robotsBody = robots?.ok ? (robots.body ?? '') : '';
   const blocked = robotsBlocksAll(robotsBody);
-  if (!robots?.ok) add('seo.robots.missing', 'warning');
-  else if (blocked) add('seo.robots.blocksAll', 'critical', {}, blocked);
-
+  if (robots?.ok) {
+    if (blocked) add('seo.robots.blocksAll', 'critical', {}, blocked);
+  } else if (missing(robots)) {
+    add('seo.robots.missing', 'warning');
+  }
   const sitemap = snap.probes?.sitemap;
   const sitemapFromRobots = /^\s*sitemap:\s*http/im.test(robotsBody);
   const sitemapIsHtml = sitemap?.ok && !!sitemap.body && /^\s*(?:﻿)?(?:<!doctype html|<html)/i.test(sitemap.body);
   if (sitemapIsHtml) add('seo.sitemap.notXml', 'warning', {}, sitemap.url);
   else if (sitemap?.ok || sitemapFromRobots) add('seo.sitemap.present', 'good', {}, sitemap?.ok ? sitemap.url : undefined);
-  else add('seo.sitemap.missing', 'warning');
+  else if (missing(sitemap)) add('seo.sitemap.missing', 'warning');
+  // Only worth saying when we actually read the file.
   if (robots?.ok && !sitemapFromRobots) add('seo.robots.noSitemap', 'info');
 
   const hasCharsetTag = tags(doc, 'meta').some((t) => attr(t, 'charset') || (attr(t, 'http-equiv') ?? '').toLowerCase() === 'content-type');
@@ -532,14 +620,36 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   const frLink = /(<a[^>]*>\s*(fran[çc]ais|fr)\s*<\/a>)/i.test(html);
   const frenchSomewhere = lang.startsWith('fr') || hasFrHreflang || frProbe || frLink;
 
+  // Before any of the metadata signals, read what the page actually says. All four signals above are
+  // metadata, and every one of them is absent on the commonest shape of French Quebec site there is: an
+  // all-French bakery on a theme that shipped `<html lang="en-US">`. Accusing that site of breaching the
+  // Charter is the worst thing this tool can do, so the words get the last word.
+  const written = languageOfText(text);
+
   if (!lang) add('lang.missing', 'warning');
-  if (!frenchSomewhere) {
-    add('lang.frenchMissing', 'critical');
-  } else if (!lang.startsWith('fr') && !hasFrHreflang && (frProbe || frLink)) {
-    add('lang.hreflangMissing', 'warning', {}, frProbe ? snap.probes?.fr?.url : undefined);
-  } else if (lang.startsWith('fr') || hasFrHreflang) {
-    add('lang.bilingual', 'good', {}, lang || undefined);
+
+  if (written === 'fr' && !lang.startsWith('fr')) {
+    // Written in French, declared as something else. A real problem — screen readers read it aloud with the
+    // wrong pronunciation — but a technical one, not a legal one.
+    add('lang.declaredWrong', 'warning', {}, lang || undefined);
   }
+
+  if (frenchSomewhere || written === 'fr') {
+    if (!lang.startsWith('fr') && !hasFrHreflang && (frProbe || frLink)) {
+      add('lang.hreflangMissing', 'warning', {}, frProbe ? snap.probes?.fr?.url : undefined);
+    } else if (lang.startsWith('fr') || hasFrHreflang) {
+      add('lang.bilingual', 'good', {}, lang || undefined);
+    }
+  } else if (written === 'en' && missing(snap.probes?.fr)) {
+    // English words, and the usual French address answered a clean 404. That is as close to certain as this
+    // check gets, and only here is the Charter worth naming.
+    add('lang.frenchMissing', 'critical');
+  } else if (written === 'en') {
+    // English words, but we could not confirm there is no French version — it may live somewhere we did not
+    // look. Ask rather than accuse.
+    add('lang.frenchUnclear', 'warning');
+  }
+  // Too little text to judge: say nothing at all.
 
   // Wiring between the language versions, checked only where there is wiring to judge.
   const alternates = tags(doc, 'link').filter((t) => attr(t, 'hreflang'));
@@ -641,12 +751,25 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   const builder = platform === 'wix' || platform === 'squarespace' || platform === 'webflow';
   const frenchMissing = findings.some((f) => f.id === 'lang.frenchMissing');
 
+  /**
+   * Telling a stranger their website should be rebuilt is a costing claim, and the engine has no basis for
+   * one it can only reach by adding up invented weights. It is now grounded in named findings instead: the
+   * things that genuinely mean "this is past patching". A long tail of small notes cannot reach that verdict,
+   * and with no critical findings at all it is never reached — the report was previously capable of printing
+   * "nothing urgent came up" directly above "a rebuild will cost less than the repairs".
+   */
+  const PAST_PATCHING: FindingId[] = [
+    'php.eol', 'wordpress.outdated', 'https.missing', 'mobile.viewport.missing',
+    'seo.robots.blocksAll', 'seo.noindex', 'seo.title.missing',
+  ];
+  const severe = findings.filter((f) => PAST_PATCHING.includes(f.id)).length;
+
   let recommendation: AuditReport['recommendation'];
-  if (score >= 80 && counts.critical === 0) {
+  if (counts.critical === 0 && counts.warning === 0) {
     recommendation = { id: 'healthy', projectType: 'changes', currentPlatform };
-  } else if (score < 55 && builder) {
+  } else if (builder && counts.critical > 0) {
     recommendation = { id: 'migration', projectType: 'redesign', currentPlatform, approach: 'migration' };
-  } else if (score < 55) {
+  } else if (severe >= 2) {
     recommendation = { id: 'redesign', projectType: 'redesign', currentPlatform, approach: 'fullRedesign' };
   } else if (frenchMissing && counts.critical <= 1) {
     recommendation = { id: 'french', projectType: 'changes', currentPlatform };

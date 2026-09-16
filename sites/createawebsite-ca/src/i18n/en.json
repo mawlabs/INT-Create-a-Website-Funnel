@@ -400,7 +400,7 @@
       "button": "Check my site",
       "checking": "Looking at your site…",
       "again": "Check another site",
-      "disclaimer": "This reads one page from the outside, the way any visitor can. It doesn't log in, change anything, or scan for private files.",
+      "disclaimer": "We read your home page and a handful of public files — robots.txt, your sitemap, the usual addresses — the way any visitor or search engine can. We don't log in, change anything, or look for private files.",
       "truncated": "Your home page is large, so we read the first part of it. A few counts below may be low.",
       "nojs": "The site check needs JavaScript. Email your address to {email} and we'll run it by hand.",
       "result": {
@@ -444,7 +444,7 @@
         "label": "email",
         "consent": "I'd like Angelique to follow up about these findings.",
         "consentHint": "Leave it unticked and you'll hear nothing from us. You'll still get the report.",
-        "purpose": "We keep your address to send you this report, and to follow up only if you ticked the box. No newsletter, no sharing.",
+        "purpose": "Your address is stored with these findings so we can follow up — only if you ticked the box. The report downloads straight to this device; we don't email it. No newsletter, no sharing.",
         "button": "Get the report",
         "sending": "Sending…",
         "back": "Back to the findings",
@@ -456,7 +456,7 @@
         }
       },
       "sent": {
-        "heading": "On its way.",
+        "heading": "It's yours.",
         "text": "The report is downloading now. It's yours to keep, or to hand to whoever looks after your site.",
         "followUp": "Angelique will read these findings and get back to you within one business day.",
         "_todo_replyTime": "TODO(angelique): confirm the reply-time promise (brief §5.8)",
@@ -465,7 +465,8 @@
         "bookHeading": "Want it walked through?",
         "bookText": "Twenty minutes with Angelique, no pitch: what to fix first, what it costs, and what you can do yourself.",
         "book": "Book a call",
-        "quote": "Or get a quote to fix these"
+        "quote": "Or get a quote to fix these",
+        "unrecorded": "The report downloaded, but we couldn't save your address — so nobody will follow up. If you'd like us to go through these findings with you, email {email}."
       },
       "file": {
         "title": "Site check — {host}",
@@ -517,10 +518,12 @@
         "site_error": "The site answered with an error ({status}). Try the exact address you use in your browser.",
         "site_blocked": "That site is behind a security service that blocks automated checks. Nothing is wrong on your end — we just can't read it from outside. Send the address to {email} and we'll go through it by hand.",
         "too_many_redirects": "That address redirects in circles, so we stopped.",
+        "redirect_unreachable": "That address sends visitors somewhere we can't follow. Check where your site redirects to, or email {email} and we'll look at it with you.",
         "rate_limited": "That's a few checks in a short time. Wait a couple of minutes and try again.",
         "method_not_allowed": "Something went wrong on our end. Try again.",
         "network": "We couldn't complete the check. Try again, or email {email} with your address.",
-        "not_configured": "The site check isn't switched on yet. Email {email} with your address and we'll run it by hand."
+        "not_configured": "The site check isn't switched on yet. Email {email} with your address and we'll run it by hand.",
+        "server_unavailable": "The check is broken on our end, not yours. Email {email} with your address and we'll run it by hand today."
       },
       "findings": {
         "https.missing": {
@@ -757,8 +760,18 @@
         },
         "lang.frenchMissing": {
           "title": "We found no French version",
-          "detail": "If you do business in Quebec, your site has to be available in French, at least as prominently as any other language. That's the Charter of the French Language, updated by Bill 96, not a preference.",
+          "detail": "The page is written in English, and the usual French address answered with a clear “not found”. If you do business in Quebec, your site has to be available in French, at least as prominently as any other language. That's the Charter of the French Language, updated by Bill 96, not a preference.",
           "fix": "Have the site translated into French and published at its own addresses, then link the two versions to each other."
+        },
+        "lang.frenchUnclear": {
+          "title": "We couldn't find a French version",
+          "detail": "The page is written in English and we looked for a French one at the usual addresses without finding it. It may well exist somewhere we didn't look — if it does, tell us and ignore this. If it doesn't: a business doing business in Quebec has to offer French, at least as prominently as any other language.",
+          "fix": "If you have a French version, make sure it is linked from every page and declared with hreflang so search engines find it too. If you don't, that is the first thing to plan."
+        },
+        "lang.declaredWrong": {
+          "title": "The page is in French but says it's in English",
+          "detail": "The words on the page are French; the code declares another language. A screen reader then reads French aloud with English pronunciation, which is close to unintelligible, and search engines can show the page to the wrong people.",
+          "fix": "Change the lang attribute on the html tag to fr-CA. One line, and nothing visible changes."
         },
         "lang.hreflangMissing": {
           "title": "Your language versions aren't linked for search engines",

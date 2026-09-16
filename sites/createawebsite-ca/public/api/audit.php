@@ -44,6 +44,12 @@ function fail(string $code, int $status = 400, array $extra = []): never {
 
 /* ----------------------------------------------------------------- input */
 
+// Preflight. Without this, a docroot missing curl — or running an older PHP than the syntax here needs —
+// answers every visitor with something that reads like their own fault. Say it is ours.
+if (PHP_VERSION_ID < 80100 || !extension_loaded('curl')) {
+    fail('server_unavailable', 503);
+}
+
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
     http_response_code(204);
     exit;
@@ -140,43 +146,55 @@ function resolve_host(string $host): array {
 }
 
 /**
- * Validate a URL and return [normalized url, host, port, pinned ip].
- * Rejects anything that is not a public http(s) endpoint on a default port.
+ * Validate a URL. Returns ['ok' => true, 'url', 'host', 'port', 'ip'] or ['ok' => false, 'reason' => code].
+ *
+ * This function REFUSES; it never ends the request. That distinction matters: a side probe that cannot be
+ * validated — a domain with no `www.` record, a redirect to a non-standard port — must leave the scan intact,
+ * and a refusal thrown as `exit` from three frames down cannot be caught by anything. Only the caller knows
+ * whether a refusal is the visitor's problem or the scanned site's.
+ *
+ * The rules below are unchanged: public http(s) only, default ports only, we resolve the host ourselves, and
+ * a single private answer refuses the whole name rather than letting us pick another address.
  */
-function check_url(string $url): array {
+function validate_url(string $url): array {
+    $no = static fn (string $reason): array => ['ok' => false, 'reason' => $reason];
+
     $parts = parse_url($url);
     if ($parts === false || empty($parts['host'])) {
-        fail('url_invalid');
+        return $no('url_invalid');
     }
     $scheme = strtolower($parts['scheme'] ?? '');
     if ($scheme !== 'http' && $scheme !== 'https') {
-        fail('url_scheme');
+        return $no('url_scheme');
     }
     if (!empty($parts['user']) || !empty($parts['pass'])) {
-        fail('url_invalid');
+        return $no('url_invalid');
     }
     $host = $parts['host'];
     $port = (int) ($parts['port'] ?? ($scheme === 'https' ? 443 : 80));
     if ($port !== 80 && $port !== 443) {
-        fail('url_port');
+        return $no('url_port');
     }
     if (str_ends_with(strtolower($host), '.local') || !str_contains($host, '.')) {
-        fail('url_private');
+        return $no('url_private');
     }
     $ips = resolve_host($host);
     if ($ips === []) {
-        fail('dns_failed', 502);
+        return $no('dns_failed');
     }
     $pinned = null;
     foreach ($ips as $ip) {
         if (!is_public_ip($ip)) {
-            fail('url_private');   // any private answer at all: refuse, rather than pick another
+            return $no('url_private');   // any private answer at all: refuse, rather than pick another
         }
         $pinned ??= $ip;
     }
     $path = $parts['path'] ?? '/';
     $query = isset($parts['query']) ? '?' . $parts['query'] : '';
-    return [$scheme . '://' . $host . ($port !== ($scheme === 'https' ? 443 : 80) ? ':' . $port : '') . $path . $query, $host, $port, $pinned];
+    $normalized = $scheme . '://' . $host
+        . ($port !== ($scheme === 'https' ? 443 : 80) ? ':' . $port : '')
+        . $path . $query;
+    return ['ok' => true, 'url' => $normalized, 'host' => $host, 'port' => $port, 'ip' => $pinned];
 }
 
 /* ------------------------------------------------------------------ fetch */
@@ -186,7 +204,13 @@ function check_url(string $url): array {
  * $method may be 'GET' or 'HEAD'.
  */
 function request(string $url, int $cap, string $method = 'GET', int $timeout = TOTAL_TIMEOUT): array {
-    [$normalized, $host, $port, $ip] = check_url($url);
+    $checked = validate_url($url);
+    if (!$checked['ok']) {
+        // The same shape a dead connection returns, so every caller already handles it.
+        return ['ok' => false, 'status' => 0, 'error' => $checked['reason'], 'headers' => [], 'body' => '',
+                'bytes' => 0, 'elapsedMs' => 0, 'url' => $url];
+    }
+    [$normalized, $host, $port, $ip] = [$checked['url'], $checked['host'], $checked['port'], $checked['ip']];
 
     $headers = [];
     $body = '';
@@ -207,6 +231,9 @@ function request(string $url, int $cap, string $method = 'GET', int $timeout = T
         CURLOPT_SSL_VERIFYHOST => 2,
         CURLOPT_PROTOCOLS      => CURLPROTO_HTTP | CURLPROTO_HTTPS,
         CURLOPT_COOKIEFILE     => '',
+        // libcurl reads http_proxy/https_proxy from the environment unless this is set. A proxy resolves the
+        // name itself, which would quietly make CURLOPT_RESOLVE — the whole rebinding defence — do nothing.
+        CURLOPT_PROXY          => '',
         CURLOPT_RESOLVE        => ["$host:$port:$ip"],
         CURLOPT_HTTPHEADER     => ['Accept: text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8', 'Accept-Language: en-CA,fr-CA;q=0.9'],
         CURLOPT_HEADERFUNCTION => function ($ch, string $line) use (&$headers): int {
@@ -239,8 +266,16 @@ function request(string $url, int $cap, string $method = 'GET', int $timeout = T
     $okCurl = curl_exec($ch);
     $elapsed = (int) round((microtime(true) - $started) * 1000);
     $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    $peer = (string) curl_getinfo($ch, CURLINFO_PRIMARY_IP);
     $error = curl_error($ch);
     curl_close($ch);
+
+    // Belt and braces on the pin: if we did not end up talking to the address we validated, discard the
+    // answer whatever it says. This catches a proxy, a rebinding race, or a future edit that drops the pin.
+    if ($peer !== '' && $peer !== $ip) {
+        return ['ok' => false, 'status' => 0, 'error' => 'url_private', 'headers' => [], 'body' => '',
+                'bytes' => 0, 'elapsedMs' => $elapsed, 'url' => $normalized];
+    }
 
     if ($okCurl === false && !$aborted && $status === 0) {
         return ['ok' => false, 'status' => 0, 'error' => $error, 'headers' => [], 'body' => '', 'bytes' => 0, 'elapsedMs' => $elapsed, 'url' => $normalized];
@@ -258,14 +293,31 @@ function request(string $url, int $cap, string $method = 'GET', int $timeout = T
     ];
 }
 
-/** Follow redirects by hand so every hop is validated. */
+/**
+ * Follow redirects by hand so every hop is validated.
+ *
+ * This is the one place a refusal ends the request, because this is the one address the visitor typed. Their
+ * own address earns a precise answer — "we couldn't find that address" belongs to a name THEY wrote, never to
+ * a hop the site chose for them.
+ */
 function fetch_page(string $url): array {
+    /** Refusals that describe the address rather than the connection, and are worth repeating verbatim. */
+    $addressReasons = ['url_invalid', 'url_scheme', 'url_port', 'url_private', 'dns_failed'];
+
     $redirects = [];
     $current = $url;
     for ($i = 0; $i <= MAX_REDIRECTS; $i++) {
         $res = request($current, MAX_BYTES);
         if ($res['status'] === 0) {
-            fail('fetch_failed', 502, ['detail' => $res['error'] ?? '']);
+            $reason = $res['error'] ?? '';
+            if ($i === 0 && in_array($reason, $addressReasons, true)) {
+                fail($reason, $reason === 'dns_failed' ? 502 : 400);
+            }
+            if ($i > 0 && in_array($reason, $addressReasons, true)) {
+                // The site sent us somewhere we will not or cannot go. Not the visitor's spelling.
+                fail('redirect_unreachable', 502, ['detail' => $reason]);
+            }
+            fail('fetch_failed', 502, ['detail' => $reason]);
         }
         $location = $res['headers']['location'] ?? null;
         if ($res['status'] >= 300 && $res['status'] < 400 && $location) {

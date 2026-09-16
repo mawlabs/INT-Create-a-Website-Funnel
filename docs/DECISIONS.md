@@ -99,6 +99,112 @@ this outright. Two fixes:
   even though it did not here. The report already carries a checked-on date, which would then mean something.
 
 
+## 2026-09-16 (evening) — the site check, audited and cut back to what it can prove
+
+Angelique: "recheck your strategy to make this a real tool." Seven independent auditors went through the whole
+path — hosting, real-world HTTP, false positives across all 71 checks, detection, abuse, privacy, product —
+and every serious finding went to a refuter told to knock it down and default to refuting when uncertain.
+55 raised, 7 refuted, 48 standing, 5 blockers. **Every engine-level claim below was then reproduced by hand
+before anything was changed.** The verdict: yes, but only as a smaller tool, and only after one real fetch.
+
+### What was demonstrably wrong, and is now fixed
+
+- **A side probe could kill a finished scan.** `probe()` wraps `request()` in `catch (Throwable)`, but
+  `check_url()` ended a refusal with `fail()`, which is `exit` — and `exit` is not a Throwable, so the catch
+  was inert. The `altHost` probe added the day before builds `www.` + host with only a syntactic guard, so a
+  bakery whose domain has no `www.` record got a complete page fetch, eight completed probes, then a hard 502
+  that the panel worded as "We couldn't find that address. Check the spelling and try again." Their own
+  address, on a page selling technical competence. `check_url` is now `validate_url`, which RETURNS a reason
+  and never exits; `request()` turns a refusal into the dead-connection shape every caller already handles.
+  **The SSRF rules are unchanged byte-for-byte** — this is control flow, not policy. Only `fetch_page`'s first
+  hop can still end the request, because that is the one address the visitor typed; a later hop gets its own
+  `redirect_unreachable` wording instead of blaming their spelling.
+- **`mixedContent` fired CRITICAL on ordinary hyperlinks.** It matched `href="http://…"` on any element, so
+  two footer links to Facebook and ville.quebec.qc.ca produced "2 things on the page still load insecurely —
+  images or scripts get blocked, which breaks how the page looks". Disprovable by looking at the screen, and
+  it dropped a perfect site from 100 to 77. Now matches sub-resources per element (`img`, `script`, `iframe`,
+  `source`, `object[data]`, `input[type=image]`, `link` only for rels that load, `form[action]`), handles
+  `srcset` lists, and dedupes. `<a href="http://…">` produces nothing, which is correct.
+- **The WordPress version was read off jQuery.** `detectWordPressVersion` took the first
+  `/wp-*/…?ver=` in the document, and every caching plugin worth using excludes jQuery from concatenation —
+  so `jquery.min.js?ver=3.7.1` is often first, and a patched site was told "WordPress 3.7.1 is no longer
+  supported… most hacked sites are simply out-of-date ones". The correct answer was already in the snapshot:
+  `/readme.html` was probed, then consulted *after* the asset regex. Order is now generator → readme → assets,
+  the asset pattern is restricted to core files whose `?ver=` really tracks the release, and a version we
+  inferred rather than were told can raise a warning but never a critical.
+- **Unanswered probes were reported as facts.** A timed-out, refused or skipped probe (`status: 0`) was
+  indistinguishable from a negative, so "No robots.txt file", "No sitemap found" and "The old insecure address
+  still works" were asserted on no evidence. Two helpers now draw the line: `answered()` (did it come back)
+  and `missing()` (a clean 404 or 410 — a 403, a 429 or a 5xx is not proof of absence). Silence where we
+  cannot tell.
+- **A false Bill 96 accusation, on the commonest French Quebec site there is.** All four French signals were
+  metadata; the page's own words were computed and never consulted. An all-French bakery on a theme shipping
+  `<html lang="en-US">` had every signal structurally absent and got "We found no French version… that's the
+  Charter of the French Language, updated by Bill 96, not a preference." So did any site whose switcher wraps
+  its label in a `<span>` (WPML, Polylang, Elementor, Divi), or uses a flag image, or puts French at `/fr-ca/`.
+  `languageOfText()` now scores function words that belong to one language and not the other over the first
+  400 words, and answers 'unknown' unless one side clearly wins. Written in French but declared otherwise is a
+  new plain warning (`lang.declaredWrong`) about screen readers, not a law. The Charter finding survives only
+  where the page reads as English *and* the usual French address answered a clean 404. Everything in between
+  is a new question, not an accusation (`lang.frenchUnclear`). Too little text to judge says nothing at all.
+  Two test fixtures had pinned the false positive as correct; both are inverted, with eight cases around them.
+- **A rebuild was recommended to sites with nothing critically wrong.** `redesign` and `migration` consulted
+  nothing but `score < 55`, and a serviceable site reached penalty 51 on warnings and one-point notes alone —
+  so the report printed "Nothing urgent came up, which is rarer than you'd think" directly above "A rebuild
+  will cost less than the repairs". That is a costing claim the engine has no basis for, and CLAUDE.md #5 bars
+  it. The verdict is now grounded in named findings (`php.eol`, `wordpress.outdated`, `https.missing`,
+  `mobile.viewport.missing`, `seo.robots.blocksAll`, `seo.noindex`, `seo.title.missing`): two or more of those
+  for a redesign, a builder plus a critical for a migration, and never either with zero criticals.
+- **PHP 8.3 was told it was fine.** `securityOnly: '8.3'` is a threshold, not a branch name, so 8.3 landed in
+  `php.current` — "Nothing to do here" — although it left active support in December 2025. Corrected to 8.4,
+  with every branch now pinned by a fixture. The wider problem stands: this file has never been checked
+  against upstream and stale data here does not go quiet, **it asserts a green tick**. Its header now says so.
+- **The lead magnet was withheld at the only conversion event the tool has.** Any HubSpot 4xx, any missing
+  form id, any ad blocker on api.hsforms.com meant the visitor typed their address and got an error — while
+  the honeypot branch handed bots the file. The report is a local blob: it is now delivered immediately, inside
+  the click that asked for it (also keeping it in the user gesture, which Safari requires), and the CRM post is
+  best-effort. When it fails the visitor is told plainly that nobody will follow up and given the support
+  address. Both failure branches fire `audit_gate_error`, because silence is how MAW would never learn.
+- **The stated purpose of collecting the email was false.** "We keep your address to send you this report" —
+  there is no mail transport anywhere in the repo, and that exact string was stored in HubSpot as the consent
+  record. For a visitor who left the follow-up box unticked, a purpose that never occurs was the only one on
+  file. Rewritten in both languages to describe what actually happens. The disclaimer's "This reads one page"
+  was also false — a WordPress scan makes eleven to sixteen requests — and now says so.
+- **The deployed `.htaccess` could take the whole site down.** `RewriteCond %{HTTPS} !=on` alone, with
+  SiteGround terminating TLS in front of Apache, redirects https to itself forever:
+  ERR_TOO_MANY_REDIRECTS on every page, not just the check. Added the `X-Forwarded-Proto` condition their own
+  HTTPS Enforce writes for this reason.
+- **Preflight and pinning.** The endpoint now refuses with `server_unavailable` ("broken on our end, not
+  yours") when PHP is too old or curl is missing, instead of failing in a way that reads as the visitor's
+  fault. `CURLOPT_PROXY => ''` stops libcurl reading `http_proxy` from the environment — a proxy resolves the
+  name itself, which would have quietly made `CURLOPT_RESOLVE`, the whole rebinding defence, do nothing. And
+  every response is now checked against `CURLINFO_PRIMARY_IP`: if we did not talk to the address we validated,
+  the answer is discarded whatever it says.
+
+### Still open, and blocking
+
+1. **TODO(angelique) — one file answers five questions at once.** Nothing has ever proved `audit.php` can
+   fetch anything. Deploy a throwaway `selftest.php` to the demo docroot printing `PHP_VERSION`,
+   `extension_loaded('curl')`, `curl_version()`, `getenv('http_proxy')`, whether `sys_get_temp_dir()` is
+   writable, `REMOTE_ADDR`, and one outbound HTTPS GET with `CURLINFO_PRIMARY_IP`. Load it once, paste the
+   output here, delete it. Every other decision is downstream of this.
+2. **TODO(angelique) — the rate limiter is wrong in both directions.** It writes to `sys_get_temp_dir()` and
+   **fails open** when that is not writable, leaving an unauthenticated URL fetcher on a shared account; and
+   `client_ip()` reads `REMOTE_ADDR` raw, so behind SiteGround's front end every Quebec visitor may share one
+   bucket and the 13th genuine prospect in ten minutes is told to wait. Not yet changed because the right
+   answer depends on (1).
+3. **TODO(angelique) — the privacy page does not mention the site check at all.** Not the address typed, not
+   the gate email, not the findings, not the HubSpot hand-off — and it closes a section with "Nothing else."
+   Related and fixable in code: the audit summary is written to `sessionStorage` on every scan and folded into
+   any later quote, so someone who declines the gate still sends their findings to `process-lead` under an
+   intake consent line that mentions only "my details and these answers".
+4. **The score.** Still an invented curve presented as a number beside a Book a call button, still the open
+   question from 8 September. The rebuild verdict no longer depends on it, which was the dangerous part.
+5. **Cutting.** The audit's recommendation is a tool of roughly a dozen checks that cannot be wrong, replayed
+   first against a captured corpus of 40–60 real Quebec sites. That corpus cannot be built from this sandbox.
+   Nothing has been cut yet — correctness first, then the knife.
+
+
 ## 2026-09-16 (later) — the site check has never seen a real website
 
 Angelique: "Can this work for real though by just entering a domain?" — then: "recheck your strategy to make

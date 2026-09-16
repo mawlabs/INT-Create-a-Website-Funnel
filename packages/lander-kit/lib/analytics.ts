@@ -68,7 +68,9 @@ export function loadGA4(measurementId: string): void {
 export type EventName =
   | 'price_reveal' | 'cta_click' | 'form_submit' | 'lang_switch'
   | 'quote_start' | 'quote_step' | 'quote_shown' | 'quote_accept' | 'quote_lead' | 'book_call' | 'out_of_budget'
-  | 'audit_start' | 'audit_done' | 'audit_error' | 'audit_to_quote' | 'audit_report_open' | 'audit_report_sent';
+  | 'audit_start' | 'audit_done' | 'audit_error' | 'audit_to_quote' | 'audit_report_open' | 'audit_report_sent'
+  // The gate is the only conversion event the site check has. When it breaks, silence is how nobody finds out.
+  | 'audit_gate_error';
 
 /**
  * Record an event. Before consent (or after decline) this only touches an in-memory array — no network.
