@@ -14,6 +14,8 @@ const suites = [
   { name: 'audit', entry: 'scripts/audit-test.mjs' },
   // Runs the checker against this site's own built pages. Needs a build, so it is skipped without one.
   { name: 'self', entry: 'scripts/audit-self.mjs', needs: 'sites/createawebsite-ca/dist' },
+  // Replays real websites captured by scripts/audit-capture.mjs. Skips itself until a corpus exists.
+  { name: 'corpus', entry: 'scripts/audit-corpus.mjs' },
 ].filter((s) => !only || s.name === only);
 
 function findEsbuild() {

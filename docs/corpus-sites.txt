@@ -1,0 +1,9 @@
+# One domain per line. Feed to: node scripts/audit-capture.mjs --from docs/corpus-sites.txt
+# Blank lines and everything after a # are ignored.
+#
+# Aim for 40–60 that look like the audience: small Quebec businesses, mostly WordPress, a mix of French-only,
+# English-only and bilingual, some on Wix or Squarespace, some behind Cloudflare. Include sites you know are
+# WELL BUILT — those are the ones that expose a false positive.
+#
+# TODO(angelique): fill this in. Past clients, prospects, the businesses on your street. Nothing invented —
+# every domain here has to be a real site someone actually runs.

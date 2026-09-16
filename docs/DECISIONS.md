@@ -99,6 +99,63 @@ this outright. Two fixes:
   even though it did not here. The report already carries a checked-on date, which would then mean something.
 
 
+## 2026-09-16 (night) — two tracks, and only one of them needs SiteGround
+
+Angelique: "so its not a working thing yet. if not how can we make it a working thing". Correct, and the
+honest reason it has stayed not-working is that one unanswered hosting question was being treated as blocking
+everything. It is not. There are two independent problems, and the second one can be finished this week on a
+laptop.
+
+**Track 1 — does the endpoint work? (blocked on one upload.)** `tools/selftest.php` now exists: a keyed,
+throwaway file, deliberately outside any `public/` directory so no deploy ships it. Uploaded by hand and
+loaded once, it answers every open hosting question at the same time — PHP version and whether it is new
+enough for `audit.php`'s syntax, whether ext-curl is loaded and has `CURLOPT_RESOLVE`, whether an environment
+proxy would void the address pin, whether the host can reach the open internet at all (it fetches one public
+URL and reports the peer IP), whether `sys_get_temp_dir()` is writable (the rate limiter currently fails
+**open** if it is not), what `REMOTE_ADDR` actually is behind SiteGround's front end, and whether Apache sees
+`HTTPS=on` (which decides the `.htaccess` rule). It ends with a verdict and a list of what would need fixing.
+Load it from the office and from a phone on cellular: the same `REMOTE_ADDR` twice means every visitor shares
+one rate-limit bucket. Paste the JSON here, then delete the file.
+
+**Track 2 — is the engine right? (not blocked on anything.)** This never needed SiteGround, PHP, or a deploy;
+it needed real web pages, which this sandbox cannot reach but any laptop can.
+
+- `scripts/audit-capture.mjs` fetches real sites and writes snapshots in exactly the shape `audit.php`
+  returns, same probes and all, so a snapshot captured on a laptop and one captured in production are the same
+  object to the engine. It is a developer tool run by a person on a list they chose — deliberately not
+  SSRF-hardened, because `audit.php` remains the only thing a stranger may point at a URL — and polite by
+  default: one site at a time, a second between them, and a user agent that says who we are.
+- `scripts/audit-corpus.mjs` replays the lot offline and prints how often each check fires across the corpus.
+  **That table is the whole point.** A `critical` firing on most real sites is either describing an epidemic or
+  is broken, and looking at the sites it names settles which in seconds. It runs as the `corpus` suite in
+  `pnpm test` and skips itself until a corpus exists, so CI stays green until there is something to check.
+- `docs/corpus/README.md` says what to collect (40–60 small Quebec businesses, mixed platforms and languages,
+  **including well-built ones — those are the only sites that expose a false positive**) and what not to commit.
+- The pipeline was tested end to end against a local server: capture → snapshot → replay → table.
+
+The first thing that table said, on a corpus of one, is the sentence this whole exercise has been circling:
+**63 of 73 checks have never fired on anything real.** Not proven harmless. Untested.
+
+### The order of work
+
+1. Upload `tools/selftest.php`, load it twice, paste the output here, delete it. (Angelique. Ten minutes.)
+2. Fill `docs/corpus-sites.txt` and run the capture on a laptop. (Angelique, or anyone with a list of real
+   Quebec businesses. Nothing invented — every domain must be a site someone actually runs.)
+3. Read the frequency table and cut. The audit's recommendation stands: roughly a dozen checks that cannot be
+   wrong beats seventy-three that are mostly right, because a wrong report arrives with MAW's name and a Book
+   a call button on it. **Nothing has been cut yet on purpose** — cutting before the corpus exists would be
+   guessing twice.
+4. Whatever Track 1 says, fix the rate limiter accordingly (it fails open today) and write the site-check
+   section of the privacy page, which still does not mention the tool at all.
+
+### Worth considering: ship it inward first
+
+A tool MAW runs on a prospect before a sales call carries none of the risk that sinks a public one — if it
+says something silly, Angelique ignores it, and no stranger ever sees a wrong report under the MAW name. It
+also builds the corpus as a side effect of normal work. The public lead magnet can wait for the table to be
+boring. TODO(angelique): decide whether the check goes behind a link only MAW has for its first few weeks.
+
+
 ## 2026-09-16 (evening) — the site check, audited and cut back to what it can prove
 
 Angelique: "recheck your strategy to make this a real tool." Seven independent auditors went through the whole

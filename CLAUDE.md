@@ -19,6 +19,8 @@ Monorepo for Monkeys at Work (MAW) funnel landing sites: static Astro sites shar
 - `pnpm lhci` — Lighthouse CI against built output with the budgets in the brief §10.5.
 - `pnpm test` — quote engine (every answer path) and audit engine (fixtures); `pnpm e2e` — browser checks of the quote flow, the audit tool, consent gating and the no-JS fallbacks against the built site.
 - `node scripts/screens.mjs` — page screenshots at 390/1280; `node scripts/screens-audit.mjs` — the site-check result and the downloadable report, which only exist after a scan.
+- `node scripts/audit-capture.mjs <domain…>` — capture real websites into `docs/corpus/` (needs internet; run it on a laptop, not here). `node scripts/audit-corpus.mjs` replays them through the engine offline and shows how often each check fires: that table is how a false positive becomes visible.
+- `tools/selftest.php` — throwaway, uploaded by hand to a docroot, answers in one page load whether `audit.php` can work on that host. Never deployed; delete it after reading.
 - `pnpm test:quote` — walks every answer path of the quote engine; `pnpm e2e` — browser checks of the quote flow, consent gating and no-JS fallbacks against the built site.
 
 ## Non-negotiables
