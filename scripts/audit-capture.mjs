@@ -35,7 +35,11 @@ const targets = fromFlag === -1
   : readFileSync(args[fromFlag + 1], 'utf8').split('\n').map((l) => l.replace(/#.*$/, '').trim()).filter(Boolean);
 
 if (targets.length === 0) {
-  console.error('usage: node scripts/audit-capture.mjs <domain…>   |   --from <file with one domain per line>');
+  console.error(fromFlag === -1
+    ? 'usage: node scripts/audit-capture.mjs <domain…>   |   --from <file with one domain per line>'
+    : `${args[fromFlag + 1]} has no domains in it yet — only comments.\n`
+      + 'It is waiting to be filled in: 40-60 real Quebec businesses, one per line, including some you know\n'
+      + 'are well built. See docs/corpus/README.md for what makes a useful corpus.');
   process.exit(1);
 }
 

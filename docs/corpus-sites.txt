@@ -1,9 +1,29 @@
-# One domain per line. Feed to: node scripts/audit-capture.mjs --from docs/corpus-sites.txt
-# Blank lines and everything after a # are ignored.
+# ─────────────────────────────────────────────────────────────────────────────
+# THIS FILE IS EMPTY ON PURPOSE. It is not missing data — it is waiting for it.
 #
-# Aim for 40–60 that look like the audience: small Quebec businesses, mostly WordPress, a mix of French-only,
-# English-only and bilingual, some on Wix or Squarespace, some behind Cloudflare. Include sites you know are
-# WELL BUILT — those are the ones that expose a false positive.
+# I cannot fill it in: CLAUDE.md #5 says facts come from the brief, the MAW chat framework or Angelique, and
+# inventing a list of Quebec businesses would be inventing facts. Every domain here has to be a real site
+# somebody actually runs.
+# ─────────────────────────────────────────────────────────────────────────────
 #
-# TODO(angelique): fill this in. Past clients, prospects, the businesses on your street. Nothing invented —
-# every domain here has to be a real site someone actually runs.
+# One domain per line. Blank lines and everything after a # are ignored.
+#
+#   node scripts/audit-capture.mjs --from docs/corpus-sites.txt
+#
+# Run that on a laptop with internet — not in the build sandbox, which cannot reach real sites.
+#
+# WHAT TO PUT HERE — 40 to 60 lines that look like the audience:
+#   · small Quebec businesses, mostly WordPress
+#   · a mix of French-only, English-only and bilingual
+#   · a few on Wix, Squarespace or Shopify
+#   · a few behind Cloudflare
+#   · some plainly neglected
+#   · AND SOME YOU KNOW ARE WELL BUILT — these matter most. A checker can only be caught lying by a site
+#     that has nothing wrong with it.
+#
+# Past clients, prospects, the businesses on your street, the ones you lost a pitch to. Their public home
+# page only; the capture reads nothing behind a login.
+#
+# Example of the format (not real sites — delete this line and add your own):
+#   boulangerie-example.ca
+#   clinique-example.qc.ca
