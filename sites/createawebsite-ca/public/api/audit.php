@@ -23,10 +23,13 @@ const MAX_BYTES        = 1500000;   // 1.5 MB of HTML is plenty; anything larger
 const MAX_PROBE_BYTES  = 60000;
 const CONNECT_TIMEOUT  = 5;
 const TOTAL_TIMEOUT    = 10;
+const PROBE_TIMEOUT    = 4;     // side requests get less rope than the page itself
+const PROBE_BUDGET     = 12;    // seconds for all side requests together; the rest are skipped
 const MAX_REDIRECTS    = 4;
 const RATE_LIMIT       = 12;        // scans
 const RATE_WINDOW      = 600;       // per 10 minutes, per IP
 const USER_AGENT       = 'Mozilla/5.0 (compatible; createawebsite.ca site check; +https://createawebsite.ca/)';
+const NOT_FOUND_PATH   = 'maw-site-check-does-not-exist-8f21c4';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -182,7 +185,7 @@ function check_url(string $url): array {
  * One request, no redirect following. Returns status, headers, body (capped), bytes and elapsed time.
  * $method may be 'GET' or 'HEAD'.
  */
-function request(string $url, int $cap, string $method = 'GET'): array {
+function request(string $url, int $cap, string $method = 'GET', int $timeout = TOTAL_TIMEOUT): array {
     [$normalized, $host, $port, $ip] = check_url($url);
 
     $headers = [];
@@ -197,7 +200,7 @@ function request(string $url, int $cap, string $method = 'GET'): array {
         CURLOPT_FOLLOWLOCATION => false,
         CURLOPT_RETURNTRANSFER => false,
         CURLOPT_CONNECTTIMEOUT => CONNECT_TIMEOUT,
-        CURLOPT_TIMEOUT        => TOTAL_TIMEOUT,
+        CURLOPT_TIMEOUT        => $timeout,
         CURLOPT_USERAGENT      => USER_AGENT,
         CURLOPT_ENCODING       => '',
         CURLOPT_SSL_VERIFYPEER => true,
@@ -291,18 +294,28 @@ function resolve_relative(string $base, string $target): string {
     return $root . $dir . '/' . $target;
 }
 
-/** A best-effort side request. Never fails the whole scan. */
-function probe(string $url, string $method = 'GET'): array {
+/**
+ * A best-effort side request. Never fails the whole scan, gets a shorter timeout than the page, and stops
+ * asking altogether once the side requests have used their shared budget: the visitor is waiting.
+ */
+function probe(string $url, string $method = 'GET', int $keep = 4000): array {
+    static $spent = 0.0;
+    if ($spent > PROBE_BUDGET) {
+        return ['status' => 0, 'ok' => false, 'skipped' => true];
+    }
+    $started = microtime(true);
     try {
-        $res = request($url, MAX_PROBE_BYTES, $method);
+        $res = request($url, MAX_PROBE_BYTES, $method, PROBE_TIMEOUT);
     } catch (Throwable) {
+        $spent += microtime(true) - $started;
         return ['status' => 0, 'ok' => false];
     }
+    $spent += microtime(true) - $started;
     return [
         'status'   => $res['status'],
         'ok'       => $res['status'] >= 200 && $res['status'] < 300,
         'location' => $res['headers']['location'] ?? null,
-        'body'     => substr($res['body'] ?? '', 0, 4000),
+        'body'     => substr($res['body'] ?? '', 0, $keep),
         'bytes'    => $res['bytes'] ?? 0,
         'url'      => $res['url'] ?? $url,
     ];
@@ -319,12 +332,15 @@ $parts = parse_url($page['finalUrl']);
 $origin = ($parts['scheme'] ?? 'https') . '://' . ($parts['host'] ?? '');
 $html = $page['body'];
 
+$host = $parts['host'] ?? '';
+
 $probes = [
-    'robots'  => probe($origin . '/robots.txt'),
-    'sitemap' => probe($origin . '/sitemap.xml', 'HEAD'),
+    'robots' => probe($origin . '/robots.txt', 'GET', 12000),
+    // Fetched, not just asked about: a sitemap address that answers with a web page is its own finding.
+    'sitemap' => probe($origin . '/sitemap.xml'),
 ];
 if (!$probes['sitemap']['ok']) {
-    $alt = probe($origin . '/sitemap_index.xml', 'HEAD');
+    $alt = probe($origin . '/sitemap_index.xml');
     if ($alt['ok']) {
         $probes['sitemap'] = $alt;
     }
@@ -333,14 +349,26 @@ if (!$probes['sitemap']['ok']) {
 if (preg_match('#/wp-(content|includes)/#i', $html) || stripos($html, 'wordpress') !== false) {
     $probes['wpJson'] = probe($origin . '/wp-json/', 'HEAD');
     $probes['readme'] = probe($origin . '/readme.html');
+    $probes['xmlrpc'] = probe($origin . '/xmlrpc.php');
 }
 // Does the http:// version send visitors to https?
 if (str_starts_with($origin, 'https://')) {
-    $probes['insecure'] = probe('http://' . ($parts['host'] ?? '') . '/', 'HEAD');
+    $probes['insecure'] = probe('http://' . $host . '/', 'HEAD');
 }
 // Is there a French (or English) version at the usual place?
 $probes['fr'] = probe($origin . '/fr/', 'HEAD');
 $probes['en'] = probe($origin . '/en/', 'HEAD');
+
+// A path that cannot exist. Anything but a 404 or a 410 here means missing pages are quietly served as
+// real ones, which search engines index and visitors never notice.
+$probes['notFound'] = probe($origin . '/' . NOT_FOUND_PATH . '/');
+
+// The same site on the other side of the www. If both answer 200 on their own, the site exists twice.
+$otherHost = str_starts_with(strtolower($host), 'www.') ? substr($host, 4) : 'www.' . $host;
+if ($otherHost !== '' && str_contains($otherHost, '.')) {
+    $altScheme = str_starts_with($origin, 'https://') ? 'https' : 'http';
+    $probes['altHost'] = probe($altScheme . '://' . $otherHost . '/', 'HEAD');
+}
 
 echo json_encode([
     'ok'        => true,

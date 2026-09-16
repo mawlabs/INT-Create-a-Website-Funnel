@@ -99,6 +99,52 @@ this outright. Two fixes:
   even though it did not here. The report already carries a checked-on date, which would then mean something.
 
 
+## 2026-09-16 — the site check, taken down to technical SEO
+
+Angelique: "For the website report generator, can we make it really intuitive like even down to technical SEO?"
+The check now covers 71 findings, up from 48, and the report is organised around what a reader can act on.
+
+- **Findings carry an area, not just a severity.** Eight plain-language areas — safety and trust, what it runs on,
+  being found on Google, English and French, on a phone, speed, everyone can use it, privacy law — declared once in
+  `FINDING_AREAS` so TypeScript catches a new finding with no home. Severity answers "how bad"; the area answers
+  "where", which is the question an owner actually has. The on-page report opens with a two-column strip of areas,
+  each carrying one of three verdicts (needs work / worth a look / fine). Affects: `audit.ts`, `audit-panel.ts`,
+  `SiteAudit.astro`.
+- **Every finding that names a problem now says what to do about it.** A one-sentence `fix` line in both languages,
+  shown under the finding on the page and in the downloadable file. The build fails if a non-reassuring finding is
+  missing one — same rule as the existing "no finding without copy" check. Affects: `copy.ts`, `SiteAudit.astro`,
+  both i18n files.
+- **Findings quote the evidence.** The 95-character title, the canonical address that points elsewhere, the header
+  that leaks the server version: shown verbatim under "What we saw". Evidence is data, not copy, so it is never
+  translated, and it is trimmed to 180 characters.
+- **The downloadable report is grouped by area with a contents list**, and keeps the checks the site passed. A list
+  of only failures reads as a sales document; the passes are what make the failures credible. Within each area the
+  findings still run urgent-first. Affects: `audit-report-file.ts`.
+- **23 technical-SEO and related checks added:** page-wide `nofollow`; canonical missing vs. pointing elsewhere;
+  meta refresh; redirect chains; www and non-www both answering; soft 404s; `robots.txt` blocking the whole site or
+  naming no sitemap; a sitemap address that serves HTML; missing charset; thin content; too few internal links;
+  heading levels that skip; an incomplete share preview; hreflang with no self-reference and no `x-default`; a
+  viewport that blocks zoom or pins a fixed width; uncompressed HTML; stylesheet count; legacy image formats; links
+  with nothing to read out; and an open `xmlrpc.php` on WordPress.
+- **Four new probes in `audit.php`:** a path that cannot exist (soft 404), the other side of the www, `xmlrpc.php`
+  on WordPress, and the sitemap fetched rather than merely asked about. Side requests now share a 12-second budget
+  and get a 4-second timeout each, so a slow site cannot make the visitor wait through eleven of them. The SSRF
+  guards are unchanged: every probe still goes through `check_url` and the pinned-address path.
+- **The score curve was retuned, not the thresholds.** Twenty-three mostly-minor findings would have dragged a
+  well-built site from 95 to the fifties on the old weights. Small notes now cost 1 instead of 2 and the softener
+  went from 45 to 60; criticals (18) and warnings (7) are unchanged. On the fixtures: a healthy bilingual site 95, a
+  tired WordPress site 27, a neglected one 22. The "healthy" recommendation threshold moved 85 → 80 to match.
+  **This does not answer the open question below about where the numbers come from — it only keeps the curve honest
+  against a longer list of checks.**
+- **Screenshots of the result now have their own script** (`scripts/screens-audit.mjs`), because `screens.mjs` only
+  photographs pages and the report only exists after a scan. It writes `audit-report--390/1280.png` plus the
+  generated `audit-full-report.html` and a full-page picture of it, all from a fixed fixture.
+
+TODO(angelique): the thresholds in these checks are ours, not anyone's published standard — title 65 characters,
+description 165, thin content under 300 words, fewer than 5 internal links, more than 6 stylesheets. They are
+defensible but they are judgement calls, and they belong in the same conversation as the score itself.
+
+
 ## 2026-09-07 (evening) — direction change: quote-first, "Menu du jour" sub-brand
 
 Angelique reviewed the first pass and the Claude Design directions and ruled: the site must do what the MAW chatbot does, get the visitor an instant quote for the type of website they want. The "sincere guide" positioning (DIY vs. freelancer vs. studio, "Do you need us?") pushed people towards DIY and is dropped. Three decisions were confirmed with her before the rebuild:

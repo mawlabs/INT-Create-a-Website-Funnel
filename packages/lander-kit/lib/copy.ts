@@ -101,7 +101,17 @@ export interface QuoteCopy extends Reviewable {
   summary: { heading: string; edit: string } & Reviewable;
 }
 
-export interface AuditFindingCopy { title: string; detail: string; /** Used when the count is 1. */ titleOne?: string }
+export interface AuditFindingCopy {
+  title: string;
+  detail: string;
+  /** One sentence: what to actually do about it. Absent on findings that report something already in order. */
+  fix?: string;
+  /** Used when the count is 1. */
+  titleOne?: string;
+}
+
+/** A plain-language section of the report: what it covers, and why a reader should care. */
+export interface AuditAreaCopy { label: string; blurb: string }
 
 export interface AuditCopy extends Reviewable {
   h2: string;
@@ -124,6 +134,10 @@ export interface AuditCopy extends Reviewable {
     groups: Record<'critical' | 'warning' | 'info' | 'good', string>;
     counts: Record<'critical' | 'warning' | 'info' | 'good', string>;
     empty: string;
+    areasHeading: string;
+    areaStatus: Record<'act' | 'watch' | 'ok', string>;
+    fixLabel: string;
+    evidenceLabel: string;
   } & Reviewable;
   report: { helpHeading: string; moreLine: string; nothingUrgent: string; download: string } & Reviewable;
   email: {
@@ -136,7 +150,12 @@ export interface AuditCopy extends Reviewable {
     bookHeading: string; bookText: string; book: string; quote: string;
   } & Reviewable;
   /** The downloadable report is a standalone document, so it carries its own strings. */
-  file: { title: string; generated: string; intro: string; recHeading: string; footer: string; print: string } & Reviewable;
+  file: {
+    title: string; generated: string; intro: string; recHeading: string; footer: string; print: string;
+    contents: string; checks: string; areaAllClear: string;
+  } & Reviewable;
+  /** Keyed by Area from lib/audit. */
+  areas: Record<string, AuditAreaCopy>;
   recommendation: Record<string, { title: string; text: string; cta: string }>;
   errors: Record<string, string>;
   findings: Record<string, AuditFindingCopy>;

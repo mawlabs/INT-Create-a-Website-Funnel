@@ -76,16 +76,43 @@ export function mountAuditPanel(root: HTMLElement): void {
 
   /* ---------- pieces ---------- */
 
+  // What it is, what it means, what we actually saw, and what to do. The last two are the difference between
+  // a list of complaints and something a reader can act on without phoning anyone.
   const findingItem = (f: Finding) => {
     const copy = c.findings[f.id];
     if (!copy) return null;
     const params = f.params ?? {};
     const title = params.count === 1 && copy.titleOne ? copy.titleOne : copy.title;
-    return h('li', { class: 'finding', 'data-severity': f.severity },
-      h('span', { class: 'sev', 'aria-hidden': 'true' }),
-      h('div', {},
-        h('p', { class: 'f-title', text: interpolate(title, params) }),
-        h('p', { class: 'f-detail', text: interpolate(copy.detail, params) })));
+    const body = h('div', {},
+      h('p', { class: 'f-title', text: interpolate(title, params) }),
+      h('p', { class: 'f-detail', text: interpolate(copy.detail, params) }));
+    if (f.evidence) {
+      body.append(h('p', { class: 'f-evidence' },
+        h('span', { class: 'f-label', text: c.result.evidenceLabel }),
+        h('code', { text: f.evidence })));
+    }
+    if (copy.fix) {
+      body.append(h('p', { class: 'f-fix' },
+        h('span', { class: 'f-label', text: c.result.fixLabel }),
+        interpolate(copy.fix, params)));
+    }
+    return h('li', { class: 'finding', 'data-severity': f.severity }, h('span', { class: 'sev', 'aria-hidden': 'true' }), body);
+  };
+
+  // Eight words that say where the trouble is. Someone who reads nothing else should still learn whether the
+  // problem is the software, the French, or being findable at all.
+  const areasBlock = () => {
+    const list = h('ul', { class: 'areas', role: 'list' });
+    for (const a of report!.areas) {
+      const copy = c.areas[a.area];
+      if (!copy) continue;
+      list.append(h('li', { class: 'area', 'data-status': a.status },
+        h('span', { class: 'area-label', text: copy.label }),
+        h('span', { class: 'area-status', text: c.result.areaStatus[a.status] })));
+    }
+    return h('div', { class: 'areas-wrap' },
+      h('h4', { class: 'areas-h', text: c.result.areasHeading }),
+      list);
   };
 
   const scoreBlock = () => {
@@ -137,6 +164,7 @@ export function mountAuditPanel(root: HTMLElement): void {
       h('h3', { class: 'report-h', tabindex: '-1', 'data-focus': true, text: interpolate(c.result.heading, { host: host() }) }),
       scoreBlock(),
       countsRow(),
+      areasBlock(),
     );
 
     // Every urgent finding is shown: they are the point of the page, and the counts row would otherwise disagree

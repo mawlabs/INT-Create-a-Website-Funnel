@@ -440,7 +440,15 @@
           "info": "{n} petites",
           "good": "{n} correct"
         },
-        "empty": "Rien à signaler, ce qui est rare et bon signe."
+        "empty": "Rien à signaler, ce qui est rare et bon signe.",
+        "areasHeading": "Où en sont les choses",
+        "areaStatus": {
+          "act": "À reprendre",
+          "watch": "À regarder",
+          "ok": "Correct"
+        },
+        "fixLabel": "Quoi faire",
+        "evidenceLabel": "Ce qu’on a vu"
       },
       "report": {
         "helpHeading": "Besoin d'aide avec ça?",
@@ -483,7 +491,10 @@
         "intro": "Voici à quoi ressemble une page de {host} vue de l'extérieur : pour un moteur de recherche, pour un navigateur, et pour quiconque cherche des logiciels périmés. Rien ici n'a exigé de connexion.",
         "recHeading": "Ce qu'on suggère",
         "footer": "createawebsite.ca est un site de Monkeys at Work, un studio web au Québec. Questions sur ce rapport : {email}",
-        "print": "Imprimer ou enregistrer en PDF"
+        "print": "Imprimer ou enregistrer en PDF",
+        "contents": "Ce que contient ce rapport",
+        "checks": "{n} vérifications, regroupées selon ce qu’elles touchent. Toutes sont listées ci-dessous, y compris celles que votre site réussit.",
+        "areaAllClear": "Rien à signaler ici."
       },
       "recommendation": {
         "healthy": {
@@ -531,7 +542,8 @@
       "findings": {
         "https.missing": {
           "title": "Votre site n'utilise pas de connexion sécurisée",
-          "detail": "Les visiteurs voient un avertissement « non sécurisé » dans la barre d'adresse, et les moteurs de recherche vous classent plus bas. Le certificat est gratuit et s'installe en quelques minutes."
+          "detail": "Les visiteurs voient un avertissement « non sécurisé » dans la barre d'adresse, et les moteurs de recherche vous classent plus bas.",
+          "fix": "Demandez à votre hébergeur d'activer un certificat Let's Encrypt gratuit, puis redirigez tout le site vers https."
         },
         "https.ok": {
           "title": "Connexion sécurisée en place",
@@ -539,48 +551,63 @@
         },
         "https.noRedirect": {
           "title": "L'ancienne adresse non sécurisée fonctionne encore",
-          "detail": "Quelqu'un qui tape votre adresse sans « https » reste sur la version non sécurisée. Elle devrait le rediriger automatiquement vers la version sécurisée."
+          "detail": "Une personne qui tape votre adresse sans « https » reste sur la version non sécurisée, tout comme les anciens liens qui y pointent.",
+          "fix": "Ajoutez une redirection permanente (301) de http:// vers https:// pour tout le site."
         },
         "https.noHsts": {
-          "title": "Le navigateur n'est pas informé d'utiliser toujours l'adresse sécurisée",
-          "detail": "Un seul en-tête (HSTS) dit aux navigateurs de ne plus jamais essayer la version non sécurisée. Petite mesure de renforcement."
+          "title": "Le navigateur n'est pas prévenu d'utiliser toujours l'adresse sécurisée",
+          "detail": "Un seul en-tête (HSTS) demande aux navigateurs de ne plus jamais essayer la version non sécurisée, ce qui ferme une petite fenêtre lors de la première visite.",
+          "fix": "Ajoutez l'en-tête Strict-Transport-Security une fois que la version https fonctionne partout."
         },
         "mixedContent": {
           "title": "{count} éléments de la page se chargent encore sans sécurité",
-          "detail": "Des images ou des scripts chargés par l'ancienne adresse non sécurisée peuvent être bloqués par le navigateur, ce qui brise l'apparence ou le fonctionnement de la page.",
-          "titleOne": "Un élément de la page se charge encore sans sécurité"
+          "detail": "Les images ou scripts chargés par l'ancienne adresse non sécurisée sont bloqués par le navigateur, ce qui casse l'apparence ou le fonctionnement de la page.",
+          "titleOne": "Un élément de la page se charge encore sans sécurité",
+          "fix": "Changez ces adresses de http:// vers https://, ou utilisez des adresses sans schéma pour qu'elles suivent la page."
         },
         "wordpress.outdated": {
           "title": "WordPress {version} n'est plus pris en charge",
-          "detail": "La version actuelle est {latest}. Les vieilles versions ne reçoivent plus de correctifs de sécurité, et la plupart des sites piratés sont simplement des sites non à jour. C'est la première chose à régler."
+          "detail": "La version actuelle est {latest}. Les anciennes versions ne reçoivent plus de correctifs de sécurité, et la plupart des sites piratés sont simplement des sites non à jour.",
+          "fix": "Sauvegardez le site, puis mettez WordPress à jour depuis le tableau de bord. Réglez ceci avant tout le reste."
         },
         "wordpress.behind": {
           "title": "WordPress {version} est en retard sur la version actuelle",
-          "detail": "La version actuelle est {latest}. La mise à jour est habituellement rapide, mais testez-la d'abord sur une copie si le site contient du code sur mesure."
+          "detail": "La version actuelle est {latest}. La mise à jour est habituellement rapide, mais testez-la d'abord sur une copie si le site a du code sur mesure.",
+          "fix": "Mettez à jour depuis le tableau de bord, idéalement sur une copie de test, et laissez les mises à jour mineures automatiques activées."
         },
         "wordpress.current": {
           "title": "WordPress {version} est à jour",
           "detail": "Rien à faire ici."
         },
         "wordpress.versionExposed": {
-          "title": "Votre version de WordPress est visible par tout le monde",
-          "detail": "La page annonce la version {version} dans son code source. Ça indique à un attaquant exactement quelles failles essayer. La cacher est une modification d'une ligne."
+          "title": "Votre version de WordPress est visible de tous",
+          "detail": "La page annonce la version {version} dans son code source, ce qui indique à un attaquant exactement quelles failles essayer.",
+          "fix": "Retirez la balise generator et les numéros ?ver= sur vos fichiers — la plupart des extensions de sécurité offrent les deux options."
         },
         "wordpress.versionUnknown": {
           "title": "Nous n'avons pas pu lire votre version de WordPress",
-          "detail": "C'est souvent bon signe : ça veut dire que la version n'est pas publiée. À confirmer depuis votre tableau de bord."
+          "detail": "C'est souvent bon signe : la version n'est pas publiée là où n'importe qui peut la lire.",
+          "fix": "Vérifiez dans votre tableau de bord que WordPress et vos extensions sont à jour."
         },
         "wordpress.readmeExposed": {
           "title": "Le fichier readme de WordPress est public",
-          "detail": "Le fichier /readme.html indique votre version exacte. Il ne sert à rien sur un site en ligne et devrait être supprimé."
+          "detail": "Le fichier /readme.html indique votre version exacte. Il ne sert à rien sur un site en ligne.",
+          "fix": "Supprimez readme.html ou bloquez-le dans la configuration du serveur. Il revient à chaque mise à jour : ajoutez-le à votre liste."
+        },
+        "wordpress.xmlrpcOpen": {
+          "title": "L'ancienne interface à distance de WordPress est ouverte",
+          "detail": "xmlrpc.php permet à des logiciels de publier sur votre site depuis l'extérieur. Presque plus rien ne l'utilise, mais les outils de devinette de mots de passe l'adorent : il autorise plusieurs essais par requête.",
+          "fix": "Bloquez xmlrpc.php dans la configuration du serveur ou avec une extension de sécurité, sauf si quelque chose en dépend encore."
         },
         "php.eol": {
           "title": "PHP {version} ne reçoit plus de correctifs de sécurité",
-          "detail": "PHP est le langage sur lequel votre site fonctionne. La version {version} a atteint sa fin de vie; la version {current} est actuelle. Votre hébergeur peut habituellement changer ça en quelques clics, mais il faut d'abord tester les extensions."
+          "detail": "PHP est le langage qui fait fonctionner votre site. La version {version} a dépassé sa fin de vie ; {current} est la version actuelle, et nettement plus rapide.",
+          "fix": "Changez la version de PHP dans votre panneau d'hébergement, après avoir testé le site sur une copie — les vieilles extensions doivent parfois être mises à jour d'abord."
         },
         "php.securityOnly": {
           "title": "PHP {version} ne reçoit plus que des correctifs de sécurité",
-          "detail": "Elle reçoit encore des correctifs de sécurité, mais plus d'améliorations. La version {current} est plus rapide. Planifiez le changement avant la fin du soutien."
+          "detail": "Il reçoit encore des correctifs de sécurité, mais plus d'améliorations, et le soutien se termine à une date connue. La version {current} est plus rapide.",
+          "fix": "Planifiez le passage à PHP {current} avant la fin du soutien, plutôt que dans l'urgence après."
         },
         "php.current": {
           "title": "PHP {version} est une version prise en charge",
@@ -588,107 +615,220 @@
         },
         "php.exposed": {
           "title": "Votre serveur annonce sa version de PHP",
-          "detail": "La version {version} apparaît dans les en-têtes de réponse. La cacher est un petit changement de réglage et donne un indice de moins aux attaquants."
+          "detail": "La version {version} apparaît dans les en-têtes de réponse, ce qui donne un indice de plus à un attaquant.",
+          "fix": "Mettez expose_php = Off dans vos réglages PHP, ou retirez l'en-tête X-Powered-By au niveau du serveur."
         },
         "jquery.outdated": {
           "title": "Une vieille version de jQuery est chargée",
-          "detail": "La version {version} est sur la page; la version {latest} est actuelle. Les vieilles versions ont des failles connues que les robots recherchent."
+          "detail": "La version {version} est sur la page ; {latest} est la version actuelle. Les anciennes versions ont des failles connues que les scanneurs automatisés recherchent.",
+          "fix": "Mettez jQuery à jour, ou le thème ou l'extension qui l'embarque. Vérifiez le site après : du vieux code dépend parfois d'un ancien comportement."
         },
         "seo.noindex": {
-          "title": "Votre site demande à Google de ne pas l'afficher",
-          "detail": "La page porte une instruction « noindex ». C'est souvent un reste de la construction du site, et ça vous exclut complètement des résultats de recherche."
+          "title": "Votre site demande à Google de ne pas le répertorier",
+          "detail": "La page porte une instruction « noindex ». C'est généralement un reste de la construction du site, et cela vous exclut complètement des résultats de recherche.",
+          "fix": "Dans WordPress, décochez Réglages → Lecture → « Demander aux moteurs de recherche de ne pas indexer ce site ». Sinon, retirez la balise noindex ou l'en-tête X-Robots-Tag."
+        },
+        "seo.nofollow": {
+          "title": "Les moteurs de recherche reçoivent l'ordre de ne pas suivre vos liens",
+          "detail": "Une instruction « nofollow » s'applique à toute la page : les moteurs la lisent mais ignorent chacun des liens qui en partent. Vos autres pages perdent la valeur que ces liens leur transmettraient.",
+          "fix": "Retirez nofollow de la balise robots qui couvre toute la page. Ne le gardez sur des liens individuels que lorsque c'est voulu, comme les liens payés ou non fiables."
         },
         "seo.title.missing": {
           "title": "La page n'a pas de titre",
-          "detail": "Le titre, c'est la ligne bleue dans les résultats Google et l'étiquette de l'onglet du navigateur. Sans lui, les moteurs de recherche en inventent un."
+          "detail": "Le titre, c'est la ligne bleue dans les résultats Google et l'étiquette de l'onglet du navigateur. Sans lui, les moteurs en inventent un à partir du texte trouvé.",
+          "fix": "Rédigez un titre de 50 à 60 caractères qui dit ce que vous faites et où."
         },
         "seo.title.long": {
           "title": "Le titre de la page est long ({length} caractères)",
-          "detail": "Google coupe les titres autour de 60 caractères. Un titre plus court garde les mots importants visibles."
+          "detail": "Google coupe les titres autour de 60 caractères : la fin du vôtre risque de ne jamais être lue.",
+          "fix": "Ramenez-le à une soixantaine de caractères et placez en premier les mots que les gens cherchent vraiment."
         },
         "seo.title.short": {
           "title": "Le titre de la page est très court ({length} caractères)",
-          "detail": "Il reste de la place pour dire ce que vous faites et où, ce que les gens cherchent justement."
+          "detail": "Il reste de la place pour dire ce que vous faites et où, ce que les gens tapent justement dans Google.",
+          "fix": "Allongez-le à 50 ou 60 caractères : ce que vous faites, puis votre ville ou région."
         },
         "seo.description.missing": {
           "title": "Il n'y a pas de description pour les résultats de recherche",
-          "detail": "La description, c'est le texte gris sous votre lien dans Google. L'écrire vous-même ne coûte rien et ça décide si les gens cliquent."
+          "detail": "La description, c'est le texte gris sous votre lien dans Google. L'écrire vous-même ne coûte rien, et c'est ce qui décide du clic.",
+          "fix": "Ajoutez une meta description d'environ 150 caractères, écrite pour une personne et non pour un moteur."
         },
         "seo.description.long": {
-          "title": "La description de recherche est longue ({length} caractères)",
-          "detail": "Google la coupe autour de 155 caractères : la fin risque de ne jamais être vue."
+          "title": "La description pour la recherche est longue ({length} caractères)",
+          "detail": "Google la coupe autour de 155 caractères : la fin risque de ne jamais être vue.",
+          "fix": "Raccourcissez-la à environ 150 caractères et faites porter l'offre par la première phrase."
         },
         "seo.h1.missing": {
           "title": "La page n'a pas de titre principal",
-          "detail": "Un titre clair dit aux lecteurs comme aux moteurs de recherche de quoi parle la page."
+          "detail": "Un titre clair en haut indique aux lecteurs comme aux moteurs de quoi parle la page. Du texte simplement mis en forme ne joue pas ce rôle.",
+          "fix": "Marquez le titre principal de la page comme un h1 — un seul par page, qui dit à quoi sert la page."
         },
         "seo.h1.multiple": {
           "title": "La page a {count} titres principaux",
-          "detail": "Un seul suffit habituellement. Plusieurs titres qui se disputent la vedette brouillent le sujet de la page."
+          "detail": "Plusieurs h1 qui se concurrencent brouillent le sujet de la page. Cela arrive souvent quand un thème marque à la fois le logo et le titre comme h1.",
+          "fix": "Gardez un seul h1 et rétrogradez les autres en h2."
+        },
+        "seo.headingSkips": {
+          "title": "Les titres sautent un niveau",
+          "detail": "Les titres doivent s'emboîter comme une table des matières. Sauter un niveau rend la structure plus difficile à suivre pour les lecteurs d'écran et pour les moteurs qui cherchent à savoir ce qui dépend de quoi.",
+          "fix": "Utilisez les niveaux dans l'ordre (h1, puis h2, puis h3) et choisissez la taille par la mise en forme plutôt que par le niveau."
         },
         "seo.canonical.missing": {
           "title": "Aucune adresse canonique n'est définie",
-          "detail": "Elle indique aux moteurs de recherche quelle adresse est la bonne quand une page est accessible de plusieurs façons. Ça évite que vos pages se fassent concurrence."
+          "detail": "Cette ligne indique aux moteurs quelle adresse est la vraie quand une page est accessible de plusieurs façons — avec ou sans barre oblique, avec des paramètres de suivi, par une vue imprimable. Sans elle, vos propres pages se font concurrence.",
+          "fix": "Ajoutez un lien canonique dans l'en-tête de la page, pointant vers l'adresse que vous voulez voir répertoriée. La plupart des extensions SEO le font pour vous."
+        },
+        "seo.canonical.mismatch": {
+          "title": "L'adresse canonique pointe ailleurs",
+          "detail": "La page déclare que sa vraie version se trouve à une autre adresse. Quand c'est une erreur — un gabarit copié, une adresse de test oubliée, une extension qui renvoie tout vers l'accueil — les moteurs écartent cette page et répertorient l'autre.",
+          "fix": "Vérifiez que l'adresse canonique est bien celle de la page. Si ce n'est pas voulu, faites-la pointer de nouveau vers cette page."
+        },
+        "seo.metaRefresh": {
+          "title": "La page se redirige elle-même avec un minuteur",
+          "detail": "Un meta refresh envoie les visiteurs ailleurs après un délai. Les moteurs y voient un signal faible et peuvent continuer à répertorier cette page, et la personne qui utilise le bouton retour se fait renvoyer en avant.",
+          "fix": "Remplacez-le par une vraie redirection 301 au niveau du serveur."
+        },
+        "seo.redirectChain": {
+          "title": "Votre adresse passe par {count} redirections",
+          "detail": "Chaque étape coûte du temps avant que quoi que ce soit s'affiche, et un peu de la valeur transmise par les liens. Ces chaînes s'accumulent avec les années : http vers https, puis www, puis une nouvelle adresse.",
+          "fix": "Redirigez directement de la première adresse vers la dernière, en une seule étape."
+        },
+        "seo.duplicateHost": {
+          "title": "Votre site répond à deux adresses différentes",
+          "detail": "La version avec www et la version sans se chargent chacune de leur côté, au lieu que l'une renvoie vers l'autre. Les moteurs peuvent les traiter comme deux sites et diviser ce que chacun a gagné.",
+          "fix": "Choisissez-en une et redirigez l'autre en permanence vers elle. Indiquez ensuite la même dans Search Console."
+        },
+        "seo.soft404": {
+          "title": "Les pages inexistantes ne disent pas qu'elles le sont",
+          "detail": "Nous avons demandé une adresse qui ne peut pas exister et le site a répondu comme s'il s'agissait d'une vraie page. Les moteurs indexent alors ces pages vides, et le visiteur qui suit un lien mort ne sait pas qu'il en a suivi un.",
+          "fix": "Faites en sorte que les adresses inexistantes renvoient un statut 404, avec une page qui le dit et propose un chemin de retour."
         },
         "seo.og.missing": {
           "title": "Les liens vers votre site se partagent mal",
-          "detail": "Aucune image ni titre d'aperçu n'est défini : publier votre lien sur Facebook ou LinkedIn n'affiche qu'une adresse nue."
+          "detail": "Aucune image ni aucun titre d'aperçu n'est défini : publier votre lien sur Facebook, LinkedIn ou dans un message texte n'affiche qu'une adresse nue.",
+          "fix": "Ajoutez og:title, og:description et une og:image d'environ 1200 × 630 pixels."
+        },
+        "seo.og.incomplete": {
+          "title": "Il manque {count} éléments à l'aperçu de partage",
+          "detail": "Une partie de l'aperçu est définie, l'autre non : ce que les gens voient en partageant votre lien est laissé au hasard.",
+          "titleOne": "Il manque un élément à l'aperçu de partage",
+          "fix": "Complétez ce qui manque. L'image compte le plus : environ 1200 × 630 pixels."
         },
         "seo.schema.present": {
-          "title": "Les moteurs de recherche obtiennent des données structurées",
+          "title": "Les moteurs reçoivent des détails structurés",
           "detail": "Vos pages se décrivent dans un format que Google lit."
         },
         "seo.schema.missing": {
-          "title": "Aucune donnée structurée pour les moteurs de recherche",
-          "detail": "Un petit bloc de données invisibles peut placer votre adresse, vos heures, vos prix ou vos avis directement dans les résultats de recherche."
+          "title": "Aucun détail structuré pour les moteurs de recherche",
+          "detail": "Un petit bloc de données cachées peut afficher votre adresse, vos heures, vos prix ou vos avis directement dans les résultats.",
+          "fix": "Ajoutez du JSON-LD pour votre entreprise : LocalBusiness avec votre adresse et vos heures est le point de départ habituel."
         },
         "seo.robots.missing": {
           "title": "Aucun fichier robots.txt",
-          "detail": "Ce petit fichier dit aux moteurs de recherche ce qu'ils peuvent consulter et où se trouve votre plan de site. La plupart des sites devraient en avoir un."
+          "detail": "Ce petit fichier indique aux moteurs ce qu'ils peuvent consulter et où se trouve votre plan de site. Son absence n'est pas fatale, mais c'est la première chose que tout robot demande.",
+          "fix": "Ajoutez un robots.txt à la racine qui autorise tout et indique votre plan de site."
+        },
+        "seo.robots.blocksAll": {
+          "title": "Votre robots.txt cache tout le site",
+          "detail": "Il demande à tous les moteurs de rester à l'écart du site entier. C'est habituellement un reste de construction ou de déménagement, et cela vous retire des résultats de recherche.",
+          "fix": "Retirez la ligne Disallow qui couvre tout le site, puis demandez une nouvelle exploration dans Google Search Console."
+        },
+        "seo.robots.noSitemap": {
+          "title": "Votre robots.txt ne mentionne aucun plan de site",
+          "detail": "C'est l'endroit où chaque robot cherche la liste de vos pages, et cela ne coûte qu'une ligne.",
+          "fix": "Ajoutez une ligne Sitemap: suivie de l'adresse complète de votre plan de site."
         },
         "seo.sitemap.present": {
           "title": "Un plan de site est publié",
-          "detail": "Les moteurs de recherche trouvent chaque page sans deviner."
+          "detail": "Les moteurs peuvent trouver chaque page sans deviner."
         },
         "seo.sitemap.missing": {
           "title": "Aucun plan de site trouvé",
-          "detail": "Un plan de site liste vos pages pour les moteurs de recherche. Sans lui, les nouvelles pages peuvent mettre bien plus de temps à apparaître."
+          "detail": "Un plan de site répertorie vos pages pour les moteurs. Sans lui, les nouvelles pages peuvent mettre bien plus de temps à apparaître.",
+          "fix": "Publiez un plan de site à /sitemap.xml, nommez-le dans robots.txt et soumettez-le dans Google Search Console."
+        },
+        "seo.sitemap.notXml": {
+          "title": "L'adresse de votre plan de site renvoie une page web, pas un plan de site",
+          "detail": "Quelque chose répond à l'adresse du plan de site, mais avec une page ordinaire plutôt que la liste XML qu'attendent les moteurs. Pour eux, il n'y a pas de plan de site.",
+          "fix": "Corrigez ou retirez cette adresse pour qu'elle serve du vrai XML, puis vérifiez-la dans Google Search Console."
+        },
+        "seo.charset.missing": {
+          "title": "La page n'indique pas son jeu de caractères",
+          "detail": "Sans cette indication, le navigateur doit deviner, et ce sont les accents qui cassent en premier : Montréal devient MontrÃ©al à l'écran.",
+          "fix": "Ajoutez <meta charset=\"utf-8\"> comme première ligne dans l'en-tête de la page."
+        },
+        "seo.thinContent": {
+          "title": "Il y a très peu de texte sur la page ({words} mots)",
+          "detail": "Les moteurs rapprochent les questions des gens des mots présents sur la page. Une page portée par des images, des carrousels ou de la vidéo leur offre peu de matière, et peu de chose au visiteur qui parcourt pour décider.",
+          "fix": "Rédigez quelques centaines de mots qui répondent à ce qu'une personne demanderait vraiment avant de faire appel à vous."
+        },
+        "seo.internalLinks": {
+          "title": "La page renvoie très peu vers votre propre site ({count} liens)",
+          "detail": "Les liens entre vos pages sont la façon dont les moteurs trouvent le reste du site et déterminent quelles pages comptent. C'est aussi ainsi qu'un visiteur va quelque part depuis ici.",
+          "fix": "Faites des liens vers vos principaux services et votre page de contact, avec des mots qui disent où mène le lien."
         },
         "lang.missing": {
           "title": "La page ne déclare pas sa langue",
-          "detail": "Un seul attribut indique aux navigateurs et aux lecteurs d'écran dans quelle langue est la page. Ça aide aussi les moteurs de recherche à la montrer aux bonnes personnes."
+          "detail": "Un seul attribut indique aux navigateurs et aux lecteurs d'écran dans quelle langue est la page. Un lecteur d'écran mal réglé lit le français avec une prononciation anglaise, ce qui est incompréhensible.",
+          "fix": "Mettez lang=\"fr-CA\" ou lang=\"en-CA\" sur la balise html de chaque page."
         },
         "lang.frenchMissing": {
           "title": "Nous n'avons trouvé aucune version française",
-          "detail": "Si vous faites affaire au Québec, votre site doit être offert en français, au moins aussi visiblement que dans toute autre langue. C'est la Charte de la langue française, mise à jour par la loi 96, pas une préférence."
+          "detail": "Si vous faites affaire au Québec, votre site doit être disponible en français, au moins aussi en évidence que toute autre langue. C'est la Charte de la langue française, modifiée par la loi 96, pas une préférence.",
+          "fix": "Faites traduire le site en français et publiez-le à ses propres adresses, puis reliez les deux versions entre elles."
         },
         "lang.hreflangMissing": {
-          "title": "Vos versions linguistiques ne sont pas liées pour les moteurs de recherche",
-          "detail": "Il semble y avoir deux langues, mais rien n'indique à Google qu'il s'agit du même site. Chaque version finit par faire concurrence à l'autre."
+          "title": "Vos versions linguistiques ne sont pas reliées pour les moteurs",
+          "detail": "Il semble y avoir deux langues, mais rien n'indique à Google qu'il s'agit du même site en deux versions : chacune fait concurrence à l'autre et les visiteurs peuvent arriver dans la mauvaise.",
+          "fix": "Ajoutez des liens hreflang sur chaque page, pointant vers la page correspondante dans l'autre langue."
         },
         "lang.bilingual": {
           "title": "Plus d'une langue est en place",
           "detail": "Votre site déclare une version française."
         },
+        "lang.hreflang.noSelf": {
+          "title": "Les liens de langue n'incluent pas cette page",
+          "detail": "Un ensemble de liens hreflang doit répertorier toutes les versions, y compris celle où l'on se trouve. Quand une page s'omet elle-même, les moteurs ignorent tout l'ensemble.",
+          "fix": "Ajoutez un lien hreflang pour la langue de cette page, à côté des autres."
+        },
+        "lang.hreflang.noXDefault": {
+          "title": "Aucune version par défaut n'est définie pour les autres langues",
+          "detail": "Vos versions sont déclarées pour les francophones et les anglophones. Une personne dont le navigateur n'est ni l'un ni l'autre reçoit la version que Google devine.",
+          "fix": "Ajoutez un lien hreflang=\"x-default\" vers la version où vous voudriez qu'un inconnu arrive."
+        },
         "mobile.viewport.missing": {
           "title": "Le site n'est pas configuré pour les téléphones",
-          "detail": "Sans cette seule ligne, les téléphones réduisent toute la page pour l'afficher, et le texte devient illisible. La plupart de vos visiteurs sont sur un téléphone."
+          "detail": "Sans cette ligne, les téléphones réduisent toute la page de bureau pour la faire entrer : le texte est illisible tant qu'on n'a pas zoomé. La plupart de vos visiteurs sont au téléphone.",
+          "fix": "Ajoutez <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> à chaque page."
         },
         "mobile.viewport.ok": {
           "title": "Configuré pour les téléphones",
-          "detail": "La page indique aux téléphones comment l'afficher."
+          "detail": "La page indique aux téléphones comment l'afficher, et laisse zoomer."
+        },
+        "mobile.viewport.noScale": {
+          "title": "Les visiteurs ne peuvent pas zoomer",
+          "detail": "La page bloque le zoom par pincement. Toute personne qui a besoin de plus gros texte — c'est-à-dire beaucoup de gens après quarante ans — n'y arrive tout simplement pas, et c'est un manquement aux règles d'accessibilité.",
+          "fix": "Retirez user-scalable=no et maximum-scale de la balise viewport."
+        },
+        "mobile.viewport.fixedWidth": {
+          "title": "La page est fixée à une largeur ({width} pixels)",
+          "detail": "La mise en page est figée à une largeur au lieu de suivre l'écran : elle est réduite sur les petits téléphones et perdue au milieu des grands.",
+          "fix": "Remplacez la largeur du viewport par device-width et laissez la mise en page s'adapter."
         },
         "speed.htmlWeight": {
           "title": "La page elle-même est lourde ({kb} Ko)",
-          "detail": "C'est seulement le code de la page, avant les images. Sur une connexion mobile, ça retarde tout le reste."
+          "detail": "Il s'agit uniquement du code de la page, avant les images. Sur une connexion mobile, cela retarde tout le reste.",
+          "fix": "Réduisez ce que la page transporte : constructeurs de pages, widgets inutilisés et styles en ligne sont les coupables habituels."
         },
         "speed.htmlWeight.info": {
           "title": "Le code de la page est un peu volumineux ({kb} Ko)",
-          "detail": "Pas encore un problème, mais à surveiller à mesure que le site grossit."
+          "detail": "Ce n'est pas encore un problème, mais c'est à surveiller à mesure que le site grossit.",
+          "fix": "Gardez-le à l'œil quand les pages s'allongent ; retirer une extension inutilisée est ce qui allège le plus."
         },
         "speed.slowResponse": {
           "title": "Le serveur a mis {ms} ms à répondre",
-          "detail": "C'est avant même que quoi que ce soit s'affiche. Une réponse lente vient souvent d'un hébergement bon marché, d'une absence de cache, ou d'une extension qui en fait trop."
+          "detail": "C'est avant que quoi que ce soit s'affiche à l'écran. Une réponse lente vient souvent d'un hébergement bon marché, d'une absence de cache ou d'une extension qui travaille trop à chaque visite.",
+          "fix": "Activez d'abord la mise en cache des pages, puis regardez le forfait d'hébergement. Les deux coûtent moins cher qu'une refonte."
         },
         "speed.fastResponse": {
           "title": "Le serveur a répondu rapidement ({ms} ms)",
@@ -696,32 +836,94 @@
         },
         "speed.blockingScripts": {
           "title": "{count} scripts retardent le premier affichage",
-          "detail": "Ils se chargent avant que quoi que ce soit apparaisse. Les marquer pour un chargement différé est habituellement un gain rapide."
+          "detail": "Ils doivent finir de se charger avant que quoi que ce soit apparaisse : le visiteur regarde une page blanche pendant ce temps.",
+          "fix": "Marquez-les defer ou async, ou chargez-les après l'affichage de la page."
+        },
+        "speed.stylesheets": {
+          "title": "{count} feuilles de style distinctes se chargent avant l'affichage",
+          "detail": "Chacune est un aller-retour au serveur, et la page ne peut pas s'afficher avant l'arrivée de la dernière. C'est souvent le signe de plusieurs extensions apportant chacune la sienne.",
+          "fix": "Regroupez-les, ou retirez les extensions dont cette page n'utilise jamais les styles."
         },
         "speed.imagesNoDimensions": {
           "title": "{count} images n'ont pas de dimensions",
-          "detail": "La page saute pendant le chargement des images, et c'est ce qui fait rater les boutons aux visiteurs."
+          "detail": "La page sursaute pendant le chargement des images, ce qui fait rater les boutons et perdre le fil.",
+          "fix": "Indiquez width et height sur chaque balise d'image, même si la mise en forme la redimensionne."
         },
         "speed.noLazyLoading": {
-          "title": "Les {count} images se chargent toutes en même temps",
-          "detail": "Les images plus bas dans la page peuvent attendre qu'on y arrive. Sur un téléphone, ça économise du temps et des données."
+          "title": "Les {count} images se chargent toutes d'un coup",
+          "detail": "Les images situées loin dans la page sont téléchargées avant que quiconque y descende. Sur un téléphone, c'est du temps et des données dépensés pour rien.",
+          "fix": "Ajoutez loading=\"lazy\" aux images sous le premier écran — mais pas à celles du haut."
+        },
+        "speed.legacyImages": {
+          "title": "{count} images utilisent d'anciens formats",
+          "detail": "Les fichiers JPEG et PNG sont généralement un tiers plus lourds que la même image en WebP ou AVIF, à qualité égale. Sur une page riche en images, c'est la plus grande économie possible.",
+          "fix": "Convertissez-les en WebP avec une solution de repli. La plupart des hébergeurs et extensions d'images le font automatiquement."
+        },
+        "speed.noCompression": {
+          "title": "La page n'est pas compressée",
+          "detail": "Le texte se compresse à environ le quart de sa taille, et tous les navigateurs le gèrent depuis vingt ans. Envoyer {kb} Ko sans compression, c'est du temps d'attente pour rien.",
+          "fix": "Activez la compression gzip ou brotli sur le serveur, ou demandez-le à votre hébergeur."
         },
         "a11y.imagesNoAlt": {
-          "title": "{count} images sur {total} n'ont pas de description textuelle",
-          "detail": "Les lecteurs d'écran n'annoncent rien pour celles-là, et les moteurs de recherche ne peuvent pas savoir ce qu'elles montrent. La description s'affiche aussi quand une image ne charge pas.",
-          "titleOne": "1 image sur {total} n'a pas de description textuelle"
+          "title": "{count} des {total} images n'ont pas de description textuelle",
+          "detail": "Les lecteurs d'écran n'annoncent rien pour celles-ci, et les moteurs ne peuvent pas savoir ce qu'elles montrent. La description s'affiche aussi quand une image ne se charge pas.",
+          "titleOne": "1 des {total} images n'a pas de description textuelle",
+          "fix": "Décrivez ce que montre chaque image. Laissez alt=\"\" — vide, mais présent — sur les images purement décoratives."
+        },
+        "a11y.linksNoText": {
+          "title": "{count} liens n'ont rien à lire à voix haute",
+          "detail": "Ce sont généralement des icônes : un téléphone, une enveloppe, un réseau social. Un lecteur d'écran les annonce comme « lien », sans moyen de savoir où ils mènent.",
+          "titleOne": "Un lien n'a rien à lire à voix haute",
+          "fix": "Donnez à chacun un aria-label, ou un texte alt sur l'icône qu'il contient, indiquant où il mène."
         },
         "privacy.analyticsNoConsent": {
           "title": "Le suivi semble démarrer avant l'accord des visiteurs",
-          "detail": "Nous avons trouvé des scripts de statistiques ou de publicité et aucune bannière de consentement. Au Québec, la loi 25 exige le consentement avant tout suivi, avec une vraie façon de refuser."
+          "detail": "Nous avons trouvé des scripts d'analyse ou de publicité et aucune bannière de consentement. Au Québec, la loi 25 exige le consentement avant tout suivi, avec un refus aussi simple que l'acceptation.",
+          "fix": "Retenez les scripts de suivi jusqu'à l'acceptation, et faites du refus un seul clic, pas une chasse dans les réglages."
         },
         "security.headers": {
           "title": "{count} en-têtes de protection standards sont absents",
-          "detail": "Ce sont de petits réglages du serveur qui bloquent des attaques courantes. Ils ne coûtent rien et ne changent rien de visible."
+          "detail": "Ce sont de petits réglages du serveur qui bloquent des attaques courantes. Ils ne coûtent rien et ne changent rien de visible.",
+          "fix": "Ajoutez X-Content-Type-Options, Referrer-Policy et une Content-Security-Policy dans la configuration du serveur."
         },
         "security.serverExposed": {
           "title": "Votre serveur annonce sa version exacte",
-          "detail": "La réponse indique {server}. Cacher le numéro de version donne une prise de moins aux attaquants."
+          "detail": "La réponse indique {server}. Les attaquants recherchent les versions précises dont les failles sont connues : moins il y a d'indices, mieux c'est.",
+          "fix": "Désactivez la signature du serveur (ServerTokens Prod sur Apache, server_tokens off sur nginx)."
+        }
+      },
+      "areas": {
+        "security": {
+          "label": "Sécurité et confiance",
+          "blurb": "Si la connexion est digne de confiance, et si le site laisse des portes faciles à un attaquant."
+        },
+        "software": {
+          "label": "Ce qui le fait fonctionner",
+          "blurb": "Les versions derrière le site. Un logiciel non à jour est la porte d'entrée de la plupart des piratages de petits sites."
+        },
+        "findability": {
+          "label": "Être trouvé sur Google",
+          "blurb": "Le côté technique de la recherche : si les moteurs peuvent lire la page, la répertorier et la distinguer de ses doublons."
+        },
+        "languages": {
+          "label": "Français et anglais",
+          "blurb": "Ce que la loi demande à une entreprise du Québec, et si les moteurs comprennent quelle version est laquelle."
+        },
+        "phone": {
+          "label": "Au téléphone",
+          "blurb": "La plupart des gens arrivent par téléphone. Il s'agit de savoir si la page a été bâtie pour ça."
+        },
+        "speed": {
+          "label": "Vitesse",
+          "blurb": "Le temps d'attente avant de voir quoi que ce soit, et ce qui cause cette attente."
+        },
+        "access": {
+          "label": "Utilisable par tout le monde",
+          "blurb": "Si une personne qui utilise un lecteur d'écran, un clavier ou un texte agrandi peut parcourir la page."
+        },
+        "privacy": {
+          "label": "Loi sur la vie privée",
+          "blurb": "La loi 25 au Québec : ce que vous pouvez recueillir, et ce qu'il faut demander avant de le faire."
         }
       }
     },

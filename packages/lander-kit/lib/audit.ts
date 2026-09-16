@@ -6,9 +6,17 @@
  *
  * No copy lives here: every finding is an id plus parameters, and the sites' i18n JSON holds the wording in
  * both languages. Version reference data is passed in, so it can be refreshed without touching the logic.
+ *
+ * Every finding belongs to an area (safety, being found, French, and so on) so the report can be read by
+ * someone who does not know what a canonical tag is, and carries optional `evidence`: the exact thing we
+ * saw on the page. Evidence is never translated — it is a quotation, not wording.
  */
 
 export type Severity = 'critical' | 'warning' | 'info' | 'good';
+
+/** The plain-language buckets the report is organised into, in the order they are shown. */
+export const AREAS = ['security', 'software', 'findability', 'languages', 'phone', 'speed', 'access', 'privacy'] as const;
+export type Area = (typeof AREAS)[number];
 
 export interface Probe {
   status: number;
@@ -37,14 +45,20 @@ export interface Snapshot {
     insecure?: Probe;                 // http:// version of the home page
     fr?: Probe;
     en?: Probe;
+    notFound?: Probe;                 // a path that cannot exist, to catch soft 404s
+    altHost?: Probe;                  // www vs non-www, to catch a duplicated site
+    xmlrpc?: Probe;
   };
 }
 
 export interface Finding {
-  id: string;
+  id: FindingId;
   severity: Severity;
+  area: Area;
   /** Interpolated into the finding's copy, e.g. {version}. */
   params?: Record<string, string | number>;
+  /** What we actually saw, quoted back. Not copy: never translated. */
+  evidence?: string;
 }
 
 export type Platform =
@@ -52,6 +66,15 @@ export type Platform =
   | 'drupal' | 'joomla' | 'shopify-headless' | 'unknown';
 
 export type RecommendationId = 'healthy' | 'french' | 'fixes' | 'redesign' | 'migration';
+
+/** How an area came out. Three words, not a second score: one number to argue with is enough. */
+export type AreaStatus = 'act' | 'watch' | 'ok';
+
+export interface AreaSummary {
+  area: Area;
+  status: AreaStatus;
+  counts: Record<Severity, number>;
+}
 
 export interface AuditReport {
   url: string;
@@ -61,6 +84,8 @@ export interface AuditReport {
   phpVersion?: string;
   score: number;
   counts: Record<Severity, number>;
+  /** Only the areas something was found in, in AREAS order. */
+  areas: AreaSummary[];
   findings: Finding[];
   recommendation: {
     id: RecommendationId;
@@ -85,18 +110,80 @@ export interface VersionData {
 export const FINDING_IDS = [
   'https.missing', 'https.ok', 'https.noRedirect', 'https.noHsts', 'mixedContent',
   'wordpress.outdated', 'wordpress.behind', 'wordpress.current', 'wordpress.versionExposed',
-  'wordpress.versionUnknown', 'wordpress.readmeExposed',
+  'wordpress.versionUnknown', 'wordpress.readmeExposed', 'wordpress.xmlrpcOpen',
   'php.eol', 'php.securityOnly', 'php.current', 'php.exposed', 'jquery.outdated',
-  'seo.noindex', 'seo.title.missing', 'seo.title.long', 'seo.title.short',
+  'seo.noindex', 'seo.nofollow', 'seo.title.missing', 'seo.title.long', 'seo.title.short',
   'seo.description.missing', 'seo.description.long', 'seo.h1.missing', 'seo.h1.multiple',
-  'seo.canonical.missing', 'seo.og.missing', 'seo.schema.present', 'seo.schema.missing',
-  'seo.robots.missing', 'seo.sitemap.present', 'seo.sitemap.missing',
+  'seo.headingSkips', 'seo.canonical.missing', 'seo.canonical.mismatch', 'seo.metaRefresh',
+  'seo.redirectChain', 'seo.duplicateHost', 'seo.soft404',
+  'seo.og.missing', 'seo.og.incomplete', 'seo.schema.present', 'seo.schema.missing',
+  'seo.robots.missing', 'seo.robots.blocksAll', 'seo.robots.noSitemap',
+  'seo.sitemap.present', 'seo.sitemap.missing', 'seo.sitemap.notXml',
+  'seo.charset.missing', 'seo.thinContent', 'seo.internalLinks',
   'lang.missing', 'lang.frenchMissing', 'lang.hreflangMissing', 'lang.bilingual',
-  'mobile.viewport.missing', 'mobile.viewport.ok',
+  'lang.hreflang.noSelf', 'lang.hreflang.noXDefault',
+  'mobile.viewport.missing', 'mobile.viewport.ok', 'mobile.viewport.noScale', 'mobile.viewport.fixedWidth',
   'speed.htmlWeight', 'speed.htmlWeight.info', 'speed.slowResponse', 'speed.fastResponse',
-  'speed.blockingScripts', 'speed.imagesNoDimensions', 'speed.noLazyLoading',
-  'a11y.imagesNoAlt', 'privacy.analyticsNoConsent', 'security.headers', 'security.serverExposed',
+  'speed.blockingScripts', 'speed.stylesheets', 'speed.imagesNoDimensions', 'speed.noLazyLoading',
+  'speed.legacyImages', 'speed.noCompression',
+  'a11y.imagesNoAlt', 'a11y.linksNoText', 'privacy.analyticsNoConsent',
+  'security.headers', 'security.serverExposed',
 ] as const;
+
+export type FindingId = (typeof FINDING_IDS)[number];
+
+/**
+ * Which part of the report each finding belongs to. Static rather than passed at the call site, so a finding
+ * cannot end up in two places, and so TypeScript notices when a new id has no home.
+ */
+export const FINDING_AREAS: Record<FindingId, Area> = {
+  'https.missing': 'security', 'https.ok': 'security', 'https.noRedirect': 'security',
+  'https.noHsts': 'security', 'mixedContent': 'security',
+  'security.headers': 'security', 'security.serverExposed': 'security', 'wordpress.xmlrpcOpen': 'security',
+  'wordpress.readmeExposed': 'security',
+
+  'wordpress.outdated': 'software', 'wordpress.behind': 'software', 'wordpress.current': 'software',
+  'wordpress.versionExposed': 'software', 'wordpress.versionUnknown': 'software',
+  'php.eol': 'software', 'php.securityOnly': 'software', 'php.current': 'software',
+  'php.exposed': 'software', 'jquery.outdated': 'software',
+
+  'seo.noindex': 'findability', 'seo.nofollow': 'findability',
+  'seo.title.missing': 'findability', 'seo.title.long': 'findability', 'seo.title.short': 'findability',
+  'seo.description.missing': 'findability', 'seo.description.long': 'findability',
+  'seo.h1.missing': 'findability', 'seo.h1.multiple': 'findability', 'seo.headingSkips': 'findability',
+  'seo.canonical.missing': 'findability', 'seo.canonical.mismatch': 'findability',
+  'seo.metaRefresh': 'findability', 'seo.redirectChain': 'findability',
+  'seo.duplicateHost': 'findability', 'seo.soft404': 'findability',
+  'seo.og.missing': 'findability', 'seo.og.incomplete': 'findability',
+  'seo.schema.present': 'findability', 'seo.schema.missing': 'findability',
+  'seo.robots.missing': 'findability', 'seo.robots.blocksAll': 'findability', 'seo.robots.noSitemap': 'findability',
+  'seo.sitemap.present': 'findability', 'seo.sitemap.missing': 'findability', 'seo.sitemap.notXml': 'findability',
+  'seo.charset.missing': 'findability', 'seo.thinContent': 'findability', 'seo.internalLinks': 'findability',
+
+  'lang.missing': 'languages', 'lang.frenchMissing': 'languages', 'lang.hreflangMissing': 'languages',
+  'lang.bilingual': 'languages', 'lang.hreflang.noSelf': 'languages', 'lang.hreflang.noXDefault': 'languages',
+
+  'mobile.viewport.missing': 'phone', 'mobile.viewport.ok': 'phone',
+  'mobile.viewport.noScale': 'phone', 'mobile.viewport.fixedWidth': 'phone',
+
+  'speed.htmlWeight': 'speed', 'speed.htmlWeight.info': 'speed', 'speed.slowResponse': 'speed',
+  'speed.fastResponse': 'speed', 'speed.blockingScripts': 'speed', 'speed.stylesheets': 'speed',
+  'speed.imagesNoDimensions': 'speed', 'speed.noLazyLoading': 'speed',
+  'speed.legacyImages': 'speed', 'speed.noCompression': 'speed',
+
+  'a11y.imagesNoAlt': 'access', 'a11y.linksNoText': 'access',
+
+  'privacy.analyticsNoConsent': 'privacy',
+};
+
+/**
+ * The findings that report something already in order. They carry no "how to fix" line, and the sites'
+ * build-time copy check knows not to ask for one.
+ */
+export const POSITIVE_FINDING_IDS: readonly FindingId[] = [
+  'https.ok', 'wordpress.current', 'php.current', 'seo.schema.present', 'seo.sitemap.present',
+  'lang.bilingual', 'mobile.viewport.ok', 'speed.fastResponse',
+];
 
 /** Error codes the fetch endpoint can return, so the sites can word them all. */
 export const AUDIT_ERROR_CODES = [
@@ -107,7 +194,10 @@ export const AUDIT_ERROR_CODES = [
 
 /* ------------------------------------------------------------------ helpers */
 
-const SEVERITY_WEIGHT: Record<Severity, number> = { critical: 18, warning: 7, info: 2, good: 0 };
+const SEVERITY_WEIGHT: Record<Severity, number> = { critical: 18, warning: 7, info: 1, good: 0 };
+/** Tunes how fast the curve falls. Raising it is kinder to sites with a long tail of small notes. */
+const SCORE_SOFTENER = 60;
+const EVIDENCE_MAX = 180;
 
 /** -1 if a < b, 0 if equal, 1 if a > b. Missing parts count as 0. */
 export function compareVersions(a: string, b: string): number {
@@ -145,6 +235,51 @@ const textOf = (html: string, tag: string): string | undefined => {
   const m = html.match(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
   return m ? m[1].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim() : undefined;
 };
+
+/** Everything a visitor would read, with markup and scripts taken out. */
+const visibleText = (html: string): string => html
+  .replace(/<(script|style|noscript|template|svg)\b[\s\S]*?<\/\1>/gi, ' ')
+  .replace(/<!--[\s\S]*?-->/g, ' ')
+  .replace(/<[^>]*>/g, ' ')
+  .replace(/&[a-z#0-9]+;/gi, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+
+/** Origin + path, no trailing slash, lowercased: enough to tell two addresses apart without false alarms. */
+const sameAddress = (a: string, b: string): boolean => {
+  const norm = (u: string): string => {
+    try {
+      const x = new URL(u, b);
+      return `${x.protocol}//${x.host}${x.pathname}`.replace(/\/+$/, '').toLowerCase();
+    } catch {
+      return u.replace(/\/+$/, '').toLowerCase();
+    }
+  };
+  return norm(a) === norm(b);
+};
+
+/**
+ * The `Disallow: /` line that hides the whole site from search engines, if there is one.
+ * Only rules addressed to every crawler count — blocking one scraper by name is a choice, not a mistake —
+ * and an equally specific `Allow: /` anywhere in those rules wins, which is how crawlers read it.
+ */
+function robotsBlocksAll(body: string): string | undefined {
+  let appliesToEveryone = false;
+  let blocking: string | undefined;
+  let allowsRoot = false;
+  for (const raw of body.split(/\r?\n/)) {
+    const line = raw.replace(/#.*$/, '').trim();
+    const m = line.match(/^(user-agent|disallow|allow)\s*:\s*(.*)$/i);
+    if (!m) continue;
+    const key = m[1].toLowerCase();
+    const value = m[2].trim();
+    if (key === 'user-agent') { appliesToEveryone = value === '*'; continue; }
+    if (!appliesToEveryone) continue;
+    if (key === 'allow' && value === '/') allowsRoot = true;
+    if (key === 'disallow' && value === '/') blocking ??= line;
+  }
+  return allowsRoot ? undefined : blocking;
+}
 
 /* --------------------------------------------------------------- detection */
 
@@ -220,7 +355,15 @@ const ANALYTICS_SIGNS = /googletagmanager\.com\/gtag|google-analytics\.com\/(ana
 
 export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   const findings: Finding[] = [];
-  const add = (id: string, severity: Severity, params?: Record<string, string | number>) => findings.push({ id, severity, params });
+  const add = (id: FindingId, severity: Severity, params?: Record<string, string | number>, evidence?: string) => {
+    findings.push({
+      id,
+      severity,
+      area: FINDING_AREAS[id],
+      params,
+      evidence: evidence ? evidence.replace(/\s+/g, ' ').trim().slice(0, EVIDENCE_MAX) : undefined,
+    });
+  };
 
   const html = snap.html;
   const h = snap.headers;
@@ -228,10 +371,11 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   const https = snap.finalUrl.startsWith('https://');
   const { platform, version: platformVersion } = detectPlatform(snap);
   const phpVersion = detectPhpVersion(snap);
+  const isWordPress = platform === 'wordpress' || platform === 'woocommerce';
 
   /* ---- connection ---- */
   if (!https) {
-    add('https.missing', 'critical');
+    add('https.missing', 'critical', undefined, snap.finalUrl);
   } else {
     add('https.ok', 'good');
     const insecure = snap.probes?.insecure;
@@ -241,13 +385,16 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
     if (!h['strict-transport-security']) add('https.noHsts', 'info');
   }
 
-  const mixed = https
-    ? (html.match(/(?:src|href)\s*=\s*["']http:\/\/(?!(?:www\.)?(?:w3\.org|schema\.org|purl\.org|ogp\.me|gmpg\.org|xmlns))/gi) ?? []).length
-    : 0;
-  if (mixed > 0) add('mixedContent', 'critical', { count: mixed });
+  const mixedMatches = https
+    ? (html.match(/(?:src|href)\s*=\s*["']http:\/\/(?!(?:www\.)?(?:w3\.org|schema\.org|purl\.org|ogp\.me|gmpg\.org|xmlns))[^"']*/gi) ?? [])
+    : [];
+  if (mixedMatches.length > 0) {
+    const first = mixedMatches[0].replace(/^[^=]*=\s*["']/, '');
+    add('mixedContent', 'critical', { count: mixedMatches.length }, first);
+  }
 
   /* ---- platform and versions ---- */
-  if (platform === 'wordpress' || platform === 'woocommerce') {
+  if (isWordPress) {
     if (platformVersion) {
       if (compareVersions(platformVersion, versions.wordpress.minSupported) < 0) {
         add('wordpress.outdated', 'critical', { version: platformVersion, latest: versions.wordpress.latest });
@@ -260,7 +407,11 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
     } else {
       add('wordpress.versionUnknown', 'info');
     }
-    if (snap.probes?.readme?.ok) add('wordpress.readmeExposed', 'warning');
+    if (snap.probes?.readme?.ok) add('wordpress.readmeExposed', 'warning', undefined, snap.probes.readme.url);
+
+    const xmlrpc = snap.probes?.xmlrpc;
+    const xmlrpcOpen = xmlrpc && (xmlrpc.status === 405 || (xmlrpc.status === 200 && /XML-RPC server accepts POST/i.test(xmlrpc.body ?? '')));
+    if (xmlrpcOpen) add('wordpress.xmlrpcOpen', 'info', undefined, xmlrpc.url);
   }
 
   if (phpVersion) {
@@ -271,7 +422,7 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
     } else {
       add('php.current', 'good', { version: phpVersion });
     }
-    add('php.exposed', 'info', { version: phpVersion });
+    add('php.exposed', 'info', { version: phpVersion }, h['x-powered-by'] ?? h['server']);
   }
 
   const jquery = detectJQuery(html);
@@ -279,36 +430,92 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
     add('jquery.outdated', 'warning', { version: jquery, latest: versions.jquery.latest });
   }
 
-  /* ---- findability ---- */
+  /* ---- findability: can a search engine read, index and tell apart this page ---- */
   const robotsMeta = (metaContent(html, 'robots') ?? '').toLowerCase();
   const xRobots = (h['x-robots-tag'] ?? '').toLowerCase();
-  if (robotsMeta.includes('noindex') || xRobots.includes('noindex')) add('seo.noindex', 'critical');
+  if (robotsMeta.includes('noindex') || xRobots.includes('noindex')) {
+    add('seo.noindex', 'critical', undefined, robotsMeta || xRobots);
+  } else if (robotsMeta.includes('nofollow') || xRobots.includes('nofollow')) {
+    add('seo.nofollow', 'warning', undefined, robotsMeta || xRobots);
+  }
 
   const title = textOf(html, 'title');
   if (!title) add('seo.title.missing', 'critical');
-  else if (title.length > 65) add('seo.title.long', 'info', { length: title.length });
-  else if (title.length < 15) add('seo.title.short', 'info', { length: title.length });
+  else if (title.length > 65) add('seo.title.long', 'info', { length: title.length }, title);
+  else if (title.length < 15) add('seo.title.short', 'info', { length: title.length }, title);
 
   const description = metaContent(html, 'description');
   if (!description) add('seo.description.missing', 'warning');
-  else if (description.length > 165) add('seo.description.long', 'info', { length: description.length });
+  else if (description.length > 165) add('seo.description.long', 'info', { length: description.length }, description);
 
   const h1s = html.match(/<h1\b[^>]*>/gi) ?? [];
   if (h1s.length === 0) add('seo.h1.missing', 'warning');
-  else if (h1s.length > 1) add('seo.h1.multiple', 'info', { count: h1s.length });
+  else if (h1s.length > 1) add('seo.h1.multiple', 'info', { count: h1s.length }, textOf(html, 'h1'));
 
-  if (!/<link[^>]+rel\s*=\s*["']?canonical/i.test(doc)) add('seo.canonical.missing', 'info');
-  if (!metaContent(html, 'og:title') && !metaContent(html, 'og:image')) add('seo.og.missing', 'info');
+  const levels = [...html.matchAll(/<h([1-6])\b[^>]*>/gi)].map((m) => Number(m[1]));
+  const skip = levels.findIndex((level, i) => i > 0 && level - levels[i - 1] > 1);
+  if (skip > 0) add('seo.headingSkips', 'info', {}, `h${levels[skip - 1]} → h${levels[skip]}`);
+
+  const canonicalTag = doc.match(/<link[^>]+rel\s*=\s*["']?canonical["']?[^>]*>/i)?.[0];
+  const canonical = canonicalTag ? attr(canonicalTag, 'href') : undefined;
+  if (!canonical) add('seo.canonical.missing', 'info');
+  else if (!sameAddress(canonical, snap.finalUrl)) add('seo.canonical.mismatch', 'warning', {}, canonical);
+
+  const refresh = tags(doc, 'meta').find((t) => (attr(t, 'http-equiv') ?? '').toLowerCase() === 'refresh');
+  if (refresh) add('seo.metaRefresh', 'warning', {}, attr(refresh, 'content'));
+
+  const chain = snap.redirects ?? [];
+  if (chain.length >= 2) add('seo.redirectChain', 'info', { count: chain.length }, [snap.url, ...chain].join(' → '));
+
+  const altHost = snap.probes?.altHost;
+  if (altHost?.status === 200) add('seo.duplicateHost', 'warning', {}, altHost.url);
+
+  const notFound = snap.probes?.notFound;
+  if (notFound?.status === 200) add('seo.soft404', 'warning', {}, notFound.url);
+
+  const ogTitle = metaContent(html, 'og:title');
+  const ogImage = metaContent(html, 'og:image');
+  const ogDescription = metaContent(html, 'og:description');
+  if (!ogTitle && !ogImage) {
+    add('seo.og.missing', 'info');
+  } else if (!ogTitle || !ogImage || !ogDescription) {
+    const missing = [!ogTitle && 'og:title', !ogDescription && 'og:description', !ogImage && 'og:image'].filter(Boolean);
+    add('seo.og.incomplete', 'info', { count: missing.length }, missing.join(', '));
+  }
 
   const hasSchema = /application\/ld\+json/i.test(html) || /itemscope/i.test(html);
   if (hasSchema) add('seo.schema.present', 'good');
   else add('seo.schema.missing', 'info');
 
   const robots = snap.probes?.robots;
+  const robotsBody = robots?.ok ? (robots.body ?? '') : '';
+  const blocked = robotsBlocksAll(robotsBody);
   if (!robots?.ok) add('seo.robots.missing', 'warning');
-  const sitemapFromRobots = /^\s*sitemap:\s*http/im.test(robots?.body ?? '');
-  if (snap.probes?.sitemap?.ok || sitemapFromRobots) add('seo.sitemap.present', 'good');
+  else if (blocked) add('seo.robots.blocksAll', 'critical', {}, blocked);
+
+  const sitemap = snap.probes?.sitemap;
+  const sitemapFromRobots = /^\s*sitemap:\s*http/im.test(robotsBody);
+  const sitemapIsHtml = sitemap?.ok && !!sitemap.body && /^\s*(?:﻿)?(?:<!doctype html|<html)/i.test(sitemap.body);
+  if (sitemapIsHtml) add('seo.sitemap.notXml', 'warning', {}, sitemap.url);
+  else if (sitemap?.ok || sitemapFromRobots) add('seo.sitemap.present', 'good', {}, sitemap?.ok ? sitemap.url : undefined);
   else add('seo.sitemap.missing', 'warning');
+  if (robots?.ok && !sitemapFromRobots) add('seo.robots.noSitemap', 'info');
+
+  const hasCharsetTag = tags(doc, 'meta').some((t) => attr(t, 'charset') || (attr(t, 'http-equiv') ?? '').toLowerCase() === 'content-type');
+  if (!hasCharsetTag && !/charset=/i.test(h['content-type'] ?? '')) add('seo.charset.missing', 'warning');
+
+  const text = visibleText(html);
+  const words = text ? text.split(' ').filter((w) => w.length > 1).length : 0;
+  if (!snap.truncated && words < 300) add('seo.thinContent', words < 120 ? 'warning' : 'info', { words });
+
+  const links = [...html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)];
+  const internal = links.filter(([, raw]) => {
+    const href = attr(`<a ${raw}>`, 'href');
+    if (!href || /^(mailto:|tel:|javascript:|#)/i.test(href)) return false;
+    if (!/^[a-z][a-z0-9+.-]*:|^\/\//i.test(href)) return true;   // relative: same site by definition
+    return sameHost(href, snap.finalUrl);
+  }).length;
+  if (internal < 5) add('seo.internalLinks', 'info', { count: internal });
 
   /* ---- languages (Charter of the French Language, updated by Bill 96) ---- */
   const htmlTag = html.match(/<html\b[^>]*>/i)?.[0] ?? '';
@@ -323,15 +530,35 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   if (!frenchSomewhere) {
     add('lang.frenchMissing', 'critical');
   } else if (!lang.startsWith('fr') && !hasFrHreflang && (frProbe || frLink)) {
-    add('lang.hreflangMissing', 'warning');
+    add('lang.hreflangMissing', 'warning', {}, frProbe ? snap.probes?.fr?.url : undefined);
   } else if (lang.startsWith('fr') || hasFrHreflang) {
-    add('lang.bilingual', 'good');
+    add('lang.bilingual', 'good', {}, lang || undefined);
   }
 
-  /* ---- phone and speed ---- */
-  if (!metaContent(html, 'viewport')) add('mobile.viewport.missing', 'critical');
-  else add('mobile.viewport.ok', 'good');
+  // Wiring between the language versions, checked only where there is wiring to judge.
+  const alternates = tags(doc, 'link').filter((t) => attr(t, 'hreflang'));
+  if (alternates.length > 0) {
+    const values = alternates.map((t) => (attr(t, 'hreflang') ?? '').toLowerCase());
+    if (!values.includes('x-default')) add('lang.hreflang.noXDefault', 'info', {}, values.join(', '));
+    if (!alternates.some((t) => sameAddress(attr(t, 'href') ?? '', snap.finalUrl))) {
+      add('lang.hreflang.noSelf', 'info', { count: alternates.length });
+    }
+  }
 
+  /* ---- on a phone ---- */
+  const viewport = metaContent(html, 'viewport');
+  if (!viewport) {
+    add('mobile.viewport.missing', 'critical');
+  } else {
+    const v = viewport.toLowerCase();
+    const locked = /user-scalable\s*=\s*(no|0)/.test(v) || /maximum-scale\s*=\s*(0?\.\d+|1(\.0+)?)\s*(,|;|$)/.test(v);
+    const fixed = v.match(/width\s*=\s*(\d+)/);
+    if (locked) add('mobile.viewport.noScale', 'warning', {}, viewport);
+    if (fixed) add('mobile.viewport.fixedWidth', 'warning', { width: fixed[1] }, viewport);
+    if (!locked && !fixed) add('mobile.viewport.ok', 'good');
+  }
+
+  /* ---- speed ---- */
   const kb = Math.round(snap.bytes / 1024);
   if (kb > 500) add('speed.htmlWeight', 'warning', { kb });
   else if (kb > 200) add('speed.htmlWeight.info', 'info', { kb });
@@ -339,8 +566,13 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   if (snap.elapsedMs > 2500) add('speed.slowResponse', 'warning', { ms: snap.elapsedMs });
   else if (snap.elapsedMs < 800) add('speed.fastResponse', 'good', { ms: snap.elapsedMs });
 
-  const blocking = tags(doc, 'script').filter((t) => attr(t, 'src') && !/\basync\b|\bdefer\b/i.test(t) && (attr(t, 'type') ?? '') !== 'module').length;
-  if (blocking > 3) add('speed.blockingScripts', 'warning', { count: blocking });
+  if (!h['content-encoding'] && snap.bytes > 50 * 1024) add('speed.noCompression', 'warning', { kb });
+
+  const blockingScripts = tags(doc, 'script').filter((t) => attr(t, 'src') && !/\basync\b|\bdefer\b/i.test(t) && (attr(t, 'type') ?? '') !== 'module');
+  if (blockingScripts.length > 3) add('speed.blockingScripts', 'warning', { count: blockingScripts.length }, attr(blockingScripts[0], 'src'));
+
+  const sheets = tags(doc, 'link').filter((t) => /stylesheet/i.test(attr(t, 'rel') ?? '')).length;
+  if (sheets > 6) add('speed.stylesheets', 'info', { count: sheets });
 
   const imgs = tags(html, 'img');
   const noAlt = imgs.filter((t) => attr(t, 'alt') === undefined).length;
@@ -350,25 +582,53 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   const lazy = imgs.filter((t) => (attr(t, 'loading') ?? '').toLowerCase() === 'lazy').length;
   if (imgs.length > 8 && lazy === 0) add('speed.noLazyLoading', 'info', { count: imgs.length });
 
+  const sources = imgs.map((t) => `${attr(t, 'src') ?? ''} ${attr(t, 'srcset') ?? ''}`);
+  const oldFormat = sources.filter((s) => /\.(jpe?g|png)(\?|#|\s|$)/i.test(s)).length;
+  const newFormat = sources.filter((s) => /\.(webp|avif)(\?|#|\s|$)/i.test(s)).length
+    + (/<source[^>]+type\s*=\s*["']image\/(webp|avif)/i.test(html) ? 1 : 0);
+  if (oldFormat >= 5 && newFormat === 0) add('speed.legacyImages', 'info', { count: oldFormat });
+
+  /* ---- everyone can use it ---- */
+  const unlabelledLinks = links.filter(([, raw, inner]) => {
+    const tag = `<a ${raw}>`;
+    if (!attr(tag, 'href')) return false;
+    if (attr(tag, 'aria-label') || attr(tag, 'title') || attr(tag, 'aria-labelledby')) return false;
+    if (visibleText(inner)) return false;
+    const img = inner.match(/<img\b[^>]*>/i);
+    return !(img && (attr(img[0], 'alt') ?? '').trim());
+  }).length;
+  if (unlabelledLinks > 0) add('a11y.linksNoText', unlabelledLinks > 3 ? 'warning' : 'info', { count: unlabelledLinks });
+
   /* ---- privacy and hardening ---- */
   const analytics = ANALYTICS_SIGNS.test(html);
   const cmp = CMP_SIGNS.test(html);
   if (analytics && !cmp) add('privacy.analyticsNoConsent', 'warning');
 
   const missingHeaders = ['x-content-type-options', 'referrer-policy', 'content-security-policy'].filter((n) => !h[n]);
-  if (missingHeaders.length >= 2) add('security.headers', 'info', { count: missingHeaders.length });
-  if (/apache\/[\d.]+|nginx\/[\d.]+/i.test(h['server'] ?? '')) add('security.serverExposed', 'info', { server: h['server'] });
+  if (missingHeaders.length >= 2) add('security.headers', 'info', { count: missingHeaders.length }, missingHeaders.join(', '));
+  if (/apache\/[\d.]+|nginx\/[\d.]+/i.test(h['server'] ?? '')) add('security.serverExposed', 'info', { server: h['server'] }, h['server']);
 
-  /* ---- score and recommendation ---- */
+  /* ---- score, areas and recommendation ---- */
   const counts: Record<Severity, number> = { critical: 0, warning: 0, info: 0, good: 0 };
   for (const f of findings) counts[f.severity] += 1;
   // A curve rather than a subtraction: a neglected site should rank low without bottoming out at zero, which
   // reads as an insult rather than a measurement.
   const penalty = findings.reduce((t, f) => t + SEVERITY_WEIGHT[f.severity], 0);
-  const score = Math.max(1, Math.min(100, Math.round(100 / (1 + penalty / 45))));
+  const score = Math.max(1, Math.min(100, Math.round(100 / (1 + penalty / SCORE_SOFTENER))));
 
   const order: Severity[] = ['critical', 'warning', 'info', 'good'];
-  findings.sort((a, b) => order.indexOf(a.severity) - order.indexOf(b.severity));
+  const bySeverity = (a: Finding, b: Finding) => order.indexOf(a.severity) - order.indexOf(b.severity);
+  findings.sort(bySeverity);
+
+  const areas: AreaSummary[] = [];
+  for (const area of AREAS) {
+    const mine = findings.filter((f) => f.area === area);
+    if (mine.length === 0) continue;
+    const areaCounts: Record<Severity, number> = { critical: 0, warning: 0, info: 0, good: 0 };
+    for (const f of mine) areaCounts[f.severity] += 1;
+    const status: AreaStatus = areaCounts.critical > 0 ? 'act' : areaCounts.warning > 0 ? 'watch' : 'ok';
+    areas.push({ area, status, counts: areaCounts });
+  }
 
   const currentPlatform: AuditReport['recommendation']['currentPlatform'] =
     platform === 'woocommerce' ? 'woocommerce' : platform === 'shopify' ? 'shopify' : platform === 'wordpress' ? 'wordpress' : 'other';
@@ -376,7 +636,7 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   const frenchMissing = findings.some((f) => f.id === 'lang.frenchMissing');
 
   let recommendation: AuditReport['recommendation'];
-  if (score >= 85 && counts.critical === 0) {
+  if (score >= 80 && counts.critical === 0) {
     recommendation = { id: 'healthy', projectType: 'changes', currentPlatform };
   } else if (score < 55 && builder) {
     recommendation = { id: 'migration', projectType: 'redesign', currentPlatform, approach: 'migration' };
@@ -388,7 +648,15 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
     recommendation = { id: 'fixes', projectType: 'changes', currentPlatform };
   }
 
-  return { url: snap.url, finalUrl: snap.finalUrl, platform, platformVersion, phpVersion, score, counts, findings, recommendation };
+  return { url: snap.url, finalUrl: snap.finalUrl, platform, platformVersion, phpVersion, score, counts, areas, findings, recommendation };
+}
+
+function sameHost(href: string, base: string): boolean {
+  try {
+    return new URL(href, base).host.replace(/^www\./i, '') === new URL(base).host.replace(/^www\./i, '');
+  } catch {
+    return false;
+  }
 }
 
 const PLATFORM_NAMES: Record<Platform, string> = {
@@ -401,12 +669,18 @@ export function platformLabel(platform: Platform): string {
   return PLATFORM_NAMES[platform] ?? '';
 }
 
+/** The findings of one area, urgent first. */
+export function findingsIn(report: AuditReport, area: Area): Finding[] {
+  return report.findings.filter((f) => f.area === area);
+}
+
 /** A one-line, copy-free summary for the lead record. */
 export function summarize(report: AuditReport): string[] {
   return [
     `Site audit: ${report.finalUrl}`,
     `Platform: ${report.platform}${report.platformVersion ? ` ${report.platformVersion}` : ''}${report.phpVersion ? `, PHP ${report.phpVersion}` : ''}`,
     `Score: ${report.score}/100 (${report.counts.critical} critical, ${report.counts.warning} warnings, ${report.counts.info} notes)`,
+    `Areas: ${report.areas.map((a) => `${a.area}=${a.status}`).join(', ')}`,
     `Findings: ${report.findings.filter((f) => f.severity !== 'good').map((f) => f.id).join(', ') || 'none'}`,
     `Recommended: ${report.recommendation.id}`,
   ];

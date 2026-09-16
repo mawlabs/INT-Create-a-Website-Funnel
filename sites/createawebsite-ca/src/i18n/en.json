@@ -422,7 +422,15 @@
           "info": "{n} small",
           "good": "{n} good"
         },
-        "empty": "Nothing to report, which is rare and good."
+        "empty": "Nothing to report, which is rare and good.",
+        "areasHeading": "Where things stand",
+        "areaStatus": {
+          "act": "Needs work",
+          "watch": "Worth a look",
+          "ok": "Fine"
+        },
+        "fixLabel": "What to do",
+        "evidenceLabel": "What we saw"
       },
       "report": {
         "helpHeading": "Need help with this?",
@@ -465,7 +473,10 @@
         "intro": "This is what one page of {host} looks like from the outside: to a search engine, to a browser, and to anyone scanning for out-of-date software. Nothing here required a login.",
         "recHeading": "What we'd suggest",
         "footer": "createawebsite.ca is run by Monkeys at Work, a web studio in Quebec. Questions about this report: {email}",
-        "print": "Print or save as PDF"
+        "print": "Print or save as PDF",
+        "contents": "What’s in this report",
+        "checks": "{n} checks, grouped by what they affect. Every one of them is listed below, including the ones your site passed.",
+        "areaAllClear": "Nothing came up here."
       },
       "recommendation": {
         "healthy": {
@@ -513,7 +524,8 @@
       "findings": {
         "https.missing": {
           "title": "Your site doesn't use a secure connection",
-          "detail": "Visitors see a “not secure” warning in the address bar, and search engines rank the site lower. A certificate is free and takes minutes to install."
+          "detail": "Visitors see a “not secure” warning in the address bar, and search engines rank the site lower.",
+          "fix": "Ask your host to turn on a free Let's Encrypt certificate, then set the site to redirect everything to https."
         },
         "https.ok": {
           "title": "Secure connection in place",
@@ -521,24 +533,29 @@
         },
         "https.noRedirect": {
           "title": "The old insecure address still works",
-          "detail": "Someone typing your address without “https” stays on the insecure version. It should send them to the secure one automatically."
+          "detail": "Someone typing your address without “https” stays on the insecure version, and so do old links pointing at it.",
+          "fix": "Add a permanent (301) redirect from http:// to https:// for the whole site."
         },
         "https.noHsts": {
           "title": "The browser isn't told to always use the secure address",
-          "detail": "A single header (HSTS) tells browsers to never try the insecure version again. Small hardening step."
+          "detail": "A single header (HSTS) tells browsers never to try the insecure version again, which closes a small window during the first visit.",
+          "fix": "Add the Strict-Transport-Security header once the https version is known to work everywhere."
         },
         "mixedContent": {
           "title": "{count} things on the page still load insecurely",
-          "detail": "Images or scripts loaded over the old insecure address can be blocked by the browser, which breaks how the page looks or works.",
-          "titleOne": "One thing on the page still loads insecurely"
+          "detail": "Images or scripts loaded over the old insecure address get blocked by the browser, which breaks how the page looks or works.",
+          "titleOne": "One thing on the page still loads insecurely",
+          "fix": "Change those addresses from http:// to https://, or use addresses without a scheme so they follow the page."
         },
         "wordpress.outdated": {
           "title": "WordPress {version} is no longer supported",
-          "detail": "The current release is {latest}. Old versions stop getting security fixes, and most hacked sites are simply out-of-date ones. This is the first thing to deal with."
+          "detail": "The current release is {latest}. Old versions stop getting security fixes, and most hacked sites are simply out-of-date ones.",
+          "fix": "Back up the site, then update WordPress from the dashboard. Deal with this before anything else on this list."
         },
         "wordpress.behind": {
           "title": "WordPress {version} is behind the current release",
-          "detail": "The current release is {latest}. Updating is usually quick, but test it on a copy first if the site has custom code."
+          "detail": "The current release is {latest}. Updating is usually quick, but test it on a copy first if the site has custom code.",
+          "fix": "Update from the dashboard, ideally on a staging copy first, and keep automatic minor updates on."
         },
         "wordpress.current": {
           "title": "WordPress {version} is up to date",
@@ -546,23 +563,33 @@
         },
         "wordpress.versionExposed": {
           "title": "Your WordPress version is visible to anyone",
-          "detail": "The page announces version {version} in its source. It tells an attacker exactly which weaknesses to try. Hiding it is a one-line change."
+          "detail": "The page announces version {version} in its source, which tells an attacker exactly which weaknesses to try.",
+          "fix": "Remove the generator tag and the ?ver= numbers on your files — most security plugins have a switch for both."
         },
         "wordpress.versionUnknown": {
           "title": "We couldn't read your WordPress version",
-          "detail": "That's often a good sign: it means the version isn't published. Worth confirming it's current from your dashboard."
+          "detail": "That's often a good sign: it means the version isn't published where anyone can read it.",
+          "fix": "Confirm from your dashboard that WordPress and your plugins are current."
         },
         "wordpress.readmeExposed": {
           "title": "The WordPress readme file is public",
-          "detail": "The file at /readme.html states your exact version. It serves no purpose on a live site and should be deleted."
+          "detail": "The file at /readme.html states your exact version. It serves no purpose on a live site.",
+          "fix": "Delete readme.html, or block it in your server config. It comes back with each update, so add it to your checklist."
+        },
+        "wordpress.xmlrpcOpen": {
+          "title": "The old WordPress remote interface is open",
+          "detail": "xmlrpc.php lets software post to your site from outside. Almost nothing uses it any more, but password-guessing tools love it because it allows many tries in one request.",
+          "fix": "Block xmlrpc.php in your server config, or with a security plugin, unless you know something still needs it."
         },
         "php.eol": {
           "title": "PHP {version} no longer gets security fixes",
-          "detail": "PHP is the language your site runs on. Version {version} is past its end of life; {current} is current. Your host can usually switch it in a few clicks, but plugins should be tested first."
+          "detail": "PHP is the language your site runs on. Version {version} is past its end of life; {current} is current and considerably faster.",
+          "fix": "Switch the PHP version in your hosting panel, after testing the site on a staging copy — old plugins sometimes need updating first."
         },
         "php.securityOnly": {
           "title": "PHP {version} only gets security fixes now",
-          "detail": "It still receives security patches, but no more improvements. Version {current} is faster. Plan the move before support ends."
+          "detail": "It still receives security patches, but no more improvements, and support ends on a published date. Version {current} is faster.",
+          "fix": "Plan the move to PHP {current} before support ends, rather than in a hurry after it does."
         },
         "php.current": {
           "title": "PHP {version} is a supported version",
@@ -570,51 +597,104 @@
         },
         "php.exposed": {
           "title": "Your server announces its PHP version",
-          "detail": "Version {version} appears in the response headers. Hiding it is a small setting change and gives attackers one less clue."
+          "detail": "Version {version} appears in the response headers, which gives an attacker one more clue about what to try.",
+          "fix": "Set expose_php = Off in your PHP settings, or strip the X-Powered-By header at the server."
         },
         "jquery.outdated": {
           "title": "An old version of jQuery is loaded",
-          "detail": "Version {version} is on the page; {latest} is current. Old versions have known weaknesses that scanners look for."
+          "detail": "Version {version} is on the page; {latest} is current. Old versions have known weaknesses that automated scanners look for.",
+          "fix": "Update jQuery, or the theme or plugin that bundles it. Check the site afterwards: old code sometimes depends on old behaviour."
         },
         "seo.noindex": {
           "title": "Your site is telling Google not to list it",
-          "detail": "The page carries a “noindex” instruction. It's usually left over from building the site, and it keeps you out of search results entirely."
+          "detail": "The page carries a “noindex” instruction. It is usually left over from building the site, and it keeps you out of search results entirely.",
+          "fix": "In WordPress, untick Settings → Reading → “Discourage search engines”. Otherwise remove the noindex meta tag or X-Robots-Tag header."
+        },
+        "seo.nofollow": {
+          "title": "Search engines are told not to follow your links",
+          "detail": "A “nofollow” instruction applies to the whole page, so search engines read it but ignore every link leading out of it. Your other pages lose the credit those links would pass on.",
+          "fix": "Remove nofollow from the page-wide robots meta tag. Keep it on individual links only where you mean it, like paid or untrusted ones."
         },
         "seo.title.missing": {
           "title": "The page has no title",
-          "detail": "The title is the blue line in Google results and the label on the browser tab. Without it, search engines invent one."
+          "detail": "The title is the blue line in Google results and the label on the browser tab. Without it, search engines invent one from whatever text they find.",
+          "fix": "Write a title of 50 to 60 characters saying what you do and where."
         },
         "seo.title.long": {
           "title": "The page title is long ({length} characters)",
-          "detail": "Google cuts titles off around 60 characters. Shorter titles keep the important words visible."
+          "detail": "Google cuts titles off around 60 characters, so the end of yours may never be read.",
+          "fix": "Trim it to about 60 characters and put the words people actually search for first."
         },
         "seo.title.short": {
           "title": "The page title is very short ({length} characters)",
-          "detail": "There's room to say what you do and where, which is what people search for."
+          "detail": "There is room to say what you do and where, which is what people type into Google.",
+          "fix": "Extend it to 50 to 60 characters: what you do, then your city or region."
         },
         "seo.description.missing": {
           "title": "There's no description for search results",
-          "detail": "The description is the grey text under your link in Google. Writing it yourself is free and it decides whether people click."
+          "detail": "The description is the grey text under your link in Google. Writing it yourself is free, and it decides whether people click.",
+          "fix": "Add a meta description of about 150 characters, written for a person rather than for a search engine."
         },
         "seo.description.long": {
           "title": "The search description is long ({length} characters)",
-          "detail": "Google cuts it off around 155 characters, so the end may never be seen."
+          "detail": "Google cuts it off around 155 characters, so the end may never be seen.",
+          "fix": "Shorten it to about 150 characters and make the first sentence carry the offer."
         },
         "seo.h1.missing": {
           "title": "The page has no main heading",
-          "detail": "One clear heading tells both readers and search engines what the page is about."
+          "detail": "One clear heading at the top tells both readers and search engines what the page is about. Styled text is not the same thing.",
+          "fix": "Mark the page's main heading as an h1 — one per page, saying what the page is for."
         },
         "seo.h1.multiple": {
           "title": "The page has {count} main headings",
-          "detail": "Usually one is enough. Several competing headings muddy what the page is about."
+          "detail": "Several competing h1 headings muddy what the page is about. It usually happens when a theme marks the logo and the page title both as h1.",
+          "fix": "Keep one h1 and demote the others to h2."
+        },
+        "seo.headingSkips": {
+          "title": "The headings skip a level",
+          "detail": "Headings are meant to nest like a table of contents. Skipping a level makes the structure harder to follow for screen readers and for search engines working out what belongs to what.",
+          "fix": "Use heading levels in order (h1, then h2, then h3) and choose the size with styling rather than the level."
         },
         "seo.canonical.missing": {
           "title": "No canonical address is set",
-          "detail": "This tells search engines which address is the real one when a page is reachable several ways. It prevents your pages competing with each other."
+          "detail": "This one line tells search engines which address is the real one when a page can be reached several ways — with and without a slash, with tracking parameters, through a print view. Without it your own pages compete with each other.",
+          "fix": "Add a canonical link in the page head pointing at the address you want listed. Most SEO plugins do this for you."
+        },
+        "seo.canonical.mismatch": {
+          "title": "The canonical address points somewhere else",
+          "detail": "The page says the real version of itself lives at another address. When that is a mistake — a copied template, a staging address left behind, a plugin pointing everything at the home page — search engines drop this page and list the other one instead.",
+          "fix": "Check the canonical address is the page's own. If it isn't deliberate, point it back at this page."
+        },
+        "seo.metaRefresh": {
+          "title": "The page redirects itself with a timer",
+          "detail": "A meta refresh sends visitors elsewhere after a delay. Search engines treat it as a weak signal and may keep listing this page, and someone using the back button gets thrown forward again.",
+          "fix": "Replace it with a proper 301 redirect at the server."
+        },
+        "seo.redirectChain": {
+          "title": "Your address goes through {count} redirects",
+          "detail": "Each hop costs time before anything appears, and a little of the value that links pass on. Chains usually build up over the years: http to https, then www, then a new address.",
+          "fix": "Redirect straight from the first address to the last one, in a single step."
+        },
+        "seo.duplicateHost": {
+          "title": "Your site answers at two different addresses",
+          "detail": "Both the www and the plain version load on their own instead of one sending visitors to the other. Search engines can treat them as two sites and split what each has earned.",
+          "fix": "Pick one, and permanently redirect the other to it. Then set the same one in Search Console."
+        },
+        "seo.soft404": {
+          "title": "Missing pages don't say they're missing",
+          "detail": "We asked for an address that cannot exist and the site answered as though it were a real page. Search engines then index those empty pages, and visitors following a dead link have no idea they hit one.",
+          "fix": "Make missing addresses return a 404 status with a page that says so and offers a way back."
         },
         "seo.og.missing": {
           "title": "Links to your site share badly",
-          "detail": "There's no preview image or title set, so posting your link on Facebook or LinkedIn shows a bare address."
+          "detail": "There's no preview image or title set, so posting your link on Facebook, LinkedIn or in a text message shows a bare address.",
+          "fix": "Add og:title, og:description and an og:image of about 1200 × 630 pixels."
+        },
+        "seo.og.incomplete": {
+          "title": "The share preview is missing {count} pieces",
+          "detail": "Part of the preview is set and part isn't, so what people see when they share your link is left to chance.",
+          "titleOne": "The share preview is missing one piece",
+          "fix": "Fill in the missing ones. The image matters most: about 1200 × 630 pixels."
         },
         "seo.schema.present": {
           "title": "Search engines get structured details",
@@ -622,11 +702,23 @@
         },
         "seo.schema.missing": {
           "title": "No structured details for search engines",
-          "detail": "A small block of hidden data can put your address, hours, prices or reviews directly in search results."
+          "detail": "A small block of hidden data can put your address, hours, prices or reviews directly in search results.",
+          "fix": "Add JSON-LD for your business: LocalBusiness with your address and hours is the usual starting point."
         },
         "seo.robots.missing": {
           "title": "No robots.txt file",
-          "detail": "This small file tells search engines what they may look at and where your sitemap is. Most sites should have one."
+          "detail": "This small file tells search engines what they may look at and where your sitemap is. Its absence isn't fatal, but it is the first thing every crawler asks for.",
+          "fix": "Add a robots.txt at the root that allows everything and names your sitemap."
+        },
+        "seo.robots.blocksAll": {
+          "title": "Your robots.txt hides the whole site",
+          "detail": "It tells every search engine to stay out of the entire site. This is normally left behind after building or moving a site, and it removes you from search results.",
+          "fix": "Remove the site-wide Disallow line, then ask for a recrawl in Google Search Console."
+        },
+        "seo.robots.noSitemap": {
+          "title": "Your robots.txt doesn't mention a sitemap",
+          "detail": "It is the one place every crawler looks for the list of your pages, and it costs one line.",
+          "fix": "Add a line reading Sitemap: followed by the full address of your sitemap."
         },
         "seo.sitemap.present": {
           "title": "A sitemap is published",
@@ -634,43 +726,91 @@
         },
         "seo.sitemap.missing": {
           "title": "No sitemap found",
-          "detail": "A sitemap lists your pages for search engines. Without it, newer pages can take much longer to appear."
+          "detail": "A sitemap lists your pages for search engines. Without it, newer pages can take much longer to appear.",
+          "fix": "Publish a sitemap at /sitemap.xml, name it in robots.txt, and submit it in Google Search Console."
+        },
+        "seo.sitemap.notXml": {
+          "title": "Your sitemap address returns a web page, not a sitemap",
+          "detail": "Something answers at the sitemap address, but with an ordinary page rather than the XML list search engines expect. As far as they are concerned there is no sitemap.",
+          "fix": "Fix or remove the sitemap address so it serves real XML, and check it in Google Search Console afterwards."
+        },
+        "seo.charset.missing": {
+          "title": "The page doesn't say which character set it uses",
+          "detail": "Without it a browser has to guess, and accents are what break first: Montréal turns into MontrÃ©al on someone's screen.",
+          "fix": "Add <meta charset=\"utf-8\"> as the first line inside the page head."
+        },
+        "seo.thinContent": {
+          "title": "There's very little text on the page ({words} words)",
+          "detail": "Search engines match people's questions against words on the page. A page carried by images, sliders or video has little for them to match, and little for a visitor skimming to decide.",
+          "fix": "Write a few hundred words that answer what someone would actually ask before hiring you."
+        },
+        "seo.internalLinks": {
+          "title": "The page links to very little of your own site ({count} links)",
+          "detail": "Links between your own pages are how search engines find the rest of the site and work out which pages matter. They are also how a visitor gets anywhere from here.",
+          "fix": "Link from this page to your main services and contact page, using words that say where the link goes."
         },
         "lang.missing": {
           "title": "The page doesn't declare its language",
-          "detail": "One attribute tells browsers and screen readers which language the page is in. It also helps search engines show it to the right people."
+          "detail": "One attribute tells browsers and screen readers which language the page is in. A screen reader with the wrong language reads French words with English pronunciation, which is unintelligible.",
+          "fix": "Set lang=\"en-CA\" or lang=\"fr-CA\" on the html tag of each page."
         },
         "lang.frenchMissing": {
           "title": "We found no French version",
-          "detail": "If you do business in Quebec, your site has to be available in French, at least as prominently as any other language. That's the Charter of the French Language, updated by Bill 96, not a preference."
+          "detail": "If you do business in Quebec, your site has to be available in French, at least as prominently as any other language. That's the Charter of the French Language, updated by Bill 96, not a preference.",
+          "fix": "Have the site translated into French and published at its own addresses, then link the two versions to each other."
         },
         "lang.hreflangMissing": {
           "title": "Your language versions aren't linked for search engines",
-          "detail": "There seem to be two languages, but nothing tells Google they're the same site. Each version ends up competing with the other."
+          "detail": "There seem to be two languages, but nothing tells Google they are the same site in two versions, so each competes with the other and visitors can land in the wrong one.",
+          "fix": "Add hreflang links on every page pointing at the matching page in the other language."
         },
         "lang.bilingual": {
           "title": "More than one language is in place",
           "detail": "Your site declares a French version."
         },
+        "lang.hreflang.noSelf": {
+          "title": "The language links don't include this page",
+          "detail": "A set of hreflang links is supposed to list every version including the one you are on. When a page leaves itself out, search engines ignore the whole set.",
+          "fix": "Add an hreflang link for this page's own language alongside the others."
+        },
+        "lang.hreflang.noXDefault": {
+          "title": "No default is set for other languages",
+          "detail": "Your versions are declared for French and English speakers. Someone whose browser is in neither gets whichever version Google guesses.",
+          "fix": "Add an hreflang=\"x-default\" link pointing at the version you'd want a stranger to land on."
+        },
         "mobile.viewport.missing": {
           "title": "The site isn't set up for phones",
-          "detail": "Without this one line, phones shrink the whole desktop page to fit, so the text is unreadable. Most of your visitors are on a phone."
+          "detail": "Without this one line, phones shrink the whole desktop page to fit, so the text is unreadable until someone pinches to zoom. Most of your visitors are on a phone.",
+          "fix": "Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> to every page."
         },
         "mobile.viewport.ok": {
           "title": "Set up for phones",
-          "detail": "The page tells phones how to display it."
+          "detail": "The page tells phones how to display it, and lets people zoom."
+        },
+        "mobile.viewport.noScale": {
+          "title": "Visitors can't zoom in",
+          "detail": "The page blocks pinch-to-zoom. Anyone who needs bigger text — which is a lot of people over forty — simply can't get it, and it fails accessibility rules for that reason.",
+          "fix": "Remove user-scalable=no and maximum-scale from the viewport tag."
+        },
+        "mobile.viewport.fixedWidth": {
+          "title": "The page is set to a fixed width ({width} pixels)",
+          "detail": "The layout is pinned to one width instead of following the screen, so it is scaled down on small phones and stranded in the middle of large ones.",
+          "fix": "Change the viewport width to device-width and let the layout adapt."
         },
         "speed.htmlWeight": {
           "title": "The page itself is heavy ({kb} KB)",
-          "detail": "That's just the page's own code, before images. On a phone connection it delays everything that follows."
+          "detail": "That's just the page's own code, before any images. On a phone connection it delays everything that follows.",
+          "fix": "Cut what the page ships: page builders, unused widgets and inline styles are the usual culprits."
         },
         "speed.htmlWeight.info": {
           "title": "The page's own code is on the large side ({kb} KB)",
-          "detail": "Not a problem yet, but worth watching as you add to the site."
+          "detail": "Not a problem yet, but worth watching as you add to the site.",
+          "fix": "Keep an eye on it as pages grow; removing an unused plugin usually takes the most off."
         },
         "speed.slowResponse": {
           "title": "The server took {ms} ms to answer",
-          "detail": "That's before anything is drawn on screen. Slow answers usually mean cheap hosting, no caching, or a plugin doing too much work."
+          "detail": "That's before anything is drawn on screen. Slow answers usually mean cheap hosting, no caching, or a plugin doing too much work on every visit.",
+          "fix": "Turn on page caching first, then look at the hosting plan. Both are cheaper than a rebuild."
         },
         "speed.fastResponse": {
           "title": "The server answered quickly ({ms} ms)",
@@ -678,32 +818,94 @@
         },
         "speed.blockingScripts": {
           "title": "{count} scripts hold up the first paint",
-          "detail": "They load before anything appears. Marking them to load later is usually a quick win."
+          "detail": "They have to finish loading before anything appears on screen, so the visitor watches a blank page while they do.",
+          "fix": "Mark them defer or async, or load them after the page has drawn."
+        },
+        "speed.stylesheets": {
+          "title": "{count} separate stylesheets load before the page appears",
+          "detail": "Each one is a separate trip to the server, and the page can't be drawn until the last one arrives. It usually means several plugins each bringing their own.",
+          "fix": "Combine them, or remove the plugins whose styles this page never uses."
         },
         "speed.imagesNoDimensions": {
           "title": "{count} images have no size set",
-          "detail": "The page jumps around as images load, which is the thing that makes people mis-tap buttons."
+          "detail": "The page jumps around as images load, which is what makes people mis-tap buttons and lose their place.",
+          "fix": "Set width and height on every image tag, even when the styling resizes it."
         },
         "speed.noLazyLoading": {
           "title": "All {count} images load at once",
-          "detail": "Images further down the page can wait until someone scrolls to them. On a phone that saves real time and data."
+          "detail": "Images far down the page are fetched before anyone has scrolled to them. On a phone that is real time and real data spent on nothing.",
+          "fix": "Add loading=\"lazy\" to images below the first screen — but not to the ones at the top."
+        },
+        "speed.legacyImages": {
+          "title": "{count} images use older formats",
+          "detail": "JPEG and PNG files are typically a third larger than the same picture in WebP or AVIF, at the same quality. On image-heavy pages that is the single biggest saving available.",
+          "fix": "Convert them to WebP with a fallback. Most hosts and image plugins do it automatically."
+        },
+        "speed.noCompression": {
+          "title": "The page isn't compressed",
+          "detail": "Text compresses to roughly a quarter of its size, and every browser has supported it for twenty years. Sending {kb} KB uncompressed is time your visitor waits for nothing.",
+          "fix": "Turn on gzip or brotli compression at the server, or ask your host to."
         },
         "a11y.imagesNoAlt": {
           "title": "{count} of {total} images have no text description",
-          "detail": "Screen readers announce nothing for these, and search engines can't tell what they show. Descriptions also appear when an image fails to load.",
-          "titleOne": "1 of {total} images has no text description"
+          "detail": "Screen readers announce nothing for these, and search engines can't tell what they show. The description also appears when an image fails to load.",
+          "titleOne": "1 of {total} images has no text description",
+          "fix": "Describe what each image shows. Leave alt=\"\" — empty, but present — on purely decorative ones."
+        },
+        "a11y.linksNoText": {
+          "title": "{count} links have nothing to read out",
+          "detail": "These are usually icons: a phone, an envelope, a social network. A screen reader announces them as “link”, with no way to know where they go.",
+          "titleOne": "One link has nothing to read out",
+          "fix": "Give each one an aria-label, or alt text on the icon inside it, saying where it leads."
         },
         "privacy.analyticsNoConsent": {
           "title": "Tracking appears to run before visitors agree",
-          "detail": "We found analytics or advertising scripts and no consent banner. In Quebec, Law 25 requires consent before tracking, with a real way to say no."
+          "detail": "We found analytics or advertising scripts and no consent banner. In Quebec, Law 25 requires consent before tracking, with a refusal that is as easy as agreeing.",
+          "fix": "Hold the tracking scripts until someone accepts, and make declining one click, not a settings hunt."
         },
         "security.headers": {
           "title": "{count} standard protection headers are missing",
-          "detail": "These are small server settings that block common attacks. They cost nothing and change nothing visible."
+          "detail": "These are small server settings that block common attacks. They cost nothing and change nothing visible.",
+          "fix": "Add X-Content-Type-Options, Referrer-Policy and a Content-Security-Policy in your server config."
         },
         "security.serverExposed": {
           "title": "Your server announces its exact version",
-          "detail": "The response says {server}. Hiding the version number gives attackers one less thing to work with."
+          "detail": "The response says {server}. Attackers scan for exact versions with known weaknesses, so the fewer clues the better.",
+          "fix": "Turn off the server signature (ServerTokens Prod in Apache, server_tokens off in nginx)."
+        }
+      },
+      "areas": {
+        "security": {
+          "label": "Safety and trust",
+          "blurb": "Whether the connection can be trusted, and whether the site leaves easy openings for an attacker."
+        },
+        "software": {
+          "label": "What it runs on",
+          "blurb": "The versions behind the site. Out-of-date software is how most small sites get broken into."
+        },
+        "findability": {
+          "label": "Being found on Google",
+          "blurb": "The technical side of search: whether search engines can read the page, list it, and tell it apart from its own duplicates."
+        },
+        "languages": {
+          "label": "English and French",
+          "blurb": "What the law asks of a business in Quebec, and whether search engines understand which version is which."
+        },
+        "phone": {
+          "label": "On a phone",
+          "blurb": "Most people arrive on a phone. This is whether the page was built for that."
+        },
+        "speed": {
+          "label": "Speed",
+          "blurb": "How long someone waits before they see anything, and what is making them wait."
+        },
+        "access": {
+          "label": "Everyone can use it",
+          "blurb": "Whether someone using a screen reader, a keyboard or larger text can get through the page."
+        },
+        "privacy": {
+          "label": "Privacy law",
+          "blurb": "Law 25 in Quebec: what you may collect, and what you have to ask before collecting it."
         }
       }
     },

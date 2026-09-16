@@ -188,6 +188,17 @@ try {
   check('audit focus moves to the report heading', await page.evaluate(() => document.activeElement?.classList.contains('report-h')));
   check('audit summary kept for the lead', (await page.evaluate(() => sessionStorage.getItem('caw-audit') ?? '')).includes('vieuxsite.ca'));
 
+  // The intuitive parts: where the trouble is, what we actually saw, and what to do about it
+  const areaRows = page.locator('[data-audit-output] .area');
+  check('audit breaks the result down by area', (await areaRows.count()) >= 4, `${await areaRows.count()} areas`);
+  const areasText = await page.textContent('[data-audit-output] .areas-wrap');
+  check('areas are named in plain words', areasText.includes('Being found on Google') && areasText.includes('Safety and trust'), areasText.slice(0, 160));
+  check('each area carries a verdict', /Needs work|Worth a look|Fine/.test(areasText));
+  check('an area needing work is marked as such', (await page.locator('[data-audit-output] .area[data-status="act"]').count()) >= 1);
+  check('urgent findings say what to do', (await page.locator('[data-audit-output] .finding .f-fix').count()) >= 1, reportText.slice(0, 80));
+  const fixText = await page.textContent('[data-audit-output] .finding .f-fix');
+  check('the fix line is labelled and actionable', fixText.startsWith('What to do') && fixText.length > 40, fixText);
+
   // The full report is behind an email, and following up is opt-in
   await page.locator('[data-audit-output] .rec button', { hasText: 'Get the full report' }).click();
   await page.waitForTimeout(200);
@@ -213,9 +224,15 @@ try {
       .replace('&quot;formGuid&quot;:&quot;&quot;', '&quot;formGuid&quot;:&quot;abcd&quot;');
     await route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body });
   });
-  // Downloads are recorded rather than performed.
+  // Downloads are recorded rather than performed, and the file's own contents are kept so we can read it.
   await page.addInitScript(() => {
     window.__downloads = [];
+    window.__downloadBodies = [];
+    const realCreate = URL.createObjectURL.bind(URL);
+    URL.createObjectURL = (blob) => {
+      blob.text().then((t) => window.__downloadBodies.push(t)).catch(() => {});
+      return realCreate(blob);
+    };
     const realClick = HTMLAnchorElement.prototype.click;
     HTMLAnchorElement.prototype.click = function () {
       if (this.download) { window.__downloads.push(this.download); return; }
@@ -241,6 +258,12 @@ try {
   check('booking link goes to the meeting page', (await page.getAttribute('[data-audit-output] a[data-cta="book"]', 'href')).includes('meetings.hubspot.com/ange1'));
   const downloads = await page.evaluate(() => window.__downloads ?? []);
   check('the full report downloads as a file', downloads.some((d) => d.startsWith('site-check-vieuxsite.ca')), JSON.stringify(downloads));
+  const file = await page.evaluate(() => window.__downloadBodies?.[0] ?? '');
+  check('the downloaded report is grouped by area', file.includes('id="area-findability"') && file.includes('id="area-security"'), file.slice(0, 120));
+  check('the downloaded report opens with a contents list', file.includes('What\u2019s in this report') && file.includes('href="#area-'));
+  check('the downloaded report says what to do for each problem', (file.match(/class="line fix"/g) ?? []).length >= 5);
+  check('the downloaded report quotes what we saw', file.includes('What we saw'));
+  check('the downloaded report keeps the checks that passed', file.includes('Already right'));
   check('the lead carries the findings and the follow-up choice', hubspotPosts.some((b) => b.includes('vieuxsite.ca') && b.includes('wordpress.outdated') && b.includes('follow up')), hubspotPosts.join('').slice(0, 200));
   await page.unroute('**/api.hsforms.com/**');
   await page.unroute(`${origin}/`);
@@ -263,6 +286,17 @@ try {
   await page.waitForTimeout(220);
   check('fr step 2 in French', (await question(page)).includes('bâti'));
   check('fr switch to EN links /', (await page.getAttribute('header a[data-lang-switch="en"]', 'href')) === '/');
+
+  // The site check reports in French too, areas and fix lines included
+  await page.route('**/api/audit.php', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(wpFixture) }));
+  await page.fill('[data-audit-url]', 'vieuxsite.ca');
+  await page.click('[data-audit-panel] button[type="submit"]');
+  await page.waitForSelector('[data-audit-output] .report .areas');
+  const frReport = await page.textContent('[data-audit-output]');
+  check('fr audit names the areas in French', frReport.includes('Être trouvé sur Google') && frReport.includes('Sécurité et confiance'), frReport.slice(0, 120));
+  check('fr audit gives verdicts in French', /À reprendre|À regarder|Correct/.test(frReport));
+  check('fr audit says what to do, in French', (await page.textContent('[data-audit-output] .finding .f-fix')).startsWith('Quoi faire'));
+  await page.unroute('**/api/audit.php');
 
   // guide hreflang + CTA to quote
   await page.goto(`${origin}/guides/how-much-does-a-website-cost-canada/`, { waitUntil: 'networkidle' });

@@ -4,7 +4,7 @@
  * fetch endpoint, analyses it in the browser, and hands the result to the quote flow.
  */
 import type { AuditCopy } from '../lib/copy';
-import { AUDIT_ERROR_CODES, FINDING_IDS, type VersionData } from '../lib/audit';
+import { AREAS, AUDIT_ERROR_CODES, FINDING_IDS, POSITIVE_FINDING_IDS, type VersionData } from '../lib/audit';
 import { interpolate, type Locale } from '../lib/i18n';
 
 interface Props {
@@ -21,10 +21,16 @@ interface Props {
 const { copy, locale, versions, endpoint, supportEmail, bookUrl, pageName, hubspot, id = 'audit' } = Astro.props;
 
 // Bilingual by law, and a finding with no wording is a blank line in front of a client: fail the build instead.
-const missingFindings = FINDING_IDS.filter((f) => !copy.findings[f]);
-const missingErrors = AUDIT_ERROR_CODES.filter((e) => !copy.errors[e]);
-if (missingFindings.length || missingErrors.length) {
-  throw new Error(`audit copy (${locale}) is missing findings [${missingFindings.join(', ')}] and errors [${missingErrors.join(', ')}]`);
+// A finding that names a problem and doesn't say what to do about it is the same failure one step later, so
+// every finding but the reassuring ones has to carry its fix line too.
+const gaps = [
+  ...FINDING_IDS.filter((f) => !copy.findings[f]).map((f) => `finding ${f}`),
+  ...FINDING_IDS.filter((f) => copy.findings[f] && !POSITIVE_FINDING_IDS.includes(f) && !copy.findings[f].fix).map((f) => `fix for ${f}`),
+  ...AUDIT_ERROR_CODES.filter((e) => !copy.errors[e]).map((e) => `error ${e}`),
+  ...AREAS.filter((a) => !copy.areas?.[a]).map((a) => `area ${a}`),
+];
+if (gaps.length) {
+  throw new Error(`audit copy (${locale}) is missing: ${gaps.join(', ')}`);
 }
 
 const strip = <T,>(v: T): T => (v && typeof v === 'object' && !Array.isArray(v)
@@ -93,6 +99,21 @@ const config = { locale, copy: strip(copy), versions, endpoint, supportEmail, bo
   [data-audit-panel] .finding[data-severity="good"] .sev { background: var(--color-confirm); }
   [data-audit-panel] .f-title { font-weight: 600; color: var(--color-heading); }
   [data-audit-panel] .f-detail { margin-top: 0.2rem; font-size: var(--step--1); }
+  [data-audit-panel] .f-label { font-family: var(--font-mono); font-size: var(--step-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-meta); margin-inline-end: 0.5rem; }
+  [data-audit-panel] .f-evidence { margin-top: 0.4rem; font-size: var(--step--1); }
+  [data-audit-panel] .f-evidence code { font-family: var(--font-mono); font-size: 0.95em; word-break: break-word; background: var(--color-surface); padding: 0.1em 0.35em; }
+  [data-audit-panel] .f-fix { margin-top: 0.4rem; font-size: var(--step--1); color: var(--color-heading); }
+  [data-audit-panel] .areas-wrap { margin-top: var(--space-3); }
+  [data-audit-panel] .areas-h { font-family: var(--font-mono); font-size: var(--step-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-meta); font-weight: 500; }
+  [data-audit-panel] .areas { list-style: none; padding: 0; margin-top: var(--space-2); display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); row-gap: 0; column-gap: var(--space-5); }
+  [data-audit-panel] .area { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); max-width: none; padding: 0.45rem 0; border-bottom: 1px solid var(--color-rule); }
+  [data-audit-panel] .area:first-child, [data-audit-panel] .area:nth-child(2) { border-top: 1px solid var(--color-rule); }
+  @media (max-width: 40rem) { [data-audit-panel] .area:nth-child(2) { border-top: 0; } }
+  [data-audit-panel] .area-label { font-weight: 600; color: var(--color-heading); font-size: var(--step--1); }
+  [data-audit-panel] .area-status { font-family: var(--font-mono); font-size: var(--step-mono); letter-spacing: 0.04em; color: var(--color-meta); white-space: nowrap; display: flex; align-items: center; gap: 0.4rem; }
+  [data-audit-panel] .area-status::before { content: ""; width: 0.6rem; height: 0.6rem; flex: none; background: var(--color-confirm); }
+  [data-audit-panel] .area[data-status="watch"] .area-status::before { background: var(--color-leader); }
+  [data-audit-panel] .area[data-status="act"] .area-status::before { background: var(--color-accent); }
   [data-audit-panel] .counts { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); list-style: none; padding: 0; margin-top: var(--space-2); font-family: var(--font-mono); font-size: var(--step-mono); letter-spacing: 0.04em; color: var(--color-meta); }
   [data-audit-panel] .counts li { display: flex; align-items: center; gap: 0.4rem; max-width: none; }
   [data-audit-panel] .counts li::before { content: ""; width: 0.6rem; height: 0.6rem; flex: none; background: var(--color-rule); }
