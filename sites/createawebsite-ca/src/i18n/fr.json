@@ -1074,7 +1074,7 @@
     "h1": "Confidentialité",
     "intro": "createawebsite.ca est un site de Monkeys at Work. Cette page dit ce que le site recueille, pourquoi, où ça va et comment changer d'idée.",
     "updated": "Mis à jour le {date}",
-    "_todo_policy": "TODO(angelique): confirmer selon la politique de monkeysat.work et nommer la personne responsable de la protection des renseignements personnels exigée par la loi 25 (brief §11)",
+    "_todo_policy": "TODO(angelique) : à confirmer avec la politique de monkeysat.work et à compléter avec le nom du responsable de la protection des renseignements personnels exigé par la loi 25 (brief §11). Les paragraphes sur la vérification de site décrivent exactement ce que fait le code, mais personne d'habilité n'a encore validé la formulation juridique.",
     "sections": [
       {
         "_review": true,
@@ -1082,7 +1082,8 @@
         "paragraphs": [
           "L'outil de soumission lui-même ne recueille rien : vos réponses restent dans votre navigateur jusqu'à ce que vous décidiez de les envoyer.",
           "Quand vous envoyez une demande de soumission ou une question : votre nom, votre adresse courriel, votre téléphone et votre entreprise si vous les avez donnés, vos réponses aux questions, la fourchette qu'on vous a montrée et ce que vous avez écrit. Rien d'autre.",
-          "Si vous acceptez les statistiques dans la bannière : les pages que vous visitez, comment vous êtes arrivé ici, votre type d'appareil et de navigateur, et votre emplacement approximatif, par Google Analytics 4. Tant que vous n'acceptez pas, aucun script de statistiques ne se charge et aucun témoin n'est déposé. Si vous refusez, rien n'est recueilli."
+          "Si vous acceptez les statistiques dans la bannière : les pages que vous visitez, comment vous êtes arrivé ici, votre type d'appareil et de navigateur, et votre emplacement approximatif, par Google Analytics 4. Tant que vous n'acceptez pas, aucun script de statistiques ne se charge et aucun témoin n'est déposé. Si vous refusez, rien n'est recueilli.",
+          "La vérification de site envoie l'adresse du site web que vous tapez à notre propre serveur, qui récupère la page d'accueil de ce site et quelques fichiers publics — robots.txt, le plan de site, les adresses françaises et anglaises habituelles, une adresse qui ne peut pas exister et, sur WordPress, le fichier readme et deux points d'accès standards. Il les lit comme le ferait n'importe quel visiteur ou moteur de recherche : aucune connexion, aucune modification de votre site, aucune recherche de fichiers privés. Les constats sont calculés dans votre propre navigateur, pas sur notre serveur. Si vous demandez le rapport complet, nous recueillons l'adresse courriel que vous donnez, les constats pour ce site, et si vous avez coché la case de suivi."
         ]
       },
       {
@@ -1090,7 +1091,8 @@
         "h2": "Pourquoi",
         "paragraphs": [
           "Les demandes de soumission servent à préparer et à confirmer votre soumission, puis à en faire le suivi. Les questions servent à vous répondre. Rien d'autre — pas d'infolettre, pas de partage, pas de vente.",
-          "Les statistiques nous disent si ce site est utile et vaut la peine d'être maintenu. C'est tout."
+          "Les statistiques nous disent si ce site est utile et vaut la peine d'être maintenu. C'est tout.",
+          "La vérification de site existe pour que vous voyiez ce qu'un inconnu voit, et pour que nous puissions offrir de le corriger. Votre adresse est conservée avec les constats afin de faire un suivi — seulement si vous avez coché la case. Le rapport lui-même est produit dans votre navigateur et téléchargé sur votre appareil ; nous ne l'envoyons pas par courriel."
         ]
       },
       {
@@ -1098,14 +1100,16 @@
         "h2": "Où ça va",
         "paragraphs": [
           "Les demandes de soumission entrent dans les systèmes de Monkeys at Work : sa base de données de demandes, HubSpot (l'outil de gestion de la relation client) et ClickUp (l'outil de gestion des tâches), exactement comme une soumission faite dans le clavardage de monkeysat.work. Les questions vont dans HubSpot avec une trace du consentement que vous avez donné.",
-          "Les données de statistiques vont dans Google Analytics 4, avec les adresses IP anonymisées."
+          "Les données de statistiques vont dans Google Analytics 4, avec les adresses IP anonymisées.",
+          "Les demandes de rapport de vérification vont dans HubSpot, avec les constats et une trace du consentement que vous avez donné. L'adresse que vous avez fait vérifier n'est publiée nulle part et n'est pas transmise au propriétaire du site."
         ]
       },
       {
         "_review": true,
         "h2": "Combien de temps on les garde",
         "paragraphs": [
-          "Votre choix pour les statistiques est retenu dans votre navigateur pendant 12 mois. Les demandes et les questions sont conservées le temps de faire le suivi avec vous, et supprimées sur demande."
+          "Votre choix pour les statistiques est retenu dans votre navigateur pendant 12 mois. Les demandes et les questions sont conservées le temps de faire le suivi avec vous, et supprimées sur demande.",
+          "Pour que la vérification ne puisse pas servir à attaquer les sites d'autres personnes, notre serveur compte les vérifications récentes à partir d'une empreinte à sens unique de votre adresse IP — pas de l'adresse elle-même — et supprime chaque compteur environ quarante minutes après sa dernière utilisation. Un résumé de votre dernière vérification reste dans la mémoire d'onglet de votre navigateur et disparaît à la fermeture de l'onglet."
         ]
       },
       {

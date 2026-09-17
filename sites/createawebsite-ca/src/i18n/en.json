@@ -1047,34 +1047,38 @@
     "h1": "Privacy",
     "intro": "createawebsite.ca is run by Monkeys at Work. This page says what the site collects, why, where it goes and how to change your mind.",
     "updated": "Updated {date}",
-    "_todo_policy": "TODO(angelique): confirm against monkeysat.work's policy and name the privacy officer Law 25 requires (brief §11)",
+    "_todo_policy": "TODO(angelique): confirm against monkeysat.work's policy and name the privacy officer Law 25 requires (brief §11). The site-check paragraphs describe exactly what the code does and were written from it, but they have not been read by anyone who can sign off on the legal wording.",
     "sections": [
       {
         "h2": "What we collect",
         "paragraphs": [
           "The quote tool itself collects nothing: your answers stay in your browser until you decide to send them.",
           "When you send a quote request or a question: your name, your email address, your phone and company if you gave them, your answers to the quote questions, the range you were shown and what you wrote. Nothing else.",
-          "If you accept analytics in the banner: which pages you visit, how you got here, your device and browser type and your approximate location, through Google Analytics 4. Until you accept, no analytics script loads and no cookie is set. If you decline, nothing is collected."
+          "If you accept analytics in the banner: which pages you visit, how you got here, your device and browser type and your approximate location, through Google Analytics 4. Until you accept, no analytics script loads and no cookie is set. If you decline, nothing is collected.",
+          "The site check sends the website address you type to our own server, which fetches that site's home page and a handful of public files — robots.txt, the sitemap, the usual French and English addresses, an address that cannot exist, and on WordPress the readme and a couple of standard endpoints. It reads them the way any visitor or search engine can: no login, no change to your site, no search for private files. The findings are worked out in your own browser, not on our server. If you ask for the full report, we collect the email address you give us, the findings for that site, and whether you ticked the follow-up box."
         ]
       },
       {
         "h2": "Why",
         "paragraphs": [
           "Quote requests are used to prepare and confirm your quote and to follow up on it. Questions are used to answer you. Nothing else — no newsletter, no sharing, no selling.",
-          "Analytics tell us whether this site is useful and worth keeping up. That's it."
+          "Analytics tell us whether this site is useful and worth keeping up. That's it.",
+          "The site check exists so you can see what a stranger sees, and so we can offer to fix it. Your address is kept with the findings so we can follow up — only if you ticked the box. The report itself is built in your browser and downloaded to your device; we do not email it."
         ]
       },
       {
         "h2": "Where it goes",
         "paragraphs": [
           "Quote requests go into Monkeys at Work's own systems: its lead database, HubSpot (the customer relationship tool) and ClickUp (the task tool), the same way a quote from the chat on monkeysat.work does. Questions go to HubSpot with a record of the consent you gave.",
-          "Analytics data goes to Google Analytics 4, with IP addresses anonymized."
+          "Analytics data goes to Google Analytics 4, with IP addresses anonymized.",
+          "Site-check report requests go to HubSpot with the findings and a record of the consent you gave. The address you scanned is not published anywhere and is not shared with the site's owner."
         ]
       },
       {
         "h2": "How long we keep it",
         "paragraphs": [
-          "Your analytics choice is remembered in your browser for 12 months. Quote requests and questions are kept for as long as we need them to follow up with you, and deleted on request."
+          "Your analytics choice is remembered in your browser for 12 months. Quote requests and questions are kept for as long as we need them to follow up with you, and deleted on request.",
+          "So the site check cannot be used to attack other people's websites, our server counts recent scans against a one-way hash of your IP address — not the address itself — and deletes each counter about forty minutes after its last use. A summary of your last scan stays in your browser's tab storage and disappears when you close the tab."
         ]
       },
       {
