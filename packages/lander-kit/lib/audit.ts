@@ -196,10 +196,26 @@ export const AUDIT_ERROR_CODES = [
 
 /* ------------------------------------------------------------------ helpers */
 
+/**
+ * How much HTML the regex passes are allowed to see.
+ *
+ * Several patterns here are a lazy quantifier between two anchors — `<script>…</script>`, `<a>…</a>`,
+ * `<!--…-->`. On a page full of OPENED but never closed tags each start position scans to the end of the
+ * document looking for a close that is not there, which is quadratic. Measured: a page of repeated
+ * `<script>x` costs 69 ms at 60 KB, 262 ms at 120 KB, 1.2 s at 250 KB and **43 seconds at MAX_BYTES** — all
+ * synchronous, in the visitor's tab, with the status still reading "checking".
+ *
+ * A hostile site can serve that deliberately, and our own truncation at MAX_BYTES can produce it by accident
+ * by cutting mid-tag. 150 KB keeps the worst case near 400 ms; a home page with more markup than that is
+ * already being told its page is heavy, from snap.bytes, which this does not affect.
+ */
+const ANALYSIS_MAX_CHARS = 150_000;
+
 const SEVERITY_WEIGHT: Record<Severity, number> = { critical: 18, warning: 7, info: 1, good: 0 };
 /** Tunes how fast the curve falls. Raising it is kinder to sites with a long tail of small notes. */
 const SCORE_SOFTENER = 60;
 const EVIDENCE_MAX = 180;
+const PARAM_MAX = 60;
 
 /** -1 if a < b, 0 if equal, 1 if a > b. Missing parts count as 0. */
 export function compareVersions(a: string, b: string): number {
@@ -344,7 +360,7 @@ export function detectPlatform(snap: Snapshot): { platform: Platform; version?: 
   if (/webflow/i.test(generator) || /data-wf-page/i.test(html) || /assets\.website-files\.com/i.test(html)) {
     return { platform: 'webflow' };
   }
-  const drupal = generator.match(/Drupal\s*([\d.]+)?/i);
+  const drupal = generator.match(/Drupal\s*([\d.]{1,20})?/i);
   if (drupal || h['x-drupal-cache'] || h['x-generator']?.match(/drupal/i)) {
     return { platform: 'drupal', version: drupal?.[1] };
   }
@@ -358,7 +374,7 @@ export function detectPlatform(snap: Snapshot): { platform: Platform; version?: 
     || snap.probes?.wpJson?.ok === true
     || !!h['link']?.match(/wp-json/i);
   if (isWp) {
-    const woo = /WooCommerce\s*([\d.]+)/i.exec(html) ?? /woocommerce[-_]/i.exec(html);
+    const woo = /WooCommerce\s*([\d.]{1,20})/i.exec(html) ?? /woocommerce[-_]/i.exec(html);
     if (woo || /class="[^"]*woocommerce/i.test(html)) return { platform: 'woocommerce', version: wpVersion, authoritative: wp.authoritative };
     return { platform: 'wordpress', version: wpVersion, authoritative: wp.authoritative };
   }
@@ -380,12 +396,12 @@ const CORE_ASSET = /\/wp-(?:includes|admin)\/(?:css\\?\/dist\\?\/block-library|c
  */
 function detectWordPressVersion(snap: Snapshot): { version?: string; authoritative: boolean } {
   const generator = metaContent(snap.html, 'generator') ?? '';
-  const fromMeta = generator.match(/WordPress\s+([\d.]+)/i);
+  const fromMeta = generator.match(/WordPress\s+([\d.]{1,20})/i);
   if (fromMeta) return { version: fromMeta[1], authoritative: true };
 
   const readme = snap.probes?.readme;
   if (readme?.ok && readme.body) {
-    const m = readme.body.match(/Version\s+([\d.]+)/i);
+    const m = readme.body.match(/Version\s+([\d.]{1,20})/i);
     if (m) return { version: m[1], authoritative: true };
   }
 
@@ -397,10 +413,10 @@ function detectWordPressVersion(snap: Snapshot): { version?: string; authoritati
 
 export function detectPhpVersion(snap: Snapshot): string | undefined {
   const powered = snap.headers['x-powered-by'] ?? '';
-  const m = powered.match(/PHP\/([\d.]+)/i);
+  const m = powered.match(/PHP\/([\d.]{1,20})/i);
   if (m) return m[1];
   const server = snap.headers['server'] ?? '';
-  const m2 = server.match(/PHP\/([\d.]+)/i);
+  const m2 = server.match(/PHP\/([\d.]{1,20})/i);
   return m2 ? m2[1] : undefined;
 }
 
@@ -452,12 +468,20 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
       id,
       severity,
       area: FINDING_AREAS[id],
-      params,
+      // `evidence` was clipped and `params` was not, so a target-supplied version string went through at full
+      // length into the report, the downloadable file and — via summarize() — the lead that reaches the CRM.
+      // An oversized lead POST fails and is reported to the visitor as unrecorded, which loses the lead
+      // silently: the worst outcome a lead magnet has.
+      params: params && Object.fromEntries(Object.entries(params).map(
+        ([k, v]) => [k, typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, PARAM_MAX) : v],
+      )),
       evidence: evidence ? evidence.replace(/\s+/g, ' ').trim().slice(0, EVIDENCE_MAX) : undefined,
     });
   };
 
-  const html = snap.html;
+  const html = snap.html.length > ANALYSIS_MAX_CHARS ? snap.html.slice(0, ANALYSIS_MAX_CHARS) : snap.html;
+  // Anything that reads "we saw none of X" has to know it may simply not have looked far enough.
+  const partial = snap.truncated === true || snap.html.length > ANALYSIS_MAX_CHARS;
   const h = snap.headers;
   const doc = head(html);
   const https = snap.finalUrl.startsWith('https://');
@@ -600,7 +624,7 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
 
   const text = visibleText(html);
   const words = text ? text.split(' ').filter((w) => w.length > 1).length : 0;
-  if (!snap.truncated && words < 300) add('seo.thinContent', words < 120 ? 'warning' : 'info', { words });
+  if (!partial && words < 300) add('seo.thinContent', words < 120 ? 'warning' : 'info', { words });
 
   const links = [...html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)];
   const internal = links.filter(([, raw]) => {

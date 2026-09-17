@@ -99,6 +99,92 @@ this outright. Two fixes:
   even though it did not here. The report already carries a checked-on date, which would then mean something.
 
 
+## 2026-09-17 (evening) — the review, finished: staging go, public with conditions
+
+The rerun completed properly — four surfaces, six agents, no failures — including the two the first attempt
+never reached. 20 findings, 1 refuted. Verdict: **staging go, public go-with-conditions.** All eight
+conditions are now implemented.
+
+What the review found sound is worth recording, because it was checked rather than assumed: **the browser
+output surface has no injection anywhere.** `h()` assigns text via `textContent`; there is no `innerHTML`,
+`insertAdjacentHTML` or `document.write` in the panel or the report builder; every attribute-context
+interpolation in the generated file reads from the fixed colour maps, never from target data; and the
+downloaded report is a Blob behind a `download` attribute, never navigated to in our own origin. The SSRF
+address core rewritten this morning was confirmed correct, as were the manual per-hop redirect validation,
+`CURLOPT_PROXY => ''`, the refuse-don't-exit contract, and the fail-closed rate-limit posture. The reviewer
+also argued the visitor-facing error taxonomy should stay exactly as it is — collapsing it for oracle-purity
+would cost real usability for near-zero security gain. That is the right call and it stands.
+
+### Verified by hand before acting
+
+- **The deadline never covered the first hop.** `if ($i > 0 && past_deadline())` — mine, from this morning —
+  skipped the one hop an attacker fully controls. Now checked before every hop and again straight after the
+  call returns, because resolution happens *inside* that call and a deadline read only beforehand cannot
+  bound something already running.
+- **A counter file was minted before the URL was validated at all.** `rate_check()` at line 203,
+  `fetch_page()` at 615. A stranger could POST a URL certain to be refused and still cost a file each time.
+- **Header bytes were counted by nothing.** Only the body passes through `WRITEFUNCTION`, so neither
+  `MAX_BYTES` nor `SCAN_MAX_BYTES` saw headers; the name was uncapped in length and the map uncapped in
+  count, and the whole map ships to the browser.
+- **The analysis regexes are quadratic on unclosed tags, and far worse than reported.** Measured here on a
+  page of repeated `<script>x`: 69 ms at 60 KB, 262 ms at 120 KB, 1.2 s at 250 KB and **43.6 seconds at
+  MAX_BYTES** — synchronous, in the visitor's tab, status still reading "checking". The benchmark itself
+  timed out at 120 s on the next shape. This is not only a hostile page: **our own truncation at MAX_BYTES
+  can cut mid-tag and produce it.** Analysis input is now capped at 150 KB, which measures near 400 ms worst
+  case, and anything that reads "we found none of X" now knows it may not have looked all the way.
+
+### The one I got wrong this morning
+
+**The Origin gate compared `HTTP_ORIGIN` against `HTTP_HOST` — both supplied by the same request.** That
+comparison is always satisfiable. Point any domain you own at this server's address and, if the request
+reaches this docroot, your page is genuinely same-origin with the endpoint: no preflight, responses
+*readable*, and every visitor arrives with their own fresh quota. It reopened the path it was added to close
+and made it worse. Now: a hardcoded `ALLOWED_HOSTS` list, checked against `HTTP_HOST` before any work is
+done, and against `Origin` when present. The list is ours and only we can change it, which was the whole
+point.
+
+### Also implemented
+
+- **PHP can no longer print over the JSON.** `display_errors` off, `log_errors` on, plus a shutdown handler
+  that turns a fatal into a well-formed `server_unavailable`. A POST over `post_max_size` used to emit a
+  startup warning *before any line of this file ran*, which started output, made every `header()` fail with
+  "headers already sent by <absolute path>", and answered 200 text/html — all before the rate limit, so free.
+- **The rate limit survives address supply.** Keyed on the /64 rather than the full address (a routed /64 is
+  standard from any cheap VPS and gave one person an unlimited quota), sharded by the first two hex
+  characters so no directory is ever O(N) to `scandir`, and the sweep moved to *after* the decision so a
+  caller already at its ceiling stops paying for our housekeeping.
+- **The store asserts it is outside the served tree** rather than assuming it, comparing `realpath()` against
+  `DOCUMENT_ROOT` and failing closed into the existing honest 503, and writing a deny rule on creation. The
+  filenames are hashes of visitor addresses; published, that is a per-visitor usage log, which for a Quebec
+  business is Law 25 territory.
+- **Only headers the engine reads are kept** — a twenty-name allowlist — and header bytes now count against
+  the scan budget.
+- **DNS is memoised per host for the life of the request.** Every probe targets the same origin as the page,
+  so one scan was paying for up to sixteen lookups of a name it had already resolved, none of which can be
+  given a timeout.
+- **Target-supplied strings are clipped centrally.** `evidence` was clipped and `params` was not, so an
+  unbounded version string reached the report, the downloadable file and — through `summarize()` — the lead
+  that lands in the CRM. An oversized lead POST fails and is shown to the visitor as unrecorded, which loses
+  the lead silently: the worst outcome a lead magnet has. Version captures are bounded at the regex too.
+
+### Where that leaves it
+
+**Staging is go.** Deploy noindexed to `caw.mawlabs.ca` via `staging.yml` with docroot
+`www/caw.mawlabs.ca/public_html`. That is also the only instrument that can answer what this review could
+not without network: whether `display_errors` is actually on, where `.caw-audit` really lands under that
+docroot, whether the host is dual-stacked, and how often real legacy-charset sites trip the U+FFFD path.
+
+**Public still waits on two things that are not code**: the privacy TODO being cleared by someone who can
+sign off on the wording, and the corpus. Everything the review asked for in the code is done.
+
+Remaining minor findings not acted on, recorded so they are not lost: `fail()` still ships libcurl's raw
+error string as `detail` (a connection oracle); non-UTF-8 pages are replaced with U+FFFD before analysis and
+the mojibake is quoted back as evidence; bidi control characters survive into quoted evidence; the early
+return in `resolve_host()` means a host whose A record is public and whose AAAA is private is no longer
+refused outright; `resolve_relative()` resolves path-relative Locations against the wrong directory; and the
+peer-vs-pin comparison is string equality between PHP's IPv6 text and libcurl's, which may differ in form.
+
+
 ## 2026-09-17 (later) — pre-deploy review: a real SSRF hole, and a CSRF path
 
 A five-surface adversarial review of `audit.php` was run before letting strangers POST to it. **It was cut

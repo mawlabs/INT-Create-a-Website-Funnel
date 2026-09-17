@@ -33,6 +33,33 @@ const RATE_WINDOW      = 600;       // per 10 minutes, per IP
 const USER_AGENT       = 'Mozilla/5.0 (compatible; createawebsite.ca site check; +https://createawebsite.ca/)';
 const NOT_FOUND_PATH   = 'maw-site-check-does-not-exist-8f21c4';
 
+/**
+ * The hostnames this endpoint will answer under. A request arriving with any other Host is refused before it
+ * does any work, and an Origin outside this list is refused too. Add a host here when a new domain is
+ * pointed at the docroot — that is the point: the list is ours, not the caller's.
+ * The last two are for running the file locally; neither is reachable from the internet.
+ */
+/** Every response header packages/lander-kit/lib/audit.ts reads. Nothing else is kept or returned. */
+const KEPT_HEADERS = [
+    'location', 'server', 'x-powered-by', 'content-type', 'content-encoding',
+    'strict-transport-security', 'x-robots-tag', 'x-content-type-options', 'referrer-policy',
+    'content-security-policy', 'link', 'x-drupal-cache', 'x-generator', 'x-shopid',
+    'x-wix-request-id', 'cf-ray', 'cf-mitigated', 'x-sucuri-id', 'x-iinfo', 'via',
+];
+
+const ALLOWED_HOSTS = [
+    'createawebsite.ca', 'www.createawebsite.ca',
+    'caw.mawlabs.ca',
+    'localhost', '127.0.0.1',
+];
+
+// PHP's own output would otherwise land in front of ours. A POST larger than post_max_size emits a startup
+// warning before a single line of this file runs; that starts output, so every header() below fails with
+// "headers already sent by <absolute path of this file>", and the visitor gets HTTP 200 text/html with our
+// path in it. It happens before the rate limit, so it is free to trigger.
+@ini_set('display_errors', '0');
+@ini_set('log_errors', '1');
+
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
@@ -49,6 +76,19 @@ function past_deadline(): bool {
     global $scanStartedAt;
     return (microtime(true) - $scanStartedAt) > SCAN_DEADLINE;
 }
+
+// A fatal after this point would otherwise end the response mid-JSON. Send something the panel can word.
+register_shutdown_function(static function (): void {
+    $e = error_get_last();
+    if ($e === null || !in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        return;
+    }
+    if (!headers_sent()) {
+        http_response_code(503);
+        header('Content-Type: application/json; charset=utf-8');
+    }
+    echo json_encode(['ok' => false, 'error' => 'server_unavailable'], JSON_UNESCAPED_SLASHES);
+});
 
 function fail(string $code, int $status = 400, array $extra = []): never {
     http_response_code($status);
@@ -81,12 +121,19 @@ if ($contentType !== 'application/json') {
     fail('method_not_allowed', 415);
 }
 
-// And when the browser tells us where the page came from, believe it.
+// Both Origin and Host come from the request, so comparing them to each other proved nothing: point any
+// domain you own at this server's address and, if the request reaches this docroot, your page is
+// "same-origin" with the endpoint — no preflight needed, responses readable, and every one of your visitors
+// brings their own rate-limit quota. Compare against a list only we can change, and refuse a Host that is
+// not ours before doing any work.
+$hostHeader = strtolower(explode(':', (string) ($_SERVER['HTTP_HOST'] ?? ''))[0]);
+if (!in_array($hostHeader, ALLOWED_HOSTS, true)) {
+    fail('method_not_allowed', 403);
+}
 $origin = (string) ($_SERVER['HTTP_ORIGIN'] ?? '');
 if ($origin !== '') {
     $originHost = strtolower((string) (parse_url($origin, PHP_URL_HOST) ?? ''));
-    $ourHost = strtolower(explode(':', (string) ($_SERVER['HTTP_HOST'] ?? ''))[0]);
-    if ($originHost === '' || $originHost !== $ourHost) {
+    if ($originHost === '' || !in_array($originHost, ALLOWED_HOSTS, true)) {
         fail('method_not_allowed', 403);
     }
 }
@@ -133,7 +180,38 @@ function rate_dir(): ?string {
     if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
         return null;
     }
-    return is_writable($dir) ? $dir : null;
+    if (!is_writable($dir)) {
+        return null;
+    }
+    // Assert, don't assume. The path is inferred from this script's depth, and the staging deploy takes a
+    // free-form docroot: put audit.php one level shallower and the store lands inside the served tree. The
+    // filenames are hashes of visitor addresses — a published one is a per-visitor usage log, which for a
+    // Quebec business is Law 25 territory. Fail closed instead; the caller already words that honestly.
+    $root = realpath((string) ($_SERVER['DOCUMENT_ROOT'] ?? ''));
+    $real = realpath($dir);
+    if ($root !== false && $real !== false && str_starts_with($real . DIRECTORY_SEPARATOR, $root . DIRECTORY_SEPARATOR)) {
+        return null;
+    }
+    // Belt and braces for a host that ignores the above: make the directory refuse to serve anything.
+    if (!is_file($dir . '/.htaccess')) {
+        @file_put_contents($dir . '/.htaccess', "Require all denied\n");
+    }
+    return $dir;
+}
+
+/**
+ * The bucket a caller counts against.
+ *
+ * Keyed on the NETWORK, not the address. A routed IPv6 /64 is standard from any cheap VPS, which gave one
+ * person 2^64 distinct addresses and therefore an unlimited quota — and a fresh counter file each time. The
+ * first eight bytes are the /64; IPv4 is used whole.
+ */
+function rate_key(string $ip): string {
+    $packed = @inet_pton($ip);
+    if ($packed === false) {
+        return hash('sha256', $ip);
+    }
+    return hash('sha256', strlen($packed) === 16 ? substr($packed, 0, 8) : $packed);
 }
 
 /** Occasionally sweep counters nobody has touched since well past the window, so the directory cannot grow forever. */
@@ -171,9 +249,14 @@ function rate_check(): string {
         return 'unavailable';
     }
     $now = time();
-    prune_rate_dir($dir, $now);
 
-    $file = $dir . '/' . hash('sha256', client_ip()) . '.json';
+    // Sharded so no single directory is ever O(N) to scandir, and so the sweep below stays cheap.
+    $key = rate_key(client_ip());
+    $shard = $dir . '/' . substr($key, 0, 2);
+    if (!is_dir($shard) && !@mkdir($shard, 0700, true) && !is_dir($shard)) {
+        return 'unavailable';
+    }
+    $file = $shard . '/' . $key . '.json';
     $handle = @fopen($file, 'c+');
     if ($handle === false) {
         return 'unavailable';
@@ -193,6 +276,9 @@ function rate_check(): string {
         ftruncate($handle, 0);
         rewind($handle);
         fwrite($handle, json_encode($hits));
+        // After the decision, not before it: a caller already at its ceiling should not be paying for our
+        // housekeeping, which is a second denial of service handed to whoever fills the directory.
+        prune_rate_dir($shard, $now);
         return 'ok';
     } finally {
         flock($handle, LOCK_UN);
@@ -317,6 +403,13 @@ function resolve_host(string $host): array {
     if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
         return [$host];
     }
+    // Memoised for the life of the request. Every probe targets the same origin as the page, so without this
+    // one scan pays for up to sixteen lookups of the same name — and no lookup here can be given a timeout.
+    static $seen = [];
+    if (isset($seen[$host])) {
+        return $seen[$host];
+    }
+
     $ips = [];
     $v4 = @gethostbynamel($host);
     if (is_array($v4) && $v4 !== []) {
@@ -324,7 +417,7 @@ function resolve_host(string $host): array {
         // because CURLOPT_RESOLVE means libcurl performs no DNS of its own. A host that answers A instantly
         // and blackholes AAAA could otherwise hold a worker for the resolver's full retry budget, at no CPU
         // cost, on every hop and every probe.
-        return array_values(array_unique($v4));
+        return $seen[$host] = array_values(array_unique($v4));
     }
     $v6 = @dns_get_record($host, DNS_AAAA);
     if (is_array($v6)) {
@@ -334,7 +427,7 @@ function resolve_host(string $host): array {
             }
         }
     }
-    return array_values(array_unique($ips));
+    return $seen[$host] = array_values(array_unique($ips));
 }
 
 /**
@@ -429,13 +522,22 @@ function request(string $url, int $cap, string $method = 'GET', int $timeout = T
         CURLOPT_RESOLVE        => ["$host:$port:$ip"],
         CURLOPT_HTTPHEADER     => ['Accept: text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8', 'Accept-Language: en-CA,fr-CA;q=0.9'],
         CURLOPT_HEADERFUNCTION => function ($ch, string $line) use (&$headers): int {
+            global $scanBytes;
             $len = strlen($line);
+            // Header traffic used to be counted by nothing: not MAX_BYTES, not SCAN_MAX_BYTES, because only
+            // the body passes through WRITEFUNCTION. The name was uncapped in length and the map uncapped in
+            // count, and the whole map is returned to the browser.
+            $scanBytes += $len;
+            if ($scanBytes > SCAN_MAX_BYTES) {
+                return 0;
+            }
             $pos = strpos($line, ':');
             if ($pos !== false) {
                 $name = strtolower(trim(substr($line, 0, $pos)));
-                $value = trim(substr($line, $pos + 1));
-                if ($name !== '' && !isset($headers[$name])) {
-                    $headers[$name] = substr($value, 0, 500);
+                // Only the headers the engine actually reads. Everything else is weight we ship to the
+                // visitor for nothing, and a place for a hostile target to put whatever it likes.
+                if (in_array($name, KEPT_HEADERS, true) && !isset($headers[$name])) {
+                    $headers[$name] = substr(trim(substr($line, $pos + 1)), 0, 500);
                 }
             }
             return $len;
@@ -503,10 +605,15 @@ function fetch_page(string $url): array {
     $redirects = [];
     $current = $url;
     for ($i = 0; $i <= MAX_REDIRECTS; $i++) {
-        if ($i > 0 && past_deadline()) {
+        if (past_deadline()) {
             fail('fetch_failed', 504, ['detail' => 'deadline']);
         }
         $res = request($current, MAX_BYTES);
+        // Checked again straight after: resolution and the transfer both happen inside that call, and a
+        // deadline that is only read before a call cannot bound one that is already running.
+        if (past_deadline() && $res['status'] === 0) {
+            fail('fetch_failed', 504, ['detail' => 'deadline']);
+        }
         if ($res['status'] === 0) {
             $reason = $res['error'] ?? '';
             if ($i === 0 && in_array($reason, $addressReasons, true)) {
