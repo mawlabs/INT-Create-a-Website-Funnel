@@ -26,6 +26,8 @@ const TOTAL_TIMEOUT    = 10;
 const PROBE_TIMEOUT    = 4;     // side requests get less rope than the page itself
 const PROBE_BUDGET     = 12;    // seconds for all side requests together; the rest are skipped
 const MAX_REDIRECTS    = 4;
+const SCAN_DEADLINE    = 25;        // seconds for the whole scan, whatever it is doing
+const SCAN_MAX_BYTES   = 8000000;   // 8 MB pulled in total, across the page and every redirect hop
 const RATE_LIMIT       = 12;        // scans
 const RATE_WINDOW      = 600;       // per 10 minutes, per IP
 const USER_AGENT       = 'Mozilla/5.0 (compatible; createawebsite.ca site check; +https://createawebsite.ca/)';
@@ -35,6 +37,18 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
+
+/**
+ * Wall clock for the whole request. PHP's max_execution_time counts CPU on Linux, so it does not bound a
+ * request that is asleep on a socket or on a DNS lookup that will never answer — which is most of what this
+ * file does. Each hop and each probe checks this before starting.
+ */
+$scanStartedAt = microtime(true);
+$scanBytes = 0;
+function past_deadline(): bool {
+    global $scanStartedAt;
+    return (microtime(true) - $scanStartedAt) > SCAN_DEADLINE;
+}
 
 function fail(string $code, int $status = 400, array $extra = []): never {
     http_response_code($status);
@@ -56,6 +70,25 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
 }
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     fail('method_not_allowed', 405);
+}
+
+// A POST carrying Content-Type: text/plain is a CORS "simple request" — no preflight — so any page on the
+// internet could make every one of its visitors drive this endpoint. They cannot read the answer, but the
+// answer is not what they are after: the outbound requests are. Insisting on JSON forces a preflight, and we
+// answer preflights without Access-Control-Allow-Origin, so a cross-origin caller never gets to send this.
+$contentType = strtolower(trim(explode(';', (string) ($_SERVER['CONTENT_TYPE'] ?? ''))[0]));
+if ($contentType !== 'application/json') {
+    fail('method_not_allowed', 415);
+}
+
+// And when the browser tells us where the page came from, believe it.
+$origin = (string) ($_SERVER['HTTP_ORIGIN'] ?? '');
+if ($origin !== '') {
+    $originHost = strtolower((string) (parse_url($origin, PHP_URL_HOST) ?? ''));
+    $ourHost = strtolower(explode(':', (string) ($_SERVER['HTTP_HOST'] ?? ''))[0]);
+    if ($originHost === '' || $originHost !== $ourHost) {
+        fail('method_not_allowed', 403);
+    }
 }
 
 $raw = file_get_contents('php://input') ?: '';
@@ -177,9 +210,106 @@ if ($rate === 'limited') {
 
 /* --------------------------------------------------------- URL validation */
 
-/** Public, routable address? Rejects private, loopback, link-local, multicast and reserved ranges. */
+/**
+ * Is this address one we are willing to connect to?
+ *
+ * filter_var's NO_PRIV_RANGE|NO_RES_RANGE is NOT a complete deny-list, which is what this used to rely on.
+ * Measured on PHP 8.4, it accepts 100.64.0.0/10 (the carrier-grade NAT space a shared host may use for its
+ * own internal network), all multicast, 198.18.0.0/15, 192.0.0.0/24, and — worst — the IPv6 forms that carry
+ * an IPv4 address inside them. `64:ff9b::7f00:1` is NAT64 for 127.0.0.1 and `2002:7f00:1::1` is 6to4 for the
+ * same. Those two defeat the CURLINFO_PRIMARY_IP pin as well, because the address curl connects to IS the
+ * address we validated and pinned — peer equals pin, and the loopback response comes back.
+ *
+ * So: decode the address, pull out any embedded IPv4, and judge what it actually reaches.
+ */
 function is_public_ip(string $ip): bool {
-    return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false;
+    $packed = @inet_pton($ip);
+    if ($packed === false) {
+        return false;
+    }
+    if (strlen($packed) === 4) {
+        return is_public_v4($packed);
+    }
+    if (strlen($packed) !== 16) {
+        return false;
+    }
+    $embedded = embedded_v4($packed);
+    if ($embedded !== null) {
+        return is_public_v4($embedded);   // judge where it really goes, not how it is spelled
+    }
+    return is_public_v6($packed);
+}
+
+/** The IPv4 address carried inside a v6 one, for every encoding that routes to v4. Null if there is none. */
+function embedded_v4(string $p): ?string {
+    $zero12 = str_repeat("\0", 12);
+    // ::ffff:a.b.c.d — IPv4-mapped
+    if (substr($p, 0, 10) === str_repeat("\0", 10) && substr($p, 10, 2) === "\xff\xff") {
+        return substr($p, 12, 4);
+    }
+    // ::a.b.c.d — IPv4-compatible (deprecated, still routed by some stacks). :: and ::1 are not v4.
+    if (substr($p, 0, 12) === $zero12 && substr($p, 12, 4) !== "\0\0\0\0" && substr($p, 12, 4) !== "\0\0\0\1") {
+        return substr($p, 12, 4);
+    }
+    // 2002:V4::/16 — 6to4
+    if (substr($p, 0, 2) === "\x20\x02") {
+        return substr($p, 2, 4);
+    }
+    // 64:ff9b::/96 and 64:ff9b:1::/48 — NAT64, well-known and local-use prefixes
+    if (substr($p, 0, 4) === "\x00\x64\xff\x9b") {
+        return substr($p, 12, 4);
+    }
+    return null;
+}
+
+/** Four packed bytes. Everything not globally routable is refused. */
+function is_public_v4(string $p): bool {
+    [$a, $b] = [ord($p[0]), ord($p[1])];
+    $long = (ord($p[0]) << 24) | (ord($p[1]) << 16) | (ord($p[2]) << 8) | ord($p[3]);
+    $in = static fn (string $cidr): bool => (static function () use ($cidr, $long): bool {
+        [$net, $bits] = explode('/', $cidr);
+        $mask = $bits === '0' ? 0 : (-1 << (32 - (int) $bits)) & 0xFFFFFFFF;
+        return ($long & $mask) === (ip2long($net) & $mask);
+    })();
+
+    foreach ([
+        '0.0.0.0/8',          // "this network"
+        '10.0.0.0/8',         // private
+        '100.64.0.0/10',      // carrier-grade NAT / shared address space
+        '127.0.0.0/8',        // loopback
+        '169.254.0.0/16',     // link-local, and the cloud metadata address
+        '172.16.0.0/12',      // private
+        '192.0.0.0/24',       // IETF protocol assignments
+        '192.0.2.0/24',       // documentation
+        '192.88.99.0/24',     // 6to4 relay anycast
+        '192.168.0.0/16',     // private
+        '198.18.0.0/15',      // benchmarking
+        '198.51.100.0/24',    // documentation
+        '203.0.113.0/24',     // documentation
+        '224.0.0.0/4',        // multicast
+        '240.0.0.0/4',        // reserved, includes 255.255.255.255
+    ] as $cidr) {
+        if ($in($cidr)) {
+            return false;
+        }
+    }
+    unset($a, $b);
+    return true;
+}
+
+/** Sixteen packed bytes, with no embedded IPv4 (that is handled before we get here). */
+function is_public_v6(string $p): bool {
+    $starts = static fn (string $prefix): bool => str_starts_with($p, $prefix);
+
+    if ($p === str_repeat("\0", 16)) return false;                       // ::
+    if ($p === str_repeat("\0", 15) . "\x01") return false;              // ::1
+    if ((ord($p[0]) & 0xFE) === 0xFC) return false;                       // fc00::/7 unique local
+    if (ord($p[0]) === 0xFE && (ord($p[1]) & 0xC0) === 0x80) return false; // fe80::/10 link-local
+    if (ord($p[0]) === 0xFF) return false;                                // ff00::/8 multicast
+    if ($starts("\x20\x01\x0d\xb8")) return false;                       // 2001:db8::/32 documentation
+    if ($starts("\x20\x01\x00\x00")) return false;                       // 2001::/32 Teredo
+    if ($starts("\x01\x00\x00\x00\x00\x00\x00\x00")) return false;      // 100::/64 discard-only
+    return true;
 }
 
 /** Every address the host resolves to, or the literal itself when the host is already an address. */
@@ -189,8 +319,12 @@ function resolve_host(string $host): array {
     }
     $ips = [];
     $v4 = @gethostbynamel($host);
-    if (is_array($v4)) {
-        $ips = $v4;
+    if (is_array($v4) && $v4 !== []) {
+        // Stop here. Neither of these calls takes a timeout, and curl's timeouts do not cover them at all
+        // because CURLOPT_RESOLVE means libcurl performs no DNS of its own. A host that answers A instantly
+        // and blackholes AAAA could otherwise hold a worker for the resolver's full retry budget, at no CPU
+        // cost, on every hop and every probe.
+        return array_values(array_unique($v4));
     }
     $v6 = @dns_get_record($host, DNS_AAAA);
     if (is_array($v6)) {
@@ -307,12 +441,16 @@ function request(string $url, int $cap, string $method = 'GET', int $timeout = T
             return $len;
         },
         CURLOPT_WRITEFUNCTION  => function ($ch, string $chunk) use (&$body, &$bytes, &$aborted, $cap): int {
+            global $scanBytes;
             $len = strlen($chunk);
             $bytes += $len;
+            $scanBytes += $len;
             if (strlen($body) < $cap) {
                 $body .= substr($chunk, 0, $cap - strlen($body));
             }
-            if ($bytes > $cap * 4) {   // far past the cap: stop pulling
+            // Per-response, and across the whole scan: five redirect hops at cap*4 each would otherwise let
+            // one POST pull tens of megabytes, which a hostile target can serve cheaply with compression.
+            if ($bytes > $cap * 4 || $scanBytes > SCAN_MAX_BYTES) {
                 $aborted = true;
                 return 0;
             }
@@ -365,6 +503,9 @@ function fetch_page(string $url): array {
     $redirects = [];
     $current = $url;
     for ($i = 0; $i <= MAX_REDIRECTS; $i++) {
+        if ($i > 0 && past_deadline()) {
+            fail('fetch_failed', 504, ['detail' => 'deadline']);
+        }
         $res = request($current, MAX_BYTES);
         if ($res['status'] === 0) {
             $reason = $res['error'] ?? '';
@@ -392,11 +533,26 @@ function fetch_page(string $url): array {
 }
 
 function resolve_relative(string $base, string $target): string {
+    $target = trim($target);
+    if ($target === '') {
+        return $base;
+    }
     if (preg_match('#^https?://#i', $target)) {
         return $target;
     }
     $parts = parse_url($base);
-    $root = ($parts['scheme'] ?? 'https') . '://' . ($parts['host'] ?? '');
+    $scheme = $parts['scheme'] ?? 'https';
+    // "//host/path" inherits the scheme and REPLACES the host. Treating it as a path — which is what the
+    // leading slash made it look like — kept us on the original site at a nonsense address, so a site
+    // legitimately redirecting to a CDN read as a broken one. Each hop is re-validated either way.
+    if (str_starts_with($target, '//')) {
+        return $scheme . ':' . preg_replace('#^/+#', '//', $target);
+    }
+    // "https:/host/" — one slash. Browsers normalise this; so do we, rather than reading it as a path.
+    if (preg_match('#^(https?):/([^/].*)$#i', $target, $m)) {
+        return strtolower($m[1]) . '://' . $m[2];
+    }
+    $root = $scheme . '://' . ($parts['host'] ?? '');
     if (str_starts_with($target, '/')) {
         return $root . $target;
     }
@@ -410,7 +566,7 @@ function resolve_relative(string $base, string $target): string {
  */
 function probe(string $url, string $method = 'GET', int $keep = 4000): array {
     static $spent = 0.0;
-    if ($spent > PROBE_BUDGET) {
+    if ($spent > PROBE_BUDGET || past_deadline()) {
         return ['status' => 0, 'ok' => false, 'skipped' => true];
     }
     $started = microtime(true);

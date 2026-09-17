@@ -99,6 +99,97 @@ this outright. Two fixes:
   even though it did not here. The report already carries a checked-on date, which would then mean something.
 
 
+## 2026-09-17 (later) — pre-deploy review: a real SSRF hole, and a CSRF path
+
+A five-surface adversarial review of `audit.php` was run before letting strangers POST to it. **It was cut
+short by a session limit: 12 of 15 agents died, including every refuter and the final go/no-go, and two
+surfaces (the request path, and hostile content reaching the browser) never ran at all.** So its 15 findings
+carry no independent verification — "standing" in that output means "unchecked", not "survived". Three of the
+sharpest were reproduced by hand against the real code instead, and all three were real.
+
+### `is_public_ip()` was not a deny-list — fixed
+
+`filter_var($ip, FILTER_VALIDATE_IP, NO_PRIV_RANGE | NO_RES_RANGE)` is not what its docblock claimed.
+Measured against the shipped function, it accepted:
+
+- `100.64.0.1` and `100.127.255.254` — carrier-grade NAT, the space a shared host may use internally
+- `224.0.0.1` and `ff02::1` — multicast, which the docblock explicitly claimed to reject
+- `198.18.0.1`, `192.0.0.1`
+- **`2002:7f00:1::1`** — 6to4 for 127.0.0.1
+- **`64:ff9b::7f00:1`** — NAT64 for 127.0.0.1
+
+The last two matter most, because the `CURLINFO_PRIMARY_IP` assertion added yesterday cannot catch them: the
+address curl connects to *is* the address we validated and pinned, so peer equals pin and the loopback
+response comes back in the JSON. A hostname with a single AAAA record of `64:ff9b::7f00:1` was a read SSRF to
+loopback on any host with NAT64 routing. Pre-existing, not a refactor regression — the old `check_url()` used
+a byte-identical check — but it was about to become reachable by the public.
+
+Replaced with an explicit check: decode with `inet_pton`, pull out any embedded IPv4 (v4-mapped,
+v4-compatible, 6to4, both NAT64 prefixes) and **judge where the address actually goes rather than how it is
+spelled**, then range-check v4 against the fifteen non-routable blocks and v6 against unique-local,
+link-local, multicast, documentation, Teredo and discard-only. 37 cases pinned, including that a genuine 6to4
+address wrapping a public v4 (`2002:808:808::1`) is still accepted, so nothing legitimate is refused.
+
+### Any website could drive the endpoint from its visitors — fixed
+
+A POST with `Content-Type: text/plain` is a CORS *simple request*: no preflight. The endpoint read the body
+with `json_decode` regardless of content type, so any page on the internet could have made every one of its
+visitors run a scan. The attacker cannot read the answer, but the answer is not the point — the outbound
+requests are, and MAW's server address is the one making them. Verified by POSTing `text/plain` with
+`Origin: https://evil.example` and watching the scan proceed.
+
+Now: only `application/json` is accepted (which forces a preflight that we never grant, since no
+`Access-Control-Allow-Origin` is set), and a present `Origin` header must match the host. Exercised:
+cross-origin `text/plain` → 415, cross-origin JSON → 403, form post → 415, same-origin JSON → proceeds,
+no Origin at all → proceeds.
+
+### One POST could hold a worker for minutes — bounded
+
+Neither `gethostbynamel()` nor `dns_get_record()` takes a timeout, and curl's timeouts do not cover them at
+all, because `CURLOPT_RESOLVE` means libcurl performs no DNS of its own. `max_execution_time` does not help
+either: on Linux it counts CPU, and a blocked socket costs none. A host answering A instantly and blackholing
+AAAA could hold an Apache worker for the resolver's full retry budget, on every hop and every probe, at
+roughly zero CPU — and a shared plan has few workers, so that takes down the whole site, not just the tool.
+
+Three bounds: `resolve_host()` returns as soon as the A lookup succeeds rather than always also asking for
+AAAA; a 25-second wall-clock deadline for the entire scan is checked before each redirect hop and each probe
+(wall clock, because that is what PHP's own limit does not measure); and an 8 MB budget now spans the whole
+scan rather than `cap * 4` per hop, which five hops could turn into tens of megabytes of attacker-supplied,
+cheaply-compressed body.
+
+### Also fixed: `resolve_relative()` sent us to the wrong address
+
+`//cdn.example/x` resolved to `https://original.example//cdn.example/x`, and `https:/host/` to a path. Not an
+SSRF bypass — every hop is re-validated regardless — but a site legitimately redirecting to a CDN read as a
+broken one. Eight cases pinned.
+
+### Not yet addressed, from the same review
+
+These were reported and are NOT verified; treat them as leads, not findings.
+
+- The limiter counts scans, not outbound work. Twelve accepted scans still authorise a lot of third-party
+  fetching, now bounded per-scan in bytes and time but not in aggregate.
+- One counter file per source address: an IPv6 /64 gives one attacker effectively unlimited source addresses,
+  so the limit is evadable and the store can be grown. It fails closed now, which makes filling it a way to
+  turn the tool off for everyone.
+- The sweep is O(files) inline and runs before the limit check, so refused requests pay for it.
+- Distinct refusal codes (`url_private` vs `dns_failed` vs `fetch_failed`) make the endpoint an oracle for
+  whether an arbitrary name resolves, and to what kind of address, run from MAW's resolver.
+- Response headers are uncapped in count and not counted against any budget.
+- **Two surfaces were never examined at all**: the request path (input parsing, `fail()` leakage, CORS
+  details, malformed bodies) and hostile fetched content reaching the visitor's browser and the downloadable
+  report. Those need a rerun before anything public.
+
+### Where that leaves the deploy
+
+**Staging only, for now.** The three verified holes are closed and the suite is green, but the review that
+was supposed to be the gate did not finish, and the two surfaces it never reached are exactly the ones that
+matter for a public URL. Deploying noindexed to `caw.mawlabs.ca`, which only MAW knows about, gets real
+scans running and builds the corpus without exposing any of this to strangers. Rerun the review — at minimum
+the request-path and browser-content surfaces, with the refuters — before the tool is linked from anywhere
+public.
+
+
 ## 2026-09-17 — the endpoint can fetch. Track 1 is answered.
 
 `tools/selftest.php` was uploaded to the demo docroot and run. **`audit.php` can work on this host.** The
