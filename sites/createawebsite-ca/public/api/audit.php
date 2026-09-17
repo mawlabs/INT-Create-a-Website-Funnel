@@ -84,36 +84,94 @@ function client_ip(): string {
     return is_string($ip) ? $ip : '0.0.0.0';
 }
 
-function rate_limited(): bool {
-    $file = sys_get_temp_dir() . '/caw-audit-' . hash('sha256', client_ip()) . '.json';
+/**
+ * Where the counters live: one directory ABOVE the docroot, so nothing here is ever served over the web and
+ * nothing here is wiped by the deploy, which rsyncs `--delete` into the docroot itself.
+ *
+ * Not sys_get_temp_dir(): on shared hosting that is shared with every other account on the box, and it can
+ * be per-process or swept between requests — a rate limiter that quietly forgets is not one.
+ *
+ * Returns null when the store cannot be used at all, which the caller treats as a broken server rather than
+ * as permission to proceed.
+ */
+function rate_dir(): ?string {
+    // audit.php sits at <docroot>/api/audit.php, so two levels up is the account directory beside the docroot.
+    $dir = dirname(__DIR__, 2) . '/.caw-audit';
+    if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
+        return null;
+    }
+    return is_writable($dir) ? $dir : null;
+}
+
+/** Occasionally sweep counters nobody has touched since well past the window, so the directory cannot grow forever. */
+function prune_rate_dir(string $dir, int $now): void {
+    if (random_int(1, 50) !== 1) {
+        return;
+    }
+    foreach (@scandir($dir) ?: [] as $name) {
+        if (!str_ends_with($name, '.json')) {
+            continue;
+        }
+        $path = $dir . '/' . $name;
+        if (@filemtime($path) < $now - (RATE_WINDOW * 4)) {
+            @unlink($path);
+        }
+    }
+}
+
+/**
+ * 'ok' | 'limited' | 'unavailable'.
+ *
+ * It used to return false — let it through — when the store could not be opened, which left an
+ * unauthenticated URL fetcher running with no limit at all on a shared hosting account, and said nothing.
+ * A public fetcher fails CLOSED. The third state exists so that a broken store is reported honestly ("this
+ * is our fault, email us") instead of wearing the "you have made a few checks, wait a couple of minutes"
+ * wording, which would be a lie that never stops being told.
+ *
+ * Keyed on REMOTE_ADDR, which cannot be forged by the caller. If a CDN or proxy is ever put in front of this
+ * docroot, REMOTE_ADDR becomes the proxy and every visitor shares one bucket — tools/selftest.php is what
+ * detects that, and it reported a real per-visitor address on 2026-09-17.
+ */
+function rate_check(): string {
+    $dir = rate_dir();
+    if ($dir === null) {
+        return 'unavailable';
+    }
     $now = time();
+    prune_rate_dir($dir, $now);
+
+    $file = $dir . '/' . hash('sha256', client_ip()) . '.json';
     $handle = @fopen($file, 'c+');
     if ($handle === false) {
-        return false; // cannot track: let it through rather than break the tool
+        return 'unavailable';
     }
     try {
         if (!flock($handle, LOCK_EX)) {
-            return false;
+            return 'unavailable';
         }
         $contents = stream_get_contents($handle) ?: '[]';
         $hits = json_decode($contents, true);
         $hits = is_array($hits) ? $hits : [];
         $hits = array_values(array_filter($hits, static fn ($t) => is_int($t) && $t > $now - RATE_WINDOW));
         if (count($hits) >= RATE_LIMIT) {
-            return true;
+            return 'limited';
         }
         $hits[] = $now;
         ftruncate($handle, 0);
         rewind($handle);
         fwrite($handle, json_encode($hits));
-        return false;
+        return 'ok';
     } finally {
         flock($handle, LOCK_UN);
         fclose($handle);
     }
 }
 
-if (rate_limited()) {
+$rate = rate_check();
+if ($rate === 'unavailable') {
+    fail('server_unavailable', 503);
+}
+if ($rate === 'limited') {
     fail('rate_limited', 429);
 }
 

@@ -99,6 +99,77 @@ this outright. Two fixes:
   even though it did not here. The report already carries a checked-on date, which would then mean something.
 
 
+## 2026-09-17 — the endpoint can fetch. Track 1 is answered.
+
+`tools/selftest.php` was uploaded to the demo docroot and run. **`audit.php` can work on this host.** The
+question that had been blocking everything since the tool was written is closed.
+
+| | |
+|---|---|
+| PHP | 8.2.33, apache2handler — past the 8.1 the file needs |
+| curl | 8.15.0, OpenSSL 3.5.8, `CURLOPT_RESOLVE` present |
+| Outbound proxy | none set |
+| DNS | resolves; `gethostbynamel` and `dns_get_record` both available |
+| **A real fetch** | **HTTP 200, 13,937 bytes, 0.017 s — and `CURLINFO_PRIMARY_IP` matched the address DNS returned** |
+| Limits | `max_execution_time` 120 s, `memory_limit` 768 M, no `disabled_functions`, no `open_basedir` |
+| Storage | temp dir writable; **the directory above the docroot writable** |
+| The visitor | `REMOTE_ADDR` a real per-visitor address, no `X-Forwarded-For`, no `CF-Connecting-IP` |
+| TLS | `HTTPS: on` **and** `X-Forwarded-Proto: https` |
+
+The peer IP matching the DNS answer is the part that matters most: it means the address pin
+(`CURLOPT_RESOLVE`, plus the new `CURLINFO_PRIMARY_IP` assertion) does what it claims on this host, and no
+proxy sits between PHP and the internet quietly resolving names for us.
+
+### What the reading settled, beyond the headline
+
+- **The rate limiter keys on a real visitor.** `REMOTE_ADDR` is a per-visitor address with no forwarding
+  headers in play, so the 12-per-10-minutes limit is per person and not per proxy. **This is a property of
+  the current setup, not of the code.** Put Cloudflare in front of this docroot and every visitor collapses
+  into one bucket; `tools/selftest.php` is what detects it, so run it again after any change to how the site
+  is fronted.
+- **The `.htaccess` HTTPS fix was the right call and is safe here.** Apache sees `HTTPS: on` *and* the proxy
+  sets `X-Forwarded-Proto: https`, so requiring both conditions before redirecting cannot loop. Had only the
+  forwarded header been set — which is the common SiteGround case — the old single-condition rule would have
+  redirected https to itself forever on every page of the site.
+- **The docroot is `caw.mawlabs.ca`, not `createawebsite.ca`.** No config change needed: `staging.yml` already
+  takes a `docroot` input, so the demo deploys with `www/caw.mawlabs.ca/public_html`. `sites.json` still
+  describes the eventual live docroot and is left alone.
+- **MAW's own host runs PHP 8.2**, which this tool's own engine classifies as security-only. Not a blocker,
+  and worth a click in Site Tools → Devs → PHP Manager before anyone points the checker at MAW.
+
+### Fixed today, because the reading made it fixable
+
+**The rate limiter now fails closed, and keeps its counters somewhere that survives.** It used to write to
+`sys_get_temp_dir()` and, when that could not be opened, `return false` — let the request through. On shared
+hosting that meant an unauthenticated URL fetcher running with no limit at all, silently. Three changes:
+
+- Counters moved to `dirname(__DIR__, 2) . '/.caw-audit'` — one level above the docroot. Nothing there is
+  served over the web, and the deploy's `rsync --delete` targets the docroot, so a counter there is not wiped
+  on every push. The self-test proved that directory writable before this was relied on.
+- `rate_check()` returns `'ok' | 'limited' | 'unavailable'`. An unusable store is now `unavailable`, which
+  the caller turns into a 503 `server_unavailable` — "The check is broken on our end, not yours. Email us and
+  we'll run it by hand today." A public fetcher fails closed, and the third state exists so a broken store is
+  reported honestly instead of wearing the "wait a couple of minutes" wording, which would be a lie told
+  forever.
+- An occasional (1-in-50) sweep removes counter files untouched for four windows, so the directory cannot
+  grow without bound.
+
+Both paths were exercised against a local Apache: twelve requests through, the thirteenth and fourteenth
+refused with 429 `rate_limited`; and with the store made uncreatable, every request answered 503
+`server_unavailable` in both languages.
+
+### What is left
+
+1. **A pre-deploy security review is running** over `audit.php` as it now stands. The SSRF-critical control
+   flow was restructured yesterday (`check_url` → `validate_url`), and that code is about to be reachable by
+   strangers. Nothing goes on a public URL before it reports.
+2. **Track 2 is still the long pole and is still waiting on a list.** `docs/corpus-sites.txt` needs 40–60 real
+   Quebec businesses. Now that the endpoint works, the deployed checker could collect that corpus itself —
+   but `scripts/audit-capture.mjs` on a laptop remains the faster path and needs nothing deployed.
+3. **The privacy page still does not mention the site check at all.** That is a blocker for anything public,
+   independent of the security review.
+
+
 ## 2026-09-16 (night) — two tracks, and only one of them needs SiteGround
 
 Angelique: "so its not a working thing yet. if not how can we make it a working thing". Correct, and the
