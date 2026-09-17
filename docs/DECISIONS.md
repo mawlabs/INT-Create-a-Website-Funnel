@@ -126,12 +126,23 @@ would cost real usability for near-zero security gain. That is the right call an
 - **Header bytes were counted by nothing.** Only the body passes through `WRITEFUNCTION`, so neither
   `MAX_BYTES` nor `SCAN_MAX_BYTES` saw headers; the name was uncapped in length and the map uncapped in
   count, and the whole map ships to the browser.
-- **The analysis regexes are quadratic on unclosed tags, and far worse than reported.** Measured here on a
-  page of repeated `<script>x`: 69 ms at 60 KB, 262 ms at 120 KB, 1.2 s at 250 KB and **43.6 seconds at
-  MAX_BYTES** — synchronous, in the visitor's tab, status still reading "checking". The benchmark itself
-  timed out at 120 s on the next shape. This is not only a hostile page: **our own truncation at MAX_BYTES
-  can cut mid-tag and produce it.** Analysis input is now capped at 150 KB, which measures near 400 ms worst
-  case, and anything that reads "we found none of X" now knows it may not have looked all the way.
+- **The analysis regexes are quadratic on unclosed tags, and far worse than reported — TWICE.** The first
+  benchmark timed out at 120 s partway through, and I acted on what it had printed: a page of repeated
+  `<script>x` costing 69 ms at 60 KB, 262 ms at 120 KB and **43.6 s at MAX_BYTES**, so I capped the analysis
+  input at 150 KB. When the timed-out run finished in the background it showed a shape it had never reached:
+  a plain run of `<` with no `>` cost **3.8 s at 100 KB, 59 s at 400 KB and 887 SECONDS at MAX_BYTES**.
+  3.8 s at 100 KB is *below the cap I had just chosen* — the fix was insufficient and would have shipped an
+  eight-second frozen tab. Cause was different too: `[^>]*` consumes the rest of the document from every
+  start position when there is no `>` anywhere. Every tag scan now excludes `<` as well, which takes that
+  shape to **8 ms at MAX_BYTES**; the cap stays for the lazy `[\s\S]*?` pairs, which no character class can
+  bound and which measure ~700 ms together at 150 KB against 78 s at MAX_BYTES. Five shapes are now pinned by
+  a test with a 3-second budget at MAX_BYTES. None of this is only about hostile pages: **our own truncation
+  at MAX_BYTES can cut mid-tag and produce it.** Anything that reads "we found none of X" now also knows it
+  may not have looked all the way.
+
+  The lesson is about process, not regexes: a benchmark that times out is not a benchmark that returned
+  nothing useful, and I treated a partial result as a complete one. The background task finishing is the only
+  reason this was caught before the commit was the last word on it.
 
 ### The one I got wrong this morning
 

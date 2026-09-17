@@ -140,6 +140,26 @@ ok(tiredButFine.counts.critical === 0, 'the tired fixture really has no critical
 ok(tiredButFine.recommendation.projectType === 'changes',
   `no criticals means no rebuild verdict (score ${tiredButFine.score}, got ${tiredButFine.recommendation.id})`);
 
+/* ---- a hostile page must not freeze the visitor's tab ---- */
+// The analysis runs synchronously in the browser with the status still reading "checking". Measured before
+// the fix: a page of '<'.repeat(n) cost 3.8 s at 100 KB, 59 s at 400 KB and 887 SECONDS at MAX_BYTES,
+// because `[^>]*` consumed the rest of the document from every start position. Tag scans now exclude `<`,
+// and the analysis input is capped, so every shape below has to finish quickly whatever it is handed.
+for (const [shape, make] of [
+  ['a run of < with no >', (n) => '<'.repeat(n)],
+  ['opened <script> tags, never closed', (n) => '<script>x'.repeat(Math.floor(n / 9))],
+  ['opened <a> tags, never closed', (n) => '<a href=x>y'.repeat(Math.floor(n / 11))],
+  ['one unclosed <script> then filler', (n) => '<script>' + 'a'.repeat(n)],
+  ['an unterminated comment', (n) => '<!--' + 'a'.repeat(n)],
+]) {
+  const html = make(1_500_000);   // MAX_BYTES: the most the endpoint will ever hand us
+  const started = Date.now();
+  const report = analyze(snap({ html, bytes: 1_500_000 }), versions);
+  const ms = Date.now() - started;
+  ok(ms < 3000, `${shape}: analysis finished in ${ms} ms, budget 3000`);
+  ok(Array.isArray(report.findings), `${shape}: still produced a report`);
+}
+
 /* ---- language: the words on the page decide, not the metadata ---- */
 // Every one of these was a false Bill 96 accusation before the page's own text was consulted. The finding
 // names a law and goes out with MAW's name on it, so it has to be right or it has to stay silent.

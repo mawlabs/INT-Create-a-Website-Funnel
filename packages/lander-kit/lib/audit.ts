@@ -206,8 +206,16 @@ export const AUDIT_ERROR_CODES = [
  * synchronous, in the visitor's tab, with the status still reading "checking".
  *
  * A hostile site can serve that deliberately, and our own truncation at MAX_BYTES can produce it by accident
- * by cutting mid-tag. 150 KB keeps the worst case near 400 ms; a home page with more markup than that is
- * already being told its page is heavy, from snap.bytes, which this does not affect.
+ * by cutting mid-tag.
+ *
+ * Two fixes, because there were two causes. The tag scans now exclude `<` as well as `>` (see `tags` below),
+ * which took a page of `'<'.repeat(n)` from 887 SECONDS at MAX_BYTES to 8 ms. What remains is the lazy
+ * `[\s\S]*?` pairs — `<script>…</script>` and `<a>…</a>` — which are still quadratic on unclosed tags and
+ * cannot be bounded by excluding a character. Hence this cap: at 150 KB those two together measure about
+ * 700 ms worst case, against 78 seconds at MAX_BYTES.
+ *
+ * A home page with more markup than 150 KB is already being told its page is heavy, from snap.bytes, which
+ * this does not affect.
  */
 const ANALYSIS_MAX_CHARS = 150_000;
 
@@ -230,7 +238,7 @@ export function compareVersions(a: string, b: string): number {
 }
 
 const head = (html: string): string => {
-  const m = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+  const m = html.match(/<head[^<>]*>([\s\S]*?)<\/head>/i);
   return m ? m[1] : html.slice(0, 40000);
 };
 
@@ -239,7 +247,16 @@ const attr = (tag: string, name: string): string | undefined => {
   return m ? (m[2] ?? m[3] ?? m[4]) : undefined;
 };
 
-const tags = (html: string, name: string): string[] => html.match(new RegExp(`<${name}\\b[^>]*>`, 'gi')) ?? [];
+/**
+ * Every tag scan here excludes `<` as well as `>`.
+ *
+ * `[^>]*` looks equivalent and is catastrophically not: on a run of `<` with no `>` anywhere, the quantifier
+ * consumes the rest of the document from every start position before failing, which is quadratic. Measured
+ * on `'<'.repeat(n)`: 3.8 s at 100 KB, 59 s at 400 KB, **887 seconds at MAX_BYTES**. Excluding `<` makes each
+ * bad position fail on its first character instead. The cost is that a raw `<` inside a quoted attribute
+ * value no longer matches, which is rare, usually malformed, and worth it.
+ */
+const tags = (html: string, name: string): string[] => html.match(new RegExp(`<${name}\\b[^<>]*>`, 'gi')) ?? [];
 
 const metaContent = (html: string, nameOrProperty: string): string | undefined => {
   for (const tag of tags(html, 'meta')) {
@@ -250,15 +267,15 @@ const metaContent = (html: string, nameOrProperty: string): string | undefined =
 };
 
 const textOf = (html: string, tag: string): string | undefined => {
-  const m = html.match(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
-  return m ? m[1].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim() : undefined;
+  const m = html.match(new RegExp(`<${tag}\\b[^<>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
+  return m ? m[1].replace(/<[^<>]*>/g, '').replace(/\s+/g, ' ').trim() : undefined;
 };
 
 /** Everything a visitor would read, with markup and scripts taken out. */
 const visibleText = (html: string): string => html
   .replace(/<(script|style|noscript|template|svg)\b[\s\S]*?<\/\1>/gi, ' ')
   .replace(/<!--[\s\S]*?-->/g, ' ')
-  .replace(/<[^>]*>/g, ' ')
+  .replace(/<[^<>]*>/g, ' ')
   .replace(/&[a-z#0-9]+;/gi, ' ')
   .replace(/\s+/g, ' ')
   .trim();
@@ -563,15 +580,15 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   if (!description) add('seo.description.missing', 'warning');
   else if (description.length > 165) add('seo.description.long', 'info', { length: description.length }, description);
 
-  const h1s = html.match(/<h1\b[^>]*>/gi) ?? [];
+  const h1s = html.match(/<h1\b[^<>]*>/gi) ?? [];
   if (h1s.length === 0) add('seo.h1.missing', 'warning');
   else if (h1s.length > 1) add('seo.h1.multiple', 'info', { count: h1s.length }, textOf(html, 'h1'));
 
-  const levels = [...html.matchAll(/<h([1-6])\b[^>]*>/gi)].map((m) => Number(m[1]));
+  const levels = [...html.matchAll(/<h([1-6])\b[^<>]*>/gi)].map((m) => Number(m[1]));
   const skip = levels.findIndex((level, i) => i > 0 && level - levels[i - 1] > 1);
   if (skip > 0) add('seo.headingSkips', 'info', {}, `h${levels[skip - 1]} → h${levels[skip]}`);
 
-  const canonicalTag = doc.match(/<link[^>]+rel\s*=\s*["']?canonical["']?[^>]*>/i)?.[0];
+  const canonicalTag = doc.match(/<link[^<>]+rel\s*=\s*["']?canonical["']?[^<>]*>/i)?.[0];
   const canonical = canonicalTag ? attr(canonicalTag, 'href') : undefined;
   if (!canonical) add('seo.canonical.missing', 'info');
   else if (!sameAddress(canonical, snap.finalUrl)) add('seo.canonical.mismatch', 'warning', {}, canonical);
@@ -626,7 +643,7 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   const words = text ? text.split(' ').filter((w) => w.length > 1).length : 0;
   if (!partial && words < 300) add('seo.thinContent', words < 120 ? 'warning' : 'info', { words });
 
-  const links = [...html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)];
+  const links = [...html.matchAll(/<a\b([^<>]*)>([\s\S]*?)<\/a>/gi)];
   const internal = links.filter(([, raw]) => {
     const href = attr(`<a ${raw}>`, 'href');
     if (!href || /^(mailto:|tel:|javascript:|#)/i.test(href)) return false;
@@ -636,12 +653,12 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   if (internal < 5) add('seo.internalLinks', 'info', { count: internal });
 
   /* ---- languages (Charter of the French Language, updated by Bill 96) ---- */
-  const htmlTag = html.match(/<html\b[^>]*>/i)?.[0] ?? '';
+  const htmlTag = html.match(/<html\b[^<>]*>/i)?.[0] ?? '';
   const lang = (attr(htmlTag, 'lang') ?? '').toLowerCase();
   const hreflangs = (html.match(/hreflang\s*=\s*["']([a-z-]+)["']/gi) ?? []).map((s) => s.toLowerCase());
   const hasFrHreflang = hreflangs.some((s) => s.includes('"fr') || s.includes("'fr"));
   const frProbe = snap.probes?.fr?.ok === true;
-  const frLink = /(<a[^>]*>\s*(fran[çc]ais|fr)\s*<\/a>)/i.test(html);
+  const frLink = /(<a[^<>]*>\s*(fran[çc]ais|fr)\s*<\/a>)/i.test(html);
   const frenchSomewhere = lang.startsWith('fr') || hasFrHreflang || frProbe || frLink;
 
   // Before any of the metadata signals, read what the page actually says. All four signals above are
@@ -725,7 +742,7 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
   const sources = imgs.map((t) => `${attr(t, 'src') ?? ''} ${attr(t, 'srcset') ?? ''}`);
   const oldFormat = sources.filter((s) => /\.(jpe?g|png)(\?|#|\s|$)/i.test(s)).length;
   const newFormat = sources.filter((s) => /\.(webp|avif)(\?|#|\s|$)/i.test(s)).length
-    + (/<source[^>]+type\s*=\s*["']image\/(webp|avif)/i.test(html) ? 1 : 0);
+    + (/<source[^<>]+type\s*=\s*["']image\/(webp|avif)/i.test(html) ? 1 : 0);
   if (oldFormat >= 5 && newFormat === 0) add('speed.legacyImages', 'info', { count: oldFormat });
 
   /* ---- everyone can use it ---- */
@@ -734,7 +751,7 @@ export function analyze(snap: Snapshot, versions: VersionData): AuditReport {
     if (!attr(tag, 'href')) return false;
     if (attr(tag, 'aria-label') || attr(tag, 'title') || attr(tag, 'aria-labelledby')) return false;
     if (visibleText(inner)) return false;
-    const img = inner.match(/<img\b[^>]*>/i);
+    const img = inner.match(/<img\b[^<>]*>/i);
     return !(img && (attr(img[0], 'alt') ?? '').trim());
   }).length;
   if (unlabelledLinks > 0) add('a11y.linksNoText', unlabelledLinks > 3 ? 'warning' : 'info', { count: unlabelledLinks });
